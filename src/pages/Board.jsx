@@ -1,4 +1,5 @@
 import Container from "@/components/Container";
+import { useCallback } from "react";
 import { useBoardByIdQuery } from "@/hooks/useBoardsQuery";
 import { useParams, Link } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDeleteBoardMutation } from "@/hooks/useBoardMutation";
 import { useNavigate } from "react-router-dom";
 
 export default function Board() {
@@ -27,6 +29,17 @@ export default function Board() {
         에러 발생: {error.message} | boards: {board}
       </div>
     );
+
+  const deleteMutation = useDeleteBoardMutation(() => {
+    // 성공 시, 목록 페이지로 이동
+    navigate("/boards");
+  });
+  const handleDelete = useCallback(() => {
+    // Custom confirmation modal should replace window.confirm
+    if (window.confirm("게시물을 삭제하시겠습니까?")) {
+      deleteMutation.mutate(id);
+    }
+  }, [id, deleteMutation]);
 
   const handleGoBack = () => {
     // 실제 라우팅 환경에 따라 navigate(-1) 또는 특정 목록 경로로 이동
@@ -54,7 +67,9 @@ export default function Board() {
             <Link to={`/boards/edit/${id}`}>
               <Button className="bg-lime-700">수정</Button>
             </Link>
-            <Button className="bg-orange-700">삭제</Button>
+            <Button className="bg-orange-700" onClick={handleDelete}>
+              삭제
+            </Button>
           </CardFooter>
         </Card>
       </div>

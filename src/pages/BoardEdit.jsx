@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import {
   useCreateBoardMutation,
   useUpdateBoardMutation,
-  useDeleteBoardMutation,
 } from "@/hooks/useBoardMutation";
 import { useParams } from "react-router-dom";
 import {
@@ -45,11 +44,6 @@ export default function BoardEdit() {
     navigate(`/boards/${updatedId}`);
   });
 
-  const deleteMutation = useDeleteBoardMutation(() => {
-    // 성공 시, 목록 페이지로 이동
-    navigate("/boards");
-  });
-
   // 4. 데이터 로딩 완료 시 폼 채우기
   useEffect(() => {
     if (isEditMode && boardData) {
@@ -77,14 +71,6 @@ export default function BoardEdit() {
       createMutation.mutate(boardPayload);
     }
   }, [title, content, isEditMode, boardId, createMutation, updateMutation]);
-
-  // 6. 삭제 처리 함수
-  const handleDelete = useCallback(() => {
-    // Custom confirmation modal should replace window.confirm
-    if (isEditMode && window.confirm("게시물을 삭제하시겠습니까?")) {
-      deleteMutation.mutate(boardId);
-    }
-  }, [isEditMode, boardId, deleteMutation]);
 
   const handleGoBack = () => {
     // 실제 라우팅 환경에 따라 navigate(-1) 또는 특정 목록 경로로 이동
@@ -153,19 +139,6 @@ export default function BoardEdit() {
               <ArrowLeftIcon className="w-4 h-4 mr-2" />
               뒤로가기
             </Button>
-
-            {/* 삭제 버튼 (수정 모드일 때만 표시) */}
-            {isEditMode && (
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting || isSaving}
-                className="bg-red-500 hover:bg-red-600"
-                icon={isDeleting ? Loader2 : Trash2Icon}
-              >
-                {isDeleting ? "삭제 중..." : "삭제"}
-              </Button>
-            )}
 
             <div className="flex-grow"></div>
 
