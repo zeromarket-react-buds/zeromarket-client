@@ -78,7 +78,7 @@ export default function BoardEdit() {
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
-  const isDeleting = deleteMutation.isPending;
+  // const isDeleting = deleteMutation.isPending;
 
   // 로딩 및 에러 처리
   if (isEditMode && isLoading) {
@@ -155,15 +155,11 @@ export default function BoardEdit() {
         </Card>
 
         {/* Mutation 결과 메시지 */}
-        {(createMutation.isError ||
-          updateMutation.isError ||
-          deleteMutation.isError) && (
+        {(createMutation.isError || updateMutation.isError) && (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg shadow-sm">
             <p className="font-semibold">작업 실패:</p>
             <p>
-              {createMutation.error?.message ||
-                updateMutation.error?.message ||
-                deleteMutation.error?.message}
+              {createMutation.error?.message || updateMutation.error?.message}
             </p>
           </div>
         )}

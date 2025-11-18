@@ -7,11 +7,14 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useBoardsQuery } from "@/hooks/useBoardsQuery";
 import { Link } from "react-router-dom";
 
 export default function Boards() {
   const { data: boards, isLoading, isError, error } = useBoardsQuery();
+  const navigate = useNavigate();
 
   if (isLoading) return <div>로딩 중...</div>;
   if (isError || !boards)
@@ -47,6 +50,12 @@ export default function Boards() {
             ))}
           </TableBody>
         </Table>
+        <Button
+          className="bg-lime-700"
+          onClick={() => navigate(`/boards/edit`)}
+        >
+          글 작성
+        </Button>
       </div>
     </Container>
   );

@@ -20,16 +20,6 @@ export default function Board() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { data: board, isLoading, isError, error } = useBoardByIdQuery(id);
-
-  if (isLoading) return <div>로딩 중...</div>;
-  if (isError || !board)
-    return (
-      <div>
-        에러 발생: {error.message} | boards: {board}
-      </div>
-    );
-
   const deleteMutation = useDeleteBoardMutation(() => {
     // 성공 시, 목록 페이지로 이동
     navigate("/boards");
@@ -40,6 +30,16 @@ export default function Board() {
       deleteMutation.mutate(id);
     }
   }, [id, deleteMutation]);
+
+  const { data: board, isLoading, isError, error } = useBoardByIdQuery(id);
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (isError || !board)
+    return (
+      <div>
+        에러 발생: {error.message} | boards: {board}
+      </div>
+    );
 
   const handleGoBack = () => {
     // 실제 라우팅 환경에 따라 navigate(-1) 또는 특정 목록 경로로 이동
@@ -73,6 +73,13 @@ export default function Board() {
           </CardFooter>
         </Card>
       </div>
+      {/* Mutation 결과 메시지 */}
+      {deleteMutation.isError && (
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg shadow-sm">
+          <p className="font-semibold">작업 실패:</p>
+          <p>{deleteMutation.error?.message}</p>
+        </div>
+      )}
     </Container>
   );
 }
