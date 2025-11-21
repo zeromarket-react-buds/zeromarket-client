@@ -6,7 +6,7 @@ import Boards from "@/pages/Boards";
 import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
-import SearchPage from "./pages/search/SearchPage";
+import SearchPage from "@/pages/search/SearchPage";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +14,14 @@ const router = createBrowserRouter([
     element: <GlobalLayout />,
     children: [
       { index: true, element: <Home /> },
+      {
+        path: "search",
+        element: <SearchPage />,
+      },
+      {
+        path: "search",
+        element: <SearchPage />,
+      },
       {
         path: "search",
         element: <SearchPage />,

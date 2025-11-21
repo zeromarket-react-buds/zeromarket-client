@@ -11,15 +11,8 @@ const SearchPage = () => {
           <Input placeholder="어떤 상품을 찾으시나요?" />
         </div>
         <ProductFilter />
-        <div className="text-2xl">"" 검색 결과</div>
-        <div className="grid grid-cols-2 gap-4">
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-          <ProductCard />
-        </div>
+        <div className="text-2xl font-semibold">"" 검색 결과</div>
+        <ProductCard />
       </div>
     </Container>
   );
