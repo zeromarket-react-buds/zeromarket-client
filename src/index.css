@@ -4,6 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-brand-green: #1b6439;
+  --color-brand-ivory: #fff7e0;
+  --color-brand-lightgray: #eeeeee;
+  --color-brand-mediumgray: #9a9a9a;
+  --color-brand-darkgray: #6c6c6c;
+  --color-brand-red: #ff0000;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
