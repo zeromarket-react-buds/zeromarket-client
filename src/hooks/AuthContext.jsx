@@ -9,13 +9,15 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
+const AuthProvider = function ({ children }) {
   const [me, setMe] = useState(null);
   const value = { memo: "히히", me: me, setMe: setMe };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
-export function useAuth() {
+const useAuth = function useAuth() {
   return useContext(AuthContext);
-}
+};
+
+export { AuthProvider, useAuth };

@@ -2,7 +2,7 @@
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-export default function ScrollToTop({ containerId, top = 0, left = 0 }) {
+const ScrollToTop = function ({ containerId, top = 0, left = 0 }) {
   const { key } = useLocation();
 
   useLayoutEffect(() => {
@@ -12,4 +12,6 @@ export default function ScrollToTop({ containerId, top = 0, left = 0 }) {
   }, [key]); // 라우트 전환마다 실행
 
   return null;
-}
+};
+
+export default ScrollToTop;

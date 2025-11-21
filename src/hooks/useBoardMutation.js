@@ -5,7 +5,7 @@ import { createBoard, updateBoard, deleteBoard } from "@/common/api";
  * 게시물 생성용 훅
  * @param {function} onSuccessCallback - 성공 시 실행할 추가 콜백
  */
-export function useCreateBoardMutation(onSuccessCallback) {
+const useCreateBoardMutation = function (onSuccessCallback) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -23,13 +23,13 @@ export function useCreateBoardMutation(onSuccessCallback) {
     },
     // onError: (error) => { ... 에러 처리 로직 ... },
   });
-}
+};
 
 /**
  * 게시물 수정용 훅
  * @param {function} onSuccessCallback - 성공 시 실행할 추가 콜백
  */
-export function useUpdateBoardMutation(onSuccessCallback) {
+const useUpdateBoardMutation = function (onSuccessCallback) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -49,13 +49,13 @@ export function useUpdateBoardMutation(onSuccessCallback) {
       }
     },
   });
-}
+};
 
 /**
  * 게시물 삭제용 훅
  * @param {function} onSuccessCallback - 성공 시 실행할 추가 콜백
  */
-export function useDeleteBoardMutation(onSuccessCallback) {
+const useDeleteBoardMutation = function (onSuccessCallback) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -72,4 +72,10 @@ export function useDeleteBoardMutation(onSuccessCallback) {
       }
     },
   });
-}
+};
+
+export {
+  useCreateBoardMutation,
+  useUpdateBoardMutation,
+  useDeleteBoardMutation,
+};

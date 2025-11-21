@@ -40,7 +40,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-function App() {
+const App = function () {
   const [count, setCount] = useState(0);
 
   return (
@@ -48,6 +48,6 @@ function App() {
       <RouterProvider router={router} />
     </Suspense>
   );
-}
+};
 
 export default App;

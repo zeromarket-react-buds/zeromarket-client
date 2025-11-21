@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeftIcon, SaveIcon, Trash2Icon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function BoardEdit() {
+const BoardEdit = function () {
   const navigate = useNavigate();
   const { id } = useParams(); // id가 있으면 수정 모드, 없으면 작성 모드
   const boardId = id ? Number(id) : null;
@@ -166,4 +166,6 @@ export default function BoardEdit() {
       </div>
     </Container>
   );
-}
+};
+
+export default BoardEdit;

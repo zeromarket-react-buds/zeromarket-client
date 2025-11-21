@@ -1,4 +1,6 @@
 import Container from "@/components/Container";
-export default function Home() {
+const Home = function () {
   return <Container>홈입니다!!</Container>;
-}
+};
+
+export default Home;

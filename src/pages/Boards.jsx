@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useBoardsQuery } from "@/hooks/useBoardsQuery";
 import { Link } from "react-router-dom";
 
-export default function Boards() {
+const Boards = function () {
   const { data: boards, isLoading, isError, error } = useBoardsQuery();
   const navigate = useNavigate();
 
@@ -59,4 +59,6 @@ export default function Boards() {
       </div>
     </Container>
   );
-}
+};
+
+export default Boards;

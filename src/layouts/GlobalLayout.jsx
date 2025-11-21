@@ -10,7 +10,7 @@ import iconJoin from "@/assets/ico_join.svg";
 import iconCart from "@/assets/ico_cart.svg";
 import iconSearch from "@/assets/ico_search.svg";
 
-function useShowWhenScrolled(threshold = 120) {
+const useShowWhenScrolled = function (threshold = 120) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -33,9 +33,9 @@ function useShowWhenScrolled(threshold = 120) {
   }, [threshold]);
 
   return visible;
-}
+};
 
-function ToTheTop() {
+const ToTheTop = function () {
   const visible = useShowWhenScrolled(120);
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -72,9 +72,9 @@ function ToTheTop() {
       <div className="text-xs font-bold">TOP</div>
     </button>
   );
-}
+};
 
-function GlobalHeader() {
+const GlobalHeader = function () {
   return (
     <header className="border-b border-gray-200">
       <Container>
@@ -142,9 +142,9 @@ function GlobalHeader() {
       </Container>
     </header>
   );
-}
+};
 
-function GlobalFooter() {
+const GlobalFooter = function () {
   return (
     <footer className="mt-16 py-8 bg-gray-50 border-gray-200 flex items-center px-4 border-t">
       <Container>
@@ -193,9 +193,9 @@ function GlobalFooter() {
       </Container>
     </footer>
   );
-}
+};
 
-export default function GlobalLayout() {
+const GlobalLayout = function () {
   return (
     <div className="flex flex-col w-full min-h-screen">
       <GlobalHeader />
@@ -209,4 +209,6 @@ export default function GlobalLayout() {
       </div>
     </div>
   );
-}
+};
+
+export default GlobalLayout;
