@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { XCircle } from "lucide-react";
+import { Search } from "lucide-react";
 
 const FilterSideBar = () => {
   return (
     <div className="flex p-2">
       <div className="flex flex-col gap-3 p-2 w-full">
-        <div className="flex gap-3 border-b border-brand-mediumgray py-3">
+        <div className="flex gap-3 items-center border-b border-brand-mediumgray py-3">
           <div className="w-full text-base font-semibold">검색필터</div>
-          <div className="text-base font-semibold pr-2">×</div>
+          <Button className="text-base font-semibold bg-white text-brand-mediumgray pr-2">
+            <XCircle />
+          </Button>
         </div>
         <div className="flex flex-col gap-3 my-3">
           <div className="text-base font-semibold border-b border-brand-mediumgray py-3">
@@ -30,8 +34,14 @@ const FilterSideBar = () => {
           </div>
         </div>
         <div className="flex flex-col text-base font-semibold gap-3 my-3">
-          <div className="border-b border-brand-mediumgray pb-2">지역</div>
-          <Input className="font-normal" placeholder="지역을 입력해주세요" />
+          <div className="border-b border-brand-mediumgray py-3">지역</div>
+          <div className="relative w-full">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
+            <Button className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4 bg-white text-brand-mediumgray">
+              <XCircle />
+            </Button>
+            <Input className="font-normal" placeholder="지역을 입력해주세요" />
+          </div>
           <Button className="font-semibold  bg-brand-ivory text-brand-green border border-brand-green">
             현재 내 위치
           </Button>
@@ -43,13 +53,18 @@ const FilterSideBar = () => {
           <div className="flex flex-row gap-2 py-3">
             <Button className="bg-white text-black border border-brand-mediumgray">
               <span>역삼동</span>
-              <span>×</span>
+              <span className="text-brand-mediumgray">
+                <XCircle />
+              </span>
             </Button>
             <Button className="bg-white text-black border border-brand-mediumgray">
               <span>0 - 20,000</span>
-              <span>×</span>
+              <span className="text-brand-mediumgray">
+                <XCircle />
+              </span>
             </Button>
           </div>
+          <div className="text-sm text-brand-darkgray underline">초기화</div>
         </div>
         <div className="flex flex-row gap-3 w-full border-t border-brand-mediumgray py-4">
           <Button className="flex-1 font-semibold bg-brand-ivory text-brand-green border border-brand-green">
