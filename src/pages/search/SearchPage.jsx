@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
-import ProductCard from "@/components/ProductCard";
-import ProductFilter from "@/components/ProductFilter";
+import ProductCard from "@/components/display/ProductCard";
+import ProductFilter from "@/components/display/ProductFilter";
 import { Input } from "@/components/ui/input";
 
 const SearchPage = () => {

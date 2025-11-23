@@ -1,7 +1,7 @@
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ProductFilter from "@/components/ProductFilter";
+import ProductFilter from "@/components/display/ProductFilter";
 import { Search } from "lucide-react";
 
 const ProductList = () => {

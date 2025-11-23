@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
+import { GlobalToast } from "@/components/GlobalToast";
 
 const router = createBrowserRouter([
   {
@@ -85,6 +86,7 @@ const App = function () {
 
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
+      <GlobalToast />
       <RouterProvider router={router} />
     </Suspense>
   );
