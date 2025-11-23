@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
+import { useLikeToast } from "@/components/GlobalToast";
 
 const DetailStickyFooter = () => {
+  const { showLikeToast } = useLikeToast();
+
   const handleButtonClick = (action) => {
     let confirmation = false;
     if (action === "끌어 올리기") {
@@ -19,22 +21,22 @@ const DetailStickyFooter = () => {
     }
   };
 
-  //   토스트 알림
-  const handleLikeClick = () => {
-    toast.success("찜 목록에 추가되었어요!", {
-      position: "bottom-center",
-      autoClose: 3000,
-      hideProgressBar: true,
-      pauseOnHover: false,
-    });
-  };
+  // //   토스트 알림
+  // const handleLikeClick = () => {
+  //   toast.success("찜 목록에 추가되었어요!", {
+  //     position: "bottom-center",
+  //     autoClose: 3000,
+  //     hideProgressBar: true,
+  //     pauseOnHover: false,
+  //   });
+  // };
   return (
     <div>
       {/* 1. 찜하트 , 채팅하기 , 바로구매 - 구매자*/}
       {/* {role === "BUYER" && ( */}
       <div className="flex gap-2 mt-5 border px-3 py-3">
         <div className="py-1 text-[#1B6439]">
-          <Heart className="size-7" onClick={handleLikeClick} />
+          <Heart className="size-7" onClick={showLikeToast} />
         </div>
 
         <Button
@@ -100,7 +102,6 @@ const DetailStickyFooter = () => {
         >
           상품삭제
         </Button>
-        <ToastContainer />
       </div>
     </div>
   );

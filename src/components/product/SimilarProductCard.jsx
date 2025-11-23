@@ -1,15 +1,17 @@
 import { Heart } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
+import { useLikeToast } from "@/components/GlobalToast";
+
 const SimilarProductCard = () => {
-  //   토스트 알림
-  const handleLikeClick = () => {
-    toast.success("찜 목록에 추가되었어요!", {
-      position: "bottom-center",
-      autoClose: 3000,
-      hideProgressBar: true,
-      pauseOnHover: false,
-    });
-  };
+  const { showLikeToast } = useLikeToast();
+  // //   토스트 알림
+  // const handleLikeClick = () => {
+  //   toast.success("찜 목록에 추가되었어요!", {
+  //     position: "bottom-center",
+  //     autoClose: 3000,
+  //     hideProgressBar: true,
+  //     pauseOnHover: false,
+  //   });
+  // };
   return (
     <div className="">
       {/* 상품 카드 1 */}
@@ -24,7 +26,7 @@ const SimilarProductCard = () => {
               예약중
             </div>
 
-            <Heart className="size-6 mx-1" onClick={handleLikeClick} />
+            <Heart className="size-6 mx-1" onClick={showLikeToast} />
           </div>
         </div>
         <div className="p-1">
@@ -33,7 +35,6 @@ const SimilarProductCard = () => {
           <div className="text-xs text-[#9A9A9A]">20분 전</div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

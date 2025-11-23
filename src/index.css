@@ -134,6 +134,7 @@
 .Toastify__toast {
   border-radius: 50px;
   text-align: center;
+  justify-content: center !important;
   padding: 0 40px;
   min-height: 40px;
   background-color: black;

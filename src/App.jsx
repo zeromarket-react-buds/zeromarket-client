@@ -7,6 +7,7 @@ import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
+import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
 
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ProductDetailPage />,
+            element: <ProductCreatePage />,
           },
           {
             path: ":id",
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
           },
           {
             path: "edit",
+            // ProductEditPage
             children: [
               { index: true, element: <ProductDetailPage /> },
               {
