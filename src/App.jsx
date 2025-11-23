@@ -10,6 +10,7 @@ import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
+import MyPage from "./pages/me/MyPage";
 
 const router = createBrowserRouter([
   {
@@ -68,6 +69,11 @@ const router = createBrowserRouter([
             ],
           },
         ],
+      },
+      // 마이페이지 라우트
+      {
+        path: "me",
+        element: <MyPage />,
       },
     ],
   },
