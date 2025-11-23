@@ -8,16 +8,16 @@ import {
   Eye,
   Smile,
 } from "lucide-react";
-import DetailStickyHeader from "@/components/DetailStickyHeader";
-import DetailStickyFooter from "@/components/DetailStickyFooter";
-import SimilarProductCard from "@/components/SimilarProductCard";
+import DetailStickyHeader from "@/components/product/DetailStickyHeader";
+import DetailStickyFooter from "@/components/product/DetailStickyFooter";
+import SimilarProductCard from "@/components/product/SimilarProductCard";
 import { products } from "@/data/product.js";
 
 const ProductDetailPage = () => {
   return (
     <Container>
       <div>상품상세페이지입니다</div>
-      <div className="max-w-sm mx-auto bg-gray-0 border">
+      <div className="max-w-full mx-auto bg-gray-0 border">
         <DetailStickyHeader />
         <div className="relative">
           {/* 사진 영역 */}
