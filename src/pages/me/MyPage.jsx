@@ -16,10 +16,7 @@ export default function MyPage() {
 
       {/* 프로필 */}
       <section className="flex items-center gap-4 mb-6">
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "#1B6439" }}
-        >
+        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
           <UserRoundPen className="text-white" size={30} strokeWidth={2} />
         </div>
         <div className="text-lg font-semibold">닉네임 표시란</div>
@@ -29,13 +26,13 @@ export default function MyPage() {
       <section className="border rounded-2xl p-4 mb-2">
         <div className="flex justify-between mb-2 text-[16px]">
           <span>신뢰점수</span>
-          <span className="text-[#1B6439] font-bold text-lg text-[20px]">
+          <span className="text-brand-green font-bold text-lg text-[20px]">
             4.5
           </span>
         </div>
         <div className="flex justify-between text-[16px]">
           <span>환경점수</span>
-          <span className="text-[#1B6439] font-bold text-lg text-[20px]">
+          <span className="text-brand-green font-bold text-lg text-[20px]">
             4,000
           </span>
         </div>
@@ -68,21 +65,37 @@ export default function MyPage() {
       {/* 찜 & 후기 */}
       <section className="border rounded-2xl p-4 flex justify-around text-center">
         <div className="flex flex-col items-center">
-          <Heart color="#1B6439" size={32} className="mx-auto mb-2.5" />
+          <Heart
+            color="var(--color-brand-green)"
+            size={32}
+            className="mx-auto mb-2.5"
+          />
           <div className="flex items-center gap-2">
             <span>찜 목록</span>
-            <span className="font-bold text-[#1B6439]">1</span>
+            <span className="font-bold text-brand-green">1</span>
             <span className="text-black">건</span>
           </div>
         </div>
         <div className="flex flex-col items-center">
-          <Pen color="#1B6439" size={32} className="mx-auto mb-2.5" />
+          <Pen
+            color="var(--color-brand-green)"
+            size={32}
+            className="mx-auto mb-2.5"
+          />
           <div className="flex items-center gap-2">
             <span>받은 후기</span>
-            <span className="font-bold text-[#1B6439]">3</span>
+            <span className="font-bold text-brand-green">3</span>
             <span className="text-black">건</span>
           </div>
         </div>
+      </section>
+
+      {/*  로그아웃 / 탈퇴 */}
+      <section className="border rounded-2xl p-4 mt-6">
+        <ul className="space-y-4 text-gray-800 text-[18px]">
+          <li className="cursor-pointer">로그아웃</li>
+          <li className="cursor-pointer">탈퇴</li>
+        </ul>
       </section>
     </div>
   );
