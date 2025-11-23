@@ -7,6 +7,7 @@ import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
+import ProductDetailPage from "@/pages/products/ProductDetailPage";
 
 const router = createBrowserRouter([
   {
