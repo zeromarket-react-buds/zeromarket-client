@@ -123,5 +123,26 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Roboto", sans-serif;
   }
+}
+.Toastify__toast-container {
+  width: fit-content;
+  min-width: 240px;
+  max-width: 1024px;
+}
+.Toastify__toast {
+  border-radius: 50px;
+  text-align: center;
+  padding: 0 40px;
+  min-height: 40px;
+  background-color: black;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 150%;
+}
+.Toastify__toast-icon {
+  display: none;
+  /* 토스트 앞에 못생긴 체크 아이콘 숨김 */
 }
