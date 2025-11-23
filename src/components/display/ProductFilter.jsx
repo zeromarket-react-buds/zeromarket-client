@@ -1,5 +1,5 @@
 import { Filter } from "lucide-react";
-import FilterSideBar from "@/components/FilterSidebar";
+import FilterSideBar from "@/components/display/FilterSidebar";
 
 const ProductFilter = () => {
   return (
