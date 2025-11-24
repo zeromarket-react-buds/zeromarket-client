@@ -4,7 +4,8 @@ import ProductFilter from "@/components/display/ProductFilter";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SearchPage = () => {
   const navigate = useNavigate();
@@ -73,18 +74,22 @@ const SearchPage = () => {
   return (
     <Container>
       <div className="flex flex-col p-2 gap-4">
-        <div>
-          <form onSubmit={handleSubmit}>
-            <Input
-              placeholder="어떤 상품을 찾으시나요?"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-            <button type="submit">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
-            </button>
-          </form>
-        </div>
+        <form onSubmit={handleSubmit} className="relative w-full">
+          <Input
+            placeholder="어떤 상품을 찾으시나요?"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <Button className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4">
+            <XCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            type="submit"
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </form>
         <ProductFilter />
         <div className="text-2xl font-semibold">"{keyword}" 검색 결과</div>
         <ProductCard products={products} />
