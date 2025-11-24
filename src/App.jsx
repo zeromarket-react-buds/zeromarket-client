@@ -10,6 +10,8 @@ import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
+import LoginPage from "@/pages/auth/LoginPage";
+import SignupPage from "@/pages/auth/SignupPage";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +68,19 @@ const router = createBrowserRouter([
                 element: <ProductDetailPage />,
               },
             ],
+          },
+        ],
+      },
+      {
+        path: "auth",
+        children: [
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+          {
+            path: "signup",
+            element: <SignupPage />,
           },
         ],
       },
