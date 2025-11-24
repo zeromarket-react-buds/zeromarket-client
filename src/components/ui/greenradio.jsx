@@ -21,7 +21,9 @@ function GreenRadio({
       <span
         className={cn(
           "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
-          checked ? "border-[#1B6439] bg-[#1B6439]" : "border-[#6C6C6C]"
+          checked
+            ? "border-brand-green bg-brand-green"
+            : "border-brand-darkgray"
         )}
       >
         {checked && <span className="w-2.5 h-2.5 bg-white rounded-full"></span>}

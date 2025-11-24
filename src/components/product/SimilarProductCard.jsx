@@ -22,7 +22,7 @@ const SimilarProductCard = () => {
           </div>
 
           <div className="flex justify-between items-center px-2 py-2 absolute bottom-0  w-full">
-            <div className="text-xs text-white  border-black rounded-md bg-[#1B6439] p-1 px-3">
+            <div className="text-xs text-white  border-black rounded-md bg-brand-green p-1 px-3">
               예약중
             </div>
 
@@ -30,9 +30,11 @@ const SimilarProductCard = () => {
           </div>
         </div>
         <div className="p-1">
-          <div className="text-sm text-[#6C6C6C]">실제로 들어갈 상품제목</div>
+          <div className="text-sm text-brand-darkgray">
+            실제로 들어갈 상품제목
+          </div>
           <div className="text-sm font-semibold">0,000원</div>
-          <div className="text-xs text-[#9A9A9A]">20분 전</div>
+          <div className="text-xs text-brand-mediumgray">20분 전</div>
         </div>
       </div>
     </div>

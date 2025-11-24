@@ -12,6 +12,9 @@ import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
+import MyPage from "./pages/me/MyPage";
+import MySalesPage from "./pages/me/MySalesPage";
+import MyPurchasesPage from "./pages/me/MyPurchasesPage";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +84,21 @@ const router = createBrowserRouter([
           {
             path: "signup",
             element: <SignupPage />,
+          },
+        ],
+      },
+      // 마이페이지 라우트
+      {
+        path: "me",
+        children: [
+          { index: true, element: <MyPage /> },
+          {
+            path: "selling",
+            element: <MySalesPage />,
+          },
+          {
+            path: "purchases",
+            element: <MyPurchasesPage />,
           },
         ],
       },

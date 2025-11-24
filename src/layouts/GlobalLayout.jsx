@@ -85,6 +85,10 @@ const GlobalHeader = function () {
           <Link to="/store" className="hover:text-black hover:underline">
             매장찾기
           </Link>
+
+          <Link to="/me" className="hover:text-black hover:underline">
+            마이페이지
+          </Link>
         </div>
         <div className="flex space-x-16 items-center h-[60px]">
           <Link to="/" className="h-[50px] shrink-0">

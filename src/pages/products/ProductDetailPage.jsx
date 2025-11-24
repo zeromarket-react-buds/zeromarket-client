@@ -1,15 +1,8 @@
 import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
-import {
-  Share2,
-  ChevronLeft,
-  UserRound,
-  Heart,
-  Eye,
-  Smile,
-} from "lucide-react";
-import DetailStickyHeader from "@/components/product/DetailStickyHeader";
-import DetailStickyFooter from "@/components/product/DetailStickyFooter";
+import { UserRound, Heart, Eye, Smile } from "lucide-react";
+import ProductHeader from "@/components/product/ProductHeader";
+import ProductFooter from "@/components/product/ProductFooter";
 import SimilarProductCard from "@/components/product/SimilarProductCard";
 import { products } from "@/data/product.js";
 
@@ -18,7 +11,7 @@ const ProductDetailPage = () => {
     <Container>
       <div>상품상세페이지입니다</div>
       <div className="max-w-full mx-auto bg-gray-0 border">
-        <DetailStickyHeader />
+        <ProductHeader type="detail" />
         <div className="relative">
           {/* 사진 영역 */}
           <div className="bg-gray-200 w-full h-70 flex items-center justify-center text-gray-600">
@@ -35,10 +28,10 @@ const ProductDetailPage = () => {
             {/* 닉네임과 관련 정보 */}
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-3 ">
-                <div className="w-12 h-12 bg-[#1B6439] rounded-full flex items-center justify-center text-[#FAF3E5] font-semibold">
+                <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-brand-ivory font-semibold">
                   <UserRound className="size-15" />
                 </div>
-                <span className="font-semibold text-[#1B6439] text-2xl">
+                <span className="font-semibold text-brand-green text-2xl">
                   닉네임
                 </span>
               </div>
@@ -47,30 +40,30 @@ const ProductDetailPage = () => {
               <div className="flex items-center gap-5 px-1">
                 {/* 조회수 */}
                 <div className="flex flex-col items-center">
-                  <span className="text-lg font-semibold text-[#1B6439]">
+                  <span className="text-lg font-semibold text-brand-green">
                     12
                   </span>
-                  <span className="text-sm text-[#9A9A9A]">
+                  <span className="text-sm text-brand-mediumgray">
                     <Eye className="size-4" />
                   </span>
                 </div>
 
                 {/* 관심수 */}
                 <div className="flex flex-col items-center">
-                  <span className="text-lg font-semibold text-[#1B6439]">
+                  <span className="text-lg font-semibold text-brand-green">
                     3
                   </span>
-                  <span className="text-sm  text-[#9A9A9A]">
+                  <span className="text-sm  text-brand-mediumgray">
                     <Heart className="size-4" />
                   </span>
                 </div>
 
                 {/* 이모지 */}
                 <div className="flex flex-col items-center">
-                  <span className="text-lg font-semibold text-[#1B6439]">
+                  <span className="text-lg font-semibold text-brand-green">
                     5
                   </span>
-                  <span className=" text-[#9A9A9A]">
+                  <span className=" text-brand-mediumgray">
                     <Smile className="size-4" />
                   </span>
                 </div>
@@ -86,7 +79,7 @@ const ProductDetailPage = () => {
 
           {/* 가격 & 예약중 */}
           <div className="flex justify-between items-center mb-1">
-            <span className="text-lg font-bold text-[#1B6439]">예약중</span>
+            <span className="text-lg font-bold text-brand-green">예약중</span>
             <span className="text-lg font-semibold">5,000원</span>
           </div>
           {/* 옵션 */}
@@ -111,19 +104,19 @@ const ProductDetailPage = () => {
           {/* 환경점수 - 2,3차 */}
           <div className="flex items-center justify-between border-t py-3 mb-10">
             <span className="">환경점수</span>
-            <span className="text-[#1B6439] text-2xl font-extrabold flex gap-3">
+            <span className="text-brand-green text-2xl font-extrabold flex gap-3">
               <span>+</span>
               <span>50p</span>
             </span>
           </div>
 
           {/* 하단 안내 */}
-          <div className=" my-5 text-sm text-[#6C6C6C] border-b py-3">
+          <div className=" my-5 text-sm text-brand-darkgray border-b py-3">
             <div>환경을 생각하는 0000님, </div>
             <div> 이 물품을 구입하면 30mg 탄소절감이 됩니다! </div>
           </div>
           {/* 거래 정보 */}
-          <div className=" my-5 text-sm text-[#6C6C6C] ">
+          <div className=" my-5 text-sm text-brand-darkgray ">
             <div className="flex justify-between mb-4">
               <span>거래방법</span>
               <div>
@@ -158,7 +151,10 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
-        <DetailStickyFooter />
+        <ProductFooter role="BUYER" />
+        <ProductFooter role="SELLER" />
+        <ProductFooter role="SELLER2" />
+        <ProductFooter role="WRITER" />
       </div>
     </Container>
   );
