@@ -7,34 +7,34 @@ export class ApiError extends Error {
   }
 }
 
-export async function handleApiError(response) {
-  let data = null;
+// export async function handleApiError(response) {
+//   let data = null;
 
-  try {
-    data = await response.clone().json();
-  } catch {
-    throw new ApiError({
-      status: response.status,
-      code: "UNKNOWN_ERROR",
-      message: "서버 응답을 해석할 수 없습니다.",
-    });
-  }
+//   try {
+//     data = await response.clone().json();
+//   } catch {
+//     throw new ApiError({
+//       status: response.status,
+//       code: "UNKNOWN_ERROR",
+//       message: "서버 응답을 해석할 수 없습니다.",
+//     });
+//   }
 
-  throw new ApiError({
-    status: response.status,
-    code: data.code || "UNKNOWN_ERROR",
-    message: data.message || "요청 처리 중 오류가 발생했습니다.",
-  });
-}
+//   throw new ApiError({
+//     status: response.status,
+//     code: data.code || "UNKNOWN_ERROR",
+//     message: data.message || "요청 처리 중 오류가 발생했습니다.",
+//   });
+// }
 
-// 실무에서 자주 쓰는 패턴 (최종 형태 예시)
-export function createApiError(response, data) {
-  return new ApiError({
-    status: response.status,
-    code: data?.code || "UNKNOWN_ERROR",
-    message: data?.message || "요청 중 오류 발생",
-  });
-}
+// // 실무에서 자주 쓰는 패턴 (최종 형태 예시)
+// export function createApiError(response, data) {
+//   return new ApiError({
+//     status: response.status,
+//     code: data?.code || "UNKNOWN_ERROR",
+//     message: data?.message || "요청 중 오류 발생",
+//   });
+// }
 
 // 에러를 ‘통일된 방식으로 다루기 위한 규칙’을 정의하는 곳
 

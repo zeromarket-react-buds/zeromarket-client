@@ -1,5 +1,5 @@
 import { refreshAccessToken, handleLogout } from "./token";
-import { handleApiError, ApiError } from "./error";
+import { ApiError } from "./error";
 
 const API_BASE = "http://localhost:8080";
 
@@ -8,11 +8,11 @@ const defaultOptions = {
   timeout: 5000,
 };
 
-export async function apiClient(
+const apiClient = async (
+  // 화살표 함수 변경! export는 마지막에!
   url,
   { method = "GET", headers = {}, body, params, timeout = 5000 } = {}
-  // options = {}
-) {
+) => {
   const accessToken = localStorage.getItem("accessToken");
 
   // Query Params 처리
@@ -20,8 +20,8 @@ export async function apiClient(
     ? "?" + new URLSearchParams(params).toString()
     : "";
 
-  //   const controller = new AbortController();
-  //   const timer = setTimeout(() => controller.abort(), timeout);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
 
   let response;
 
@@ -34,7 +34,7 @@ export async function apiClient(
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       },
       body: body ? JSON.stringify(body) : undefined,
-      //   signal: AbortController.signal,
+      signal: AbortController.signal,
     });
   } catch (error) {
     clearTimeout(timer);
@@ -45,7 +45,7 @@ export async function apiClient(
     });
   }
 
-  // clearTimeout(timer);
+  clearTimeout(timer);
 
   // ✅ 여기서부터 ky/axios 기능 구현됨
   let data = null;
@@ -56,7 +56,7 @@ export async function apiClient(
     data = null;
   }
 
-  // ✅ 401 처리 (토큰 만료일 때만 refresh flow + 재요청)
+  // ✅ 401 처리 (401 & 토큰 만료 --> refresh flow + 재요청)
   if (response.status === 401 && data?.code === "TOKEN_EXPIRED") {
     try {
       const newToken = await refreshAccessToken();
@@ -95,10 +95,9 @@ export async function apiClient(
     headers: response.headers,
     data,
   };
-  //   handleLogout();
-  //   await handleApiError(response);
-  //   //   throw new Error(`Auth failed: ${errorData.code}`);
-}
+};
+
+export { apiClient };
 
 // - baseURL
 // - headers

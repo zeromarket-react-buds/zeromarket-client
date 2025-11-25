@@ -15,6 +15,7 @@ import SignupPage from "@/pages/auth/SignupPage";
 import MyPage from "./pages/me/MyPage";
 import MySalesPage from "./pages/me/MySalesPage";
 import MyPurchasesPage from "./pages/me/MyPurchasesPage";
+import { AuthProvider } from "@/hooks/AuthContext";
 
 const router = createBrowserRouter([
   {
@@ -111,8 +112,10 @@ const App = function () {
 
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
-      <GlobalToast />
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <GlobalToast />
+        <RouterProvider router={router} />
+      </AuthProvider>
     </Suspense>
   );
 };
