@@ -11,10 +11,10 @@ export async function loginApi(loginId, password) {
 }
 
 // 회원가입
-export async function registerApi(email, password) {
-  const { data } = await apiClient("/api/auth/register", {
+export async function registerApi(form) {
+  const { data } = await apiClient("/api/auth/signup", {
     method: "POST",
-    body: { email, password },
+    body: form,
   });
 
   return data;
@@ -30,8 +30,14 @@ export async function refreshTokenApi(refreshToken) {
   return data; // { accessToken }
 }
 
-// 내 정보 조회(테스트용)
-export async function getMyInfo() {
+// 내 정보 조회
+export async function getMyInfoApi() {
   const { data } = await apiClient("/api/users/me");
   return data;
 }
+
+// 아이디 중복 체크
+export const checkDuplicateIdApi = async (id) => {
+  const { data } = await apiClient(`/api/auth/check-id?loginId=${id}`);
+  return data;
+};
