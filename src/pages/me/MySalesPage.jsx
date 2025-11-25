@@ -4,14 +4,7 @@ import { ChevronLeft, Search, XCircle } from "lucide-react";
 
 const MySalesPage = () => {
   return (
-    <div className="w-full max-w-md mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <button>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">나의 판매내역</h1>
-        <div className="justify-self-end w-9" />
-      </div>
+    <Container>
       <div className="flex flex-col p-2 gap-4 max-w-full">
         <div className="relative w-full">
           <form>
@@ -31,7 +24,7 @@ const MySalesPage = () => {
           </form>
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 

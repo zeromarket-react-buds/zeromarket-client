@@ -5,9 +5,11 @@ import { GreenRadio } from "@/components/ui/greenradio";
 import { ChevronDown, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductHeader from "@/components/product/ProductHeader";
-import ProductFooter from "@/components/product/ProductFooter";
+import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/ProductImageUploader";
+import { Input } from "@/components/ui/input";
 
+import { cn } from "@/lib/utils";
 const categories = [
   {
     id: 1,
@@ -53,7 +55,7 @@ const ProductCreatePage = () => {
     return parseInt(numericValue, 10).toLocaleString();
   };
 
-  const handelPrice = (e) => {
+  const handlePrice = (e) => {
     const value = e.target.value;
     setPrice(formatNumber(value));
   };
@@ -62,9 +64,6 @@ const ProductCreatePage = () => {
     <Container>
       <div>상품등록페이지입니다</div>
       <div className="max-w-full mx-auto bg-gray-0 border">
-        <div>
-          <ProductHeader type="register" />
-        </div>
         <div className="px-6">
           <div className="border-b py-4">
             <span className="text-lg font-semibold pl-5">상품 정보</span>
@@ -101,7 +100,7 @@ const ProductCreatePage = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="상품명을 입력해 주세요."
-                className="w-full border p-3 rounded-lg"
+                className={cn("w-full border p-3 rounded-lg")}
               />
               {title && (
                 <button
@@ -130,8 +129,8 @@ const ProductCreatePage = () => {
                     }))
                   }
                 >
-                  {item.options.map((op, i) => (
-                    <option key={i}>{op}</option>
+                  {item.options.map((option, i) => (
+                    <option key={i}>{option}</option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-6 -translate-y-1/2 text-gray-500 pointer-events-none" />
@@ -144,7 +143,7 @@ const ProductCreatePage = () => {
             <p className="font-medium mb-2 text-lg">판매가격</p>
             <input
               value={price}
-              onChange={handelPrice}
+              onChange={handlePrice}
               placeholder="₩ 판매가격"
               className="w-full border p-3 rounded-lg"
             />
@@ -249,7 +248,7 @@ const ProductCreatePage = () => {
             </div>
           </div>
         </div>
-        <ProductFooter role="WRITER" />
+        <ActionButtonBar role="WRITER" />
       </div>
     </Container>
   );

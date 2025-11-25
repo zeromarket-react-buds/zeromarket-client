@@ -57,7 +57,7 @@ const ProductImageUploader = ({ images, setImages }) => {
     <div className="mt-4">
       <p className="font-medium my-3">상품 이미지</p>
 
-      <div className="flex gap-2 overflow-x-auto items-center">
+      <div className="flex gap-1.5 overflow-x-auto items-center">
         {/* 이미지 업로드 버튼 */}
         <button
           type="button"
@@ -83,7 +83,7 @@ const ProductImageUploader = ({ images, setImages }) => {
         />
 
         {/* 업로드 된 이미지들 */}
-        <div className="flex gap-2 items-center h-22">
+        <div className="flex gap-1.5 items-center h-22">
           {images.map((img, idx) => (
             <div
               key={idx}
@@ -97,7 +97,7 @@ const ProductImageUploader = ({ images, setImages }) => {
                   className="w-full h-full object-cover"
                 />
                 {mainIndex === idx && (
-                  <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-60 text-white text-xs text-center py-0.5">
+                  <div className="absolute bottom-0 left-0 w-full bg-black opacity-80 text-white text-xs text-center py-0.5">
                     대표사진
                   </div>
                 )}
@@ -106,7 +106,7 @@ const ProductImageUploader = ({ images, setImages }) => {
               <button
                 type="button"
                 onClick={(e) => {
-                  e.stopPropagation();
+                  // e.stopPropagation();
                   removeImage(idx);
                 }}
                 className="absolute -top-1 -right-1 bg-gray-200 rounded-full p-0.5 cursor-pointer"

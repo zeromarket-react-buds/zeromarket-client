@@ -1,19 +1,9 @@
 import { ChevronLeft, Bell, UserRoundPen, Heart, Pen } from "lucide-react";
+import Container from "@/components/Container";
 
 export default function MyPage() {
   return (
-    <div className="w-full max-w-md mx-auto p-4">
-      {/* 상단 헤더 */}
-      <header className="flex items-center justify-between mb-6">
-        <button>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">마이페이지</h1>
-        <button>
-          <Bell size={24} />
-        </button>
-      </header>
-
+    <Container>
       {/* 프로필 */}
       <section className="flex items-center gap-4 mb-6">
         <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
@@ -97,6 +87,6 @@ export default function MyPage() {
           <li className="cursor-pointer">탈퇴</li>
         </ul>
       </section>
-    </div>
+    </Container>
   );
 }

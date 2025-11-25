@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import GlobalLayout from "@/layouts/GlobalLayout";
+import RootLayout from "@/layouts/RootLayout";
 import { useState } from "react";
 import Boards from "@/pages/Boards";
 import Board from "@/pages/Board";
@@ -12,15 +12,23 @@ import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
-import MyPage from "./pages/me/MyPage";
-import MySalesPage from "./pages/me/MySalesPage";
-import MyPurchasesPage from "./pages/me/MyPurchasesPage";
+import MyPage from "@/pages/me/MyPage";
 import { AuthProvider } from "@/hooks/AuthContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <GlobalLayout />,
+    element: <RootLayout />,
+    handle: {
+      layout: {
+        header: {
+          component: "DefaultHeader",
+        },
+        footer: {
+          component: "DefaultFooter",
+        },
+      },
+    },
     children: [
       { index: true, element: <Home /> },
       {
@@ -57,10 +65,32 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <ProductCreatePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "ProductHeader",
+                  props: { type: "register" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: ":id",
             element: <ProductDetailPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "ProductHeader",
+                  props: { type: "detail" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: "edit",
@@ -91,15 +121,48 @@ const router = createBrowserRouter([
       // 마이페이지 라우트
       {
         path: "me",
+        element: <MyPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "마이페이지" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
         children: [
-          { index: true, element: <MyPage /> },
           {
             path: "selling",
             element: <MySalesPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "나의 판매내역" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: "purchases",
             element: <MyPurchasesPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "나의 구매내역" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
         ],
       },

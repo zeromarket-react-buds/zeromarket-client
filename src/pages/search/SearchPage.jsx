@@ -4,7 +4,7 @@ import ProductFilter from "@/components/display/ProductFilter";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
-import { Filter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { Button } from "@/components/ui/button";
 
@@ -14,10 +14,11 @@ const SearchPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // 검색 관련
+  // 검색/sort 관련
   const [searchParams] = useSearchParams();
   const keywordFromUrl = searchParams.get("keyword") || "";
   const [keyword, setKeyword] = useState(keywordFromUrl);
+  const [sort, setSort] = useState("popularity");
 
   // cursor 관련
   const [cursor, setCursor] = useState(null);
@@ -35,6 +36,9 @@ const SearchPage = () => {
       const params = new URLSearchParams();
       if (keywordFromUrl) params.set("keyword", keywordFromUrl);
       if (nextCursor !== null) params.set("cursor", nextCursor);
+      if (sort) params.set("sort", sort);
+
+      console.log("정렬:", sort, "쿼리스트링:", params.toString());
 
       const res = await fetch(
         `http://localhost:8080/api/products?${params.toString()}`
@@ -51,7 +55,19 @@ const SearchPage = () => {
       const next = data.cursor;
       const nextHas = data.hasNext;
 
-      setProducts((prev) => (nextCursor ? [...prev, ...fetched] : fetched));
+      setProducts((prev) => {
+        if (!nextCursor) {
+          // 첫 화면 그냥 교체
+          return fetched;
+        }
+
+        const existingIds = new Set(prev.map((p) => p.productId));
+        const duplicateRemove = fetched.filter(
+          (p) => !existingIds.has(p.productId)
+        );
+
+        return [...prev, ...duplicateRemove];
+      });
       setCursor(next);
       setHasNext(nextHas);
     } catch (e) {
@@ -67,7 +83,13 @@ const SearchPage = () => {
     setHasNext(true);
     setKeyword(keywordFromUrl);
     fetchProducts(null);
-  }, [keywordFromUrl]);
+  }, [keywordFromUrl, sort]);
+
+  // sort 관련 함수
+  const handleSort = (e) => {
+    const sortValue = e.currentTarget.dataset.sort;
+    setSort(sortValue);
+  };
 
   // cursor 관련 무한스크롤
   useEffect(() => {
@@ -85,7 +107,7 @@ const SearchPage = () => {
     observer.observe(target);
 
     return () => observer.disconnect();
-  }, [cursor]);
+  }, [cursor, sort, hasNext, loading]);
 
   // 글등록 페이지 이동
   const goProductCreatePage = () => {
@@ -100,18 +122,30 @@ const SearchPage = () => {
           <Input
             placeholder="어떤 상품을 찾으시나요?"
             value={keyword}
+            readOnly
+            onChange={(e) => setKeyword(e.target.value)}
             onClick={() => setIsOpen(true)}
           />
           <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
         </div>
 
         {/* sort */}
-        <div className="flex justify-between items-center px-2">
-          <Filter className="w-5 h-5" />
-          <div className="text-sm">
-            <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
-            <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
-          </div>
+        <div className="flex gap-2 px-2 text-sm -mt-3">
+          <NavLink data-sort="popularity" onClick={handleSort}>
+            인기순
+          </NavLink>{" "}
+          |{" "}
+          <NavLink data-sort="latest" onClick={handleSort}>
+            최신순
+          </NavLink>{" "}
+          |{" "}
+          <NavLink data-sort="priceAsc" onClick={handleSort}>
+            낮은가격순
+          </NavLink>{" "}
+          |{" "}
+          <NavLink data-sort="priceDesc" onClick={handleSort}>
+            높은가격순
+          </NavLink>
         </div>
 
         {/* 필터 */}
@@ -131,7 +165,7 @@ const SearchPage = () => {
       {loading && <div className="py-4 text-center">로딩중...</div>}
 
       {/* 상품등록 버튼 */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-40">
         <Button
           variant="green"
           className="w-14 h-14 rounded-full flex items-center justify-center"
