@@ -2,9 +2,10 @@ import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { UserRound, Heart, Eye, Smile } from "lucide-react";
 import ProductHeader from "@/components/product/ProductHeader";
-import ProductFooter from "@/components/product/ProductFooter";
+import ActionButtonBar from "@/components/product/ActionButtonBar";
 import SimilarProductCard from "@/components/product/SimilarProductCard";
 import { products } from "@/data/product.js";
+import ProductCard from "@/components/display/ProductCard";
 
 const ProductDetailPage = () => {
   return (
@@ -14,11 +15,11 @@ const ProductDetailPage = () => {
         <ProductHeader type="detail" />
         <div className="relative">
           {/* 사진 영역 */}
-          <div className="bg-gray-200 w-full h-70 flex items-center justify-center text-gray-600">
+          <div className="bg-gray-200 w-full h-85 flex items-center justify-center text-gray-600">
             사진
           </div>
-          <div className="absolute bottom-2 right-2 m-2">
-            <span>1 </span>/ <span>5</span>
+          <div className="absolute bottom-2 right-2 m-5 font-">
+            <span>1 </span> <span>/ 5</span>
           </div>
         </div>
 
@@ -143,6 +144,7 @@ const ProductDetailPage = () => {
               <h3 className="text-lg font-semibold text-gray-800 my-3">
                 비슷한 물품
               </h3>
+              {/* <ProductCard products={products} /> */}
               <div className="grid grid-cols-2 gap-1">
                 {products.map((p) => (
                   <SimilarProductCard key={p.id} />
@@ -151,10 +153,10 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
-        <ProductFooter role="BUYER" />
-        <ProductFooter role="SELLER" />
-        <ProductFooter role="SELLER2" />
-        <ProductFooter role="WRITER" />
+        <ActionButtonBar role="BUYER" />
+        <ActionButtonBar role="SELLER" />
+        <ActionButtonBar role="SELLER2" />
+        <ActionButtonBar role="WRITER" />
       </div>
     </Container>
   );

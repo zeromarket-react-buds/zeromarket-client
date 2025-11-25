@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
 
-const ProductFooter = ({ role }) => {
+const ActionButtonBar = ({ role }) => {
   const { showLikeToast } = useLikeToast();
 
   const handleButtonClick = (action) => {
@@ -114,4 +114,4 @@ const ProductFooter = ({ role }) => {
   );
 };
 
-export default ProductFooter;
+export default ActionButtonBar;
