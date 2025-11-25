@@ -1,7 +1,7 @@
 import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Filter, Plus, Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
@@ -109,7 +109,7 @@ const ProductList = () => {
       )}
 
       {/* 상품등록 버튼 */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-40">
         <Button
           variant="green"
           className="w-14 h-14 rounded-full flex items-center justify-center"
