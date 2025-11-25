@@ -6,13 +6,20 @@ const API_BASE = "http://localhost:8080";
 // 기본 옵션
 const defaultOptions = {
   timeout: 5000,
+  retry: false,
 };
 
 // retry -> "이미 재시도했는지 여부"를 표시하는 플래그
 const apiClient = async (
   url,
-  { method = "GET", headers = {}, body, params, timeout = 5000 } = {},
-  retry = false
+  {
+    method = "GET",
+    headers = {},
+    body,
+    params,
+    timeout = defaultOptions.timeout,
+  } = {},
+  retry = defaultOptions.retry
 ) => {
   const accessToken = localStorage.getItem("accessToken");
 
@@ -48,7 +55,7 @@ const apiClient = async (
       body: hasBody ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
-  } catch {
+  } catch (error) {
     // 네트워크 자체 실패(연결 불가, 타임아웃, CORS 차단 등) & 요청 자체가 abort 됨
     clearTimeout(timer);
     // handleApiError(response); // response가 undefined 일 수 있음
@@ -113,6 +120,11 @@ const apiClient = async (
       code: data?.code || "REQUEST_FAILED",
       message: data?.message || "요청에 실패했습니다.",
     });
+    // throw new ApiError({
+    //   status: response.status,
+    //   code: data?.code || "REQUEST_FAILED",
+    //   message: data?.message || "요청에 실패했습니다.",
+    // });
   }
 
   // ✅ ky/axios 스타일 반환 구조

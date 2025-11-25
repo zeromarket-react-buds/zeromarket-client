@@ -8,10 +8,10 @@ export class ApiError extends Error {
 }
 
 export async function handleApiError(response) {
-  let data = null;
+  let errorData = null;
 
   try {
-    data = await response.clone().json();
+    errorData = await response.clone().json();
   } catch {
     throw new ApiError({
       status: response.status,
@@ -22,8 +22,8 @@ export async function handleApiError(response) {
 
   throw new ApiError({
     status: response.status,
-    code: data.code || "UNKNOWN_ERROR",
-    message: data.message || "요청 처리 중 오류가 발생했습니다.",
+    code: errorData.code || "REQUEST_FAILED",
+    message: errorData.message || "요청에 실패했습니다.",
   });
 }
 
