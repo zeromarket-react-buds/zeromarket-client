@@ -3,37 +3,39 @@ import { Button } from "../ui/button";
 import { Search, XCircle } from "lucide-react";
 import FilterSideBar from "./FilterSidebar";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
+  const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
   const keywordRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && keywordRef.current) {
-      keywordRef.current.focus();
+    if (isOpen) {
+      setTempKeyword(keyword ?? "");
+      setTimeout(() => keywordRef.current?.focus(), 0);
     }
-  }, [isOpen]);
+  }, [isOpen, keyword]);
 
-  //input창 클리어
-  const clearInput = (e) => {
-    e.preventDefault(); // submit 방지
-    e.stopPropagation(); // 이벤트버블링 방지
-    setKeyword("");
-    requestAnimationFrame(() => {
-      keywordRef.current.focus();
-    });
+  const clearInput = () => {
+    setTempKeyword("");
+    setTimeout(() => keywordRef.current?.focus(), 0);
   };
 
-  // 필터 검색 form submit 함수
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const next = tempKeyword.trim(); // 모달창에서 임시 키워드 input값 넣은 부분
+    if (!next) return;
+    setKeyword(next); // submit 후 keyword 확정
+
     const params = new URLSearchParams();
-    if (keyword.trim()) params.set("keyword", keyword.trim());
+    if (next) params.set("keyword", next);
 
     navigate(`/search?${params.toString()}`);
     onClose();
   };
+
   return (
     <div>
       {isOpen && (
@@ -61,11 +63,11 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
               <div className="relative w-full py-2 mb-2">
                 <Input
                   placeholder="어떤 상품을 찾으시나요?"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
+                  value={tempKeyword}
+                  onChange={(e) => setTempKeyword(e.target.value)}
                   ref={keywordRef}
                 />
-                {keyword && (
+                {tempKeyword && (
                   <Button
                     type="button"
                     onClick={clearInput}

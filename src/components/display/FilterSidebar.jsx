@@ -25,9 +25,7 @@ const FilterSideBar = () => {
     e.preventDefault(); // submit 방지
     e.stopPropagation(); // 이벤트버블링 방지
     setArea("");
-    requestAnimationFrame(() => {
-      inputRef.current.focus();
-    });
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
   return (
     <div className="flex flex-col gap-3 w-full">

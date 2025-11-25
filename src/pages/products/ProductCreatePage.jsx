@@ -64,9 +64,6 @@ const ProductCreatePage = () => {
     <Container>
       <div>상품등록페이지입니다</div>
       <div className="max-w-full mx-auto bg-gray-0 border">
-        <div>
-          <ProductHeader type="register" />
-        </div>
         <div className="px-6">
           <div className="border-b py-4">
             <span className="text-lg font-semibold pl-5">상품 정보</span>
