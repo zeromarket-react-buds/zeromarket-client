@@ -26,6 +26,7 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
     e.preventDefault();
 
     const next = tempKeyword.trim(); // 모달창에서 임시 키워드 input값 넣은 부분
+    if (!next) return;
     setKeyword(next); // submit 후 keyword 확정
 
     const params = new URLSearchParams();
