@@ -11,7 +11,6 @@ const ProductDetailPage = () => {
     <Container>
       <div>상품상세페이지입니다</div>
       <div className="max-w-full mx-auto bg-gray-0 border">
-        <ProductHeader type="detail" />
         <div className="relative">
           {/* 사진 영역 */}
           <div className="bg-gray-200 w-full h-70 flex items-center justify-center text-gray-600">
