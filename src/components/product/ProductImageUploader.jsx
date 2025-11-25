@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, CircleX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ProductImageUploader = ({ images, setImages }) => {
   const fileInputRef = useRef(null);
@@ -109,9 +110,11 @@ const ProductImageUploader = ({ images, setImages }) => {
                   // e.stopPropagation();
                   removeImage(idx);
                 }}
-                className="absolute -top-1 -right-1 bg-gray-200 rounded-full p-0.5 cursor-pointer"
+                className="absolute -top-1 -right-1 bg-gray-200 rounded-full cursor-pointer"
               >
-                <X className="text-gray-600 stroke-2 w-5 h-5" />
+                {/* <X className="text-gray-600 stroke-2 w-5 h-5" /> */}
+
+                <CircleX className="text-gray-600 stroke-2 w-5 h-5" />
               </button>
             </div>
           ))}
