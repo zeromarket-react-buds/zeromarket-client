@@ -1,5 +1,5 @@
 import { refreshAccessToken, handleLogout } from "./token";
-import { ApiError } from "./error";
+import { ApiError, handleApiError } from "./error";
 
 const API_BASE = "http://localhost:8080";
 
@@ -9,11 +9,17 @@ const defaultOptions = {
 };
 
 const apiClient = async (
-  // 화살표 함수 변경! export는 마지막에!
   url,
   { method = "GET", headers = {}, body, params, timeout = 5000 } = {}
 ) => {
   const accessToken = localStorage.getItem("accessToken");
+
+  // 명시적 undefined/null 체크 & GET/HEAD 체크
+  const hasBody =
+    body !== undefined &&
+    body !== null &&
+    method !== "GET" &&
+    method !== "HEAD";
 
   // Query Params 처리
   const queryString = params
@@ -33,16 +39,18 @@ const apiClient = async (
         ...headers,
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: hasBody ? JSON.stringify(body) : undefined,
       signal: AbortController.signal,
     });
   } catch (error) {
     clearTimeout(timer);
-    throw new ApiError({
-      status: 0,
-      code: "NETWORK_ERROR",
-      message: "서버에 연결할 수 없습니다.",
-    });
+    handleApiError(response);
+    console.error(error);
+    // throw new ApiError({
+    //   status: 0,
+    //   code: "NETWORK_ERROR",
+    //   message: "서버에 연결할 수 없습니다.",
+    // });
   }
 
   clearTimeout(timer);
