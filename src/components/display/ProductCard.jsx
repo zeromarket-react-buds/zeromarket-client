@@ -8,8 +8,11 @@ import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
 import dayjs from "@/utils/time";
 import { Badge } from "../ui/badge";
+import { useNavigate } from "react-router-dom";
 const ProductCard = ({ products, onToggleLike }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
+
+  const navigate = useNavigate();
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = (productId, liked) => {
@@ -18,10 +21,16 @@ const ProductCard = ({ products, onToggleLike }) => {
 
     onToggleLike(productId);
   };
+
+  // 상품상세 페이지 이동
+  const goDetail = (productId) => {
+    navigate(`/products/${productId}`);
+  };
+
   return (
     <div className="grid grid-cols-2 gap-6">
       {products.map((p) => (
-        <div key={p.productId}>
+        <div key={p.productId} onClick={() => goDetail(p.productId)}>
           <Card className="border-0 shadow-none w-full max-w-sm p-2">
             <CardHeader className="p-0">
               {/* 상품에 관한 이미지 부분 */}
@@ -41,7 +50,10 @@ const ProductCard = ({ products, onToggleLike }) => {
                   {/* 찜하기 버튼 */}
                   <Heart
                     className="size-6 mx-1 cursor-pointer"
-                    onClick={() => handleHeartClick(p.productId, p.liked)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleHeartClick(p.productId, p.liked);
+                    }}
                     fill={p.liked ? "red" : "none"}
                     stroke={p.liked ? "red" : "currentColor"}
                   />
