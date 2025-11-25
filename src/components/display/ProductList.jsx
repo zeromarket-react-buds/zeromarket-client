@@ -1,19 +1,26 @@
 import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ProductFilter from "@/components/display/ProductFilter";
-import { Search, XCircle } from "lucide-react";
+import { Filter, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import ProductFilter from "./ProductFilter";
+import { useLikeToggle } from "@/hooks/useLikeToggle";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const ProductList = () => {
-  const [keyword, setKeyword] = useState("");
+  const { products, setProducts, onToggleLike } = useLikeToggle([]);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
+
+  // 검색 관련
+  const [keyword, setKeyword] = useState("");
+
+  // cursor 관련
   const [cursor, setCursor] = useState(null);
   const [hasNext, setHasNext] = useState(true);
-  const [loading, setLoading] = useState(false);
 
+  // 검색 fetch 요청 함수
   const fetchHomeProducts = async (nextCursor = null) => {
     if (loading) return;
     setLoading(true);
@@ -55,37 +62,62 @@ const ProductList = () => {
     fetchHomeProducts(null);
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const params = new URLSearchParams();
-    if (keyword.trim()) params.set("keyword", keyword.trim());
-
-    navigate(`/search?${params.toString()}`);
+  // 글등록 페이지 이동
+  const goProductCreatePage = () => {
+    navigate(`/products`);
   };
+
   return (
-    <div className="flex flex-col p-2 gap-4 max-w-full">
-      <form onSubmit={handleSubmit} className="relative w-full">
+    <div className="flex flex-col gap-4 max-w-full">
+      {/* 상품 검색창 */}
+      <div className="relative p-2">
         <Input
           placeholder="어떤 상품을 찾으시나요?"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onClick={() => setIsOpen(true)}
         />
-        <Button className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4">
-          <XCircle className="h-4 w-4" />
-        </Button>
+        <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
+      </div>
+
+      {/* sort */}
+      <div className="flex justify-between items-center px-2">
+        <Filter className="w-5 h-5" />
+        <div className="text-sm">
+          <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
+          <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
+        </div>
+      </div>
+
+      {/* 필터 */}
+      <ProductFilter
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        keyword={keyword}
+        setKeyword={setKeyword}
+      />
+      <ProductCard products={products} onToggleLike={onToggleLike} />
+
+      {/* 더보기 */}
+      {hasNext && (
         <Button
-          type="submit"
-          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4"
+          variant="green"
+          className="px-4 py-2"
+          onClick={() => fetchHomeProducts(cursor)}
+          disabled={loading}
         >
-          <Search className="h-4 w-4" />
+          {loading ? "로딩중..." : "더 보기"}
         </Button>
-      </form>
-      <ProductFilter />
-      <ProductCard products={products} />
-      <Button variant="green" className="px-4 py-2">
-        더 보기
-      </Button>
+      )}
+
+      {/* 상품등록 버튼 */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          variant="green"
+          className="w-14 h-14 rounded-full flex items-center justify-center"
+          onClick={goProductCreatePage}
+        >
+          등록
+        </Button>
+      </div>
     </div>
   );
 };
