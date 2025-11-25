@@ -63,6 +63,7 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
               <div className="relative w-full py-2 mb-2">
                 <Input
                   placeholder="어떤 상품을 찾으시나요?"
+                  className="font-normal"
                   value={tempKeyword}
                   onChange={(e) => setTempKeyword(e.target.value)}
                   ref={keywordRef}
@@ -71,12 +72,12 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
                   <Button
                     type="button"
                     onClick={clearInput}
-                    className="absolute right-10 top-1/2 -translate-y-1/2 h-4 w-4"
+                    className="absolute right-8 top-1/2 -translate-y-1/2 h-4 w-4"
                   >
-                    <XCircle className="h-4 w-4" />
+                    <XCircle />
                   </Button>
                 )}
-                <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
               </div>
               <FilterSideBar />
             </form>
