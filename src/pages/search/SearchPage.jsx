@@ -100,6 +100,7 @@ const SearchPage = () => {
           <Input
             placeholder="어떤 상품을 찾으시나요?"
             value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
             onClick={() => setIsOpen(true)}
           />
           <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
@@ -131,7 +132,7 @@ const SearchPage = () => {
       {loading && <div className="py-4 text-center">로딩중...</div>}
 
       {/* 상품등록 버튼 */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-40">
         <Button
           variant="green"
           className="w-14 h-14 rounded-full flex items-center justify-center"
