@@ -6,19 +6,28 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 
 const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
-  const inputRef = useRef(null);
+  const keywordRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen && keywordRef.current) {
+      keywordRef.current.focus();
     }
   }, [isOpen]);
+
+  //input창 클리어
+  const clearInput = (e) => {
+    e.preventDefault(); // submit 방지
+    e.stopPropagation(); // 이벤트버블링 방지
+    setKeyword("");
+    requestAnimationFrame(() => {
+      keywordRef.current.focus();
+    });
+  };
 
   // 필터 검색 form submit 함수
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const params = new URLSearchParams();
     if (keyword.trim()) params.set("keyword", keyword.trim());
 
@@ -40,27 +49,35 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
           >
             <div className="flex gap-3 items-center border-b border-brand-mediumgray py-0.5">
               <div className="w-full text-base font-semibold">검색필터</div>
-              <Button onClick={onClose} className="text-base pr-2">
+              <Button
+                type="button"
+                onClick={onClose}
+                className="text-base pr-2"
+              >
                 <XCircle />
               </Button>
             </div>
-            <form
-              onSubmit={handleSubmit}
-              className="relative w-full py-2 mb-2
-            "
-            >
-              <Input
-                placeholder="어떤 상품을 찾으시나요?"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                ref={inputRef}
-              />
-              <Button className="absolute right-10 top-1/2 -translate-y-1/2 h-4 w-4">
-                <XCircle className="h-4 w-4" />
-              </Button>
-              <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
+            <form onSubmit={handleSubmit}>
+              <div className="relative w-full py-2 mb-2">
+                <Input
+                  placeholder="어떤 상품을 찾으시나요?"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  ref={keywordRef}
+                />
+                {keyword && (
+                  <Button
+                    type="button"
+                    onClick={clearInput}
+                    className="absolute right-10 top-1/2 -translate-y-1/2 h-4 w-4"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                )}
+                <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
+              </div>
+              <FilterSideBar />
             </form>
-            <FilterSideBar />
           </div>
         </div>
       )}
