@@ -8,24 +8,36 @@ const defaultOptions = {
   timeout: 5000,
 };
 
+// retry -> "이미 재시도했는지 여부"를 표시하는 플래그
 const apiClient = async (
-  // 화살표 함수 변경! export는 마지막에!
   url,
-  { method = "GET", headers = {}, body, params, timeout = 5000 } = {}
+  { method = "GET", headers = {}, body, params, timeout = 5000 } = {},
+  retry = false
 ) => {
   const accessToken = localStorage.getItem("accessToken");
+
+  // body, method 체크
+  const hasBody =
+    body !== undefined &&
+    body !== null &&
+    method !== "GET" &&
+    method !== "HEAD";
 
   // Query Params 처리
   const queryString = params
     ? "?" + new URLSearchParams(params).toString()
     : "";
 
+  // abortController: fetch 요청을 '외부에서 제어'할 수 있게 만들어주는 도구
+  // - controller.signal : 요청에 연결되는 신호
+  // - controller.abort() : 이걸 호출하면 요청 종료
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
   let response;
 
   try {
+    // 401, 404, 500 --> 정상 응답(예외 아님)
     response = await fetch(`${API_BASE}${url}${queryString}`, {
       method,
       headers: {
@@ -33,11 +45,14 @@ const apiClient = async (
         ...headers,
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       },
-      body: body ? JSON.stringify(body) : undefined,
-      signal: AbortController.signal,
+      body: hasBody ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
-  } catch (error) {
+  } catch {
+    // 네트워크 자체 실패(연결 불가, 타임아웃, CORS 차단 등) & 요청 자체가 abort 됨
     clearTimeout(timer);
+    // handleApiError(response); // response가 undefined 일 수 있음
+    console.error(error);
     throw new ApiError({
       status: 0,
       code: "NETWORK_ERROR",
@@ -52,24 +67,35 @@ const apiClient = async (
 
   try {
     data = await response.clone().json();
-  } catch {
-    data = null;
-  }
+  } catch {}
 
-  // ✅ 401 처리 (401 & 토큰 만료 --> refresh flow + 재요청)
+  // ✅ 401 + TOKEN_EXPIRED -> refresh token + 재요청 (1회만)
   if (response.status === 401 && data?.code === "TOKEN_EXPIRED") {
+    if (retry) {
+      handleLogout();
+      throw new ApiError({
+        status: 401,
+        code: "SESSION_EXPIRED",
+        message: "로그인이 만료되었습니다.",
+      });
+    }
+
     try {
       const newToken = await refreshAccessToken();
 
-      return apiClient(url, {
-        method,
-        headers: {
-          ...headers,
-          Authorization: `Bearer ${newToken}`,
+      return apiClient(
+        url,
+        {
+          method,
+          headers: {
+            ...headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+          body,
+          params,
         },
-        body,
-        params,
-      }); // 왜 재요청할 때는 url에 쿼리 부착, body json 변환 등을 안해?
+        true
+      );
     } catch {
       handleLogout();
       throw new ApiError({
@@ -80,7 +106,7 @@ const apiClient = async (
     }
   }
 
-  // ✅ 응답 실패 시 자동 throw (axios 스타일)
+  // ✅ 200~299가 아니면 자동 예외 (axios 스타일)
   if (!response.ok) {
     throw new ApiError({
       status: response.status,

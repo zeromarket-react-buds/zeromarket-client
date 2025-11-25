@@ -7,7 +7,7 @@ import {
   useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyInfo, loginApi } from "@/common/api/auth.api";
+import { getMyInfoApi, loginApi, refreshTokenApi } from "@/common/api/auth.api";
 
 /*
 전역으로 관리할 상태 
@@ -29,15 +29,21 @@ function AuthProvider({ children }) {
   // ✅ 앱 시작(로드) 시 로그인 상태 복구
   useEffect(() => {
     async function initAuth() {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        setLoading(false); // 로딩 끝 -> 비로그인 상태
+        return;
+      }
+
       try {
         const res = await refreshTokenApi(refreshToken);
         localStorage.setItem("accessToken", res.accessToken);
         localStorage.setItem("refreshToken", res.refreshToken);
 
-        const userData = await getMyInfo();
+        const userData = await getMyInfoApi();
         setUser(userData);
         console.log("초기 인증 복구 성공");
-      } catch {
+      } catch (e) {
         setUser(null);
         console.error("초기 인증 복구 실패", e);
       } finally {
@@ -55,7 +61,7 @@ function AuthProvider({ children }) {
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
 
-    const userData = await getMyInfo();
+    const userData = await getMyInfoApi();
     setUser(userData);
   }
 
