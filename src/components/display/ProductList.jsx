@@ -73,18 +73,16 @@ const ProductList = () => {
       <div className="relative p-2">
         <Input
           placeholder="어떤 상품을 찾으시나요?"
+          readOnly
           onClick={() => setIsOpen(true)}
         />
         <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
       </div>
 
       {/* sort */}
-      <div className="flex justify-between items-center px-2">
-        <Filter className="w-5 h-5" />
-        <div className="text-sm">
-          <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
-          <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
-        </div>
+      <div className="flex gap-2 px-2 text-sm -mt-3">
+        <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
+        <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
       </div>
 
       {/* 필터 */}

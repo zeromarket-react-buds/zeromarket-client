@@ -100,6 +100,7 @@ const SearchPage = () => {
           <Input
             placeholder="어떤 상품을 찾으시나요?"
             value={keyword}
+            readOnly
             onChange={(e) => setKeyword(e.target.value)}
             onClick={() => setIsOpen(true)}
           />
@@ -107,12 +108,9 @@ const SearchPage = () => {
         </div>
 
         {/* sort */}
-        <div className="flex justify-between items-center px-2">
-          <Filter className="w-5 h-5" />
-          <div className="text-sm">
-            <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
-            <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
-          </div>
+        <div className="flex gap-2 px-2 text-sm -mt-3">
+          <NavLink>인기순</NavLink> | <NavLink>최신순</NavLink> |{" "}
+          <NavLink>낮은가격순</NavLink> | <NavLink>높은가격순</NavLink>
         </div>
 
         {/* 필터 */}
