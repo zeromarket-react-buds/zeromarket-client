@@ -13,8 +13,6 @@ import { GlobalToast } from "@/components/GlobalToast";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import MyPage from "./pages/me/MyPage";
-import MySalesPage from "./pages/me/MySalesPage";
-import MyPurchasesPage from "./pages/me/MyPurchasesPage";
 import { AuthProvider } from "@/hooks/AuthContext";
 import MySalesPage from "@/pages/me/MySalesPage";
 import MyPurchasesPage from "@/pages/me/MyPurchasesPage";
