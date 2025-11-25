@@ -7,6 +7,7 @@ import {
 import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
 import dayjs from "@/utils/time";
+import { Badge } from "../ui/badge";
 const ProductCard = ({ products, onToggleLike }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
 
@@ -31,10 +32,12 @@ const ProductCard = ({ products, onToggleLike }) => {
                   className="relative w-[250px] h-[250px] rounded-xl"
                 />
                 <div className="flex absolute justify-between items-center bottom-0 w-full px-2 py-2">
-                  {/* 상품상태 버튼 */}
-                  <div className="text-xs text-white rounded-md bg-brand-green p-1 px-3">
-                    예약중
-                  </div>
+                  {/* 상품상태  */}
+                  {p.salesStatus === "RESERVED" ? (
+                    <Badge>예약중</Badge>
+                  ) : (
+                    <div></div>
+                  )}
                   {/* 찜하기 버튼 */}
                   <Heart
                     className="size-6 mx-1 cursor-pointer"
