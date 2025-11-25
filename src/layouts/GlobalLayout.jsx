@@ -208,7 +208,7 @@ const GlobalLayout = function () {
         <Outlet />
       </main>
       <GlobalFooter />
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-24 right-6 z-50">
         <ToTheTop />
       </div>
     </div>
