@@ -88,16 +88,13 @@ const apiClient = async (
     }
 
     try {
-      const newToken = await refreshAccessToken();
+      await refreshAccessToken();
 
       return apiClient(
         url,
         {
           method,
-          headers: {
-            ...headers,
-            Authorization: `Bearer ${newToken}`,
-          },
+          headers,
           body,
           params,
         },

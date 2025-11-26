@@ -30,8 +30,6 @@ export async function refreshAccessToken() {
 
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", newRT);
-
-      return accessToken;
     } finally {
       isRefreshing = false;
       refreshPromise = null;
