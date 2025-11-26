@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -51,10 +51,12 @@ const ProductList = () => {
       const hasNext = data.hasNext;
 
       setProducts((prev) => {
+        // 화면 처음 그려질 때(nextCursor 없을 경우)는 그냥 fetch 요청한거 그대로
         if (!nextCursor) {
           return fetched;
         }
 
+        // 불려와진 후
         const existingIds = new Set(prev.map((p) => p.productId));
         const duplicateRemove = fetched.filter(
           (p) => !existingIds.has(p.productId)
@@ -78,9 +80,9 @@ const ProductList = () => {
   }, [sort]);
 
   // sort 관련 함수
-  const handleSort = (e) => {
-    const sortValue = e.currentTarget.dataset.sort;
-    setSort(sortValue);
+  const handleSort = (value) => {
+    if (!value || value === sort) return;
+    setSort(value);
   };
 
   // 글등록 페이지 이동
@@ -102,21 +104,41 @@ const ProductList = () => {
 
       {/* sort */}
       <div className="flex gap-2 px-2 text-sm -mt-3">
-        <NavLink data-sort="popularity" onClick={handleSort}>
+        <span
+          onClick={() => handleSort("popularity")}
+          className={`cursor-pointer ${
+            sort === "popularity" ? "font-semibold" : "text-brand-mediumgray"
+          }`}
+        >
           인기순
-        </NavLink>{" "}
+        </span>{" "}
         |{" "}
-        <NavLink data-sort="latest" onClick={handleSort}>
+        <span
+          onClick={() => handleSort("latest")}
+          className={`cursor-pointer ${
+            sort === "latest" ? "font-semibold" : "text-brand-mediumgray"
+          }`}
+        >
           최신순
-        </NavLink>{" "}
+        </span>{" "}
         |{" "}
-        <NavLink data-sort="priceAsc" onClick={handleSort}>
+        <span
+          onClick={() => handleSort("priceAsc")}
+          className={`cursor-pointer ${
+            sort === "priceAsc" ? "font-semibold" : "text-brand-mediumgray"
+          }`}
+        >
           낮은가격순
-        </NavLink>{" "}
+        </span>{" "}
         |{" "}
-        <NavLink data-sort="priceDesc" onClick={handleSort}>
+        <span
+          onClick={() => handleSort("priceDesc")}
+          className={`cursor-pointer ${
+            sort === "priceDesc" ? "font-semibold" : "text-brand-mediumgray"
+          }`}
+        >
           높은가격순
-        </NavLink>
+        </span>
       </div>
 
       {/* 필터 */}
@@ -125,6 +147,7 @@ const ProductList = () => {
         onClose={() => setIsOpen(false)}
         keyword={keyword}
         setKeyword={setKeyword}
+        sort={sort}
       />
       <ProductCard products={products} onToggleLike={onToggleLike} />
 

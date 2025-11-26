@@ -5,7 +5,7 @@ import FilterSideBar from "./FilterSidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
+const ProductFilter = ({ isOpen, onClose, keyword, setKeyword, sort }) => {
   const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
   const keywordRef = useRef(null);
   const navigate = useNavigate();
@@ -31,6 +31,7 @@ const ProductFilter = ({ isOpen, onClose, keyword, setKeyword }) => {
 
     const params = new URLSearchParams();
     if (next) params.set("keyword", next);
+    if (sort) params.set("sort", sort);
 
     navigate(`/search?${params.toString()}`);
     onClose();

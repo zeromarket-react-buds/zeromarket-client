@@ -3,7 +3,7 @@ import ProductCard from "@/components/display/ProductCard";
 import ProductFilter from "@/components/display/ProductFilter";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,16 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 검색/sort 관련
-  const [searchParams] = useSearchParams();
+  // 검색/sort 관련 받아오는 쪽
+  const searchParams = new URLSearchParams(location.search);
   const keywordFromUrl = searchParams.get("keyword") || "";
+  const sortFromUrl = searchParams.get("sort") ?? "popularity";
+
+  // 실제 서버 요청에 쓰이는 확정된 상태
   const [keyword, setKeyword] = useState(keywordFromUrl);
-  const [sort, setSort] = useState("popularity");
+  const [sort, setSort] = useState(sortFromUrl);
 
   // cursor 관련
   const [cursor, setCursor] = useState(null);
@@ -34,9 +38,10 @@ const SearchPage = () => {
 
     try {
       const params = new URLSearchParams();
-      if (keywordFromUrl) params.set("keyword", keywordFromUrl);
-      if (nextCursor !== null) params.set("cursor", nextCursor);
+
+      if (keyword) params.set("keyword", keyword);
       if (sort) params.set("sort", sort);
+      if (nextCursor !== null) params.set("cursor", nextCursor);
 
       console.log("정렬:", sort, "쿼리스트링:", params.toString());
 
@@ -56,11 +61,12 @@ const SearchPage = () => {
       const nextHas = data.hasNext;
 
       setProducts((prev) => {
+        // 화면 처음 그려질 때(nextCursor 없을 경우)는 그냥 fetch 요청한거 그대로
         if (!nextCursor) {
-          // 첫 화면 그냥 교체
           return fetched;
         }
 
+        // 불려와진 후
         const existingIds = new Set(prev.map((p) => p.productId));
         const duplicateRemove = fetched.filter(
           (p) => !existingIds.has(p.productId)
@@ -77,18 +83,18 @@ const SearchPage = () => {
     }
   };
 
+  // 다시 그려지는 기준
   useEffect(() => {
     setProducts([]);
     setCursor(null);
     setHasNext(true);
-    setKeyword(keywordFromUrl);
     fetchProducts(null);
-  }, [keywordFromUrl, sort]);
+  }, [keyword, sort]);
 
   // sort 관련 함수
-  const handleSort = (e) => {
-    const sortValue = e.currentTarget.dataset.sort;
-    setSort(sortValue);
+  const handleSort = (value) => {
+    if (!value || value === sort) return;
+    setSort(value);
   };
 
   // cursor 관련 무한스크롤
@@ -99,7 +105,7 @@ const SearchPage = () => {
     const observer = new IntersectionObserver((entries) => {
       const entry = entries[0];
 
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting && hasNext && !loading) {
         fetchProducts(cursor);
       }
     });
@@ -123,7 +129,6 @@ const SearchPage = () => {
             placeholder="어떤 상품을 찾으시나요?"
             value={keyword}
             readOnly
-            onChange={(e) => setKeyword(e.target.value)}
             onClick={() => setIsOpen(true)}
           />
           <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
@@ -131,21 +136,49 @@ const SearchPage = () => {
 
         {/* sort */}
         <div className="flex gap-2 px-2 text-sm -mt-3">
-          <NavLink data-sort="popularity" onClick={handleSort}>
+          <Link
+            to={`/search?keyword=${keyword}&sort=popularity`}
+            data-sort="popularity"
+            onClick={handleSort}
+            className={
+              sort === "popularity" ? "font-semibold" : "text-brand-mediumgray"
+            }
+          >
             인기순
-          </NavLink>{" "}
+          </Link>{" "}
           |{" "}
-          <NavLink data-sort="latest" onClick={handleSort}>
+          <Link
+            to={`/search?keyword=${keyword}&sort=latest`}
+            data-sort="latest"
+            onClick={handleSort}
+            className={
+              sort === "latest" ? "font-semibold" : "text-brand-mediumgray"
+            }
+          >
             최신순
-          </NavLink>{" "}
+          </Link>{" "}
           |{" "}
-          <NavLink data-sort="priceAsc" onClick={handleSort}>
+          <Link
+            to={`/search?keyword=${keyword}&sort=priceAsc`}
+            data-sort="priceAsc"
+            onClick={handleSort}
+            className={
+              sort === "priceAsc" ? "font-semibold" : "text-brand-mediumgray"
+            }
+          >
             낮은가격순
-          </NavLink>{" "}
+          </Link>{" "}
           |{" "}
-          <NavLink data-sort="priceDesc" onClick={handleSort}>
+          <Link
+            to={`/search?keyword=${keyword}&sort=priceDesc`}
+            data-sort="priceDesc"
+            onClick={handleSort}
+            className={
+              sort === "priceDesc" ? "font-semibold" : "text-brand-mediumgray"
+            }
+          >
             높은가격순
-          </NavLink>
+          </Link>
         </div>
 
         {/* 필터 */}
