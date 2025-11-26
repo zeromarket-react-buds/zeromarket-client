@@ -108,6 +108,8 @@ const router = createBrowserRouter([
           },
         ],
       },
+
+      // auth (로그인)
       {
         path: "auth",
         children: [
@@ -115,12 +117,26 @@ const router = createBrowserRouter([
             path: "login",
             element: <LoginPage />,
           },
-          {
-            path: "signup",
-            element: <SignupPage />,
-          },
         ],
       },
+
+      // 회원가입 (/join)
+      {
+        path: "join",
+        element: <SignupPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { type: "detail", title: "회원가입" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
+
       // 마이페이지 라우트
       {
         path: "me",
@@ -169,7 +185,8 @@ const router = createBrowserRouter([
           },
         ],
       },
-      //셀러샵 페이지 라우터
+
+      // 셀러샵 페이지 라우터
       {
         path: "sellershop",
         element: <SellerShopPage />,
@@ -184,7 +201,7 @@ const router = createBrowserRouter([
             },
           },
         },
-      }, //
+      },
     ],
   },
 ]);

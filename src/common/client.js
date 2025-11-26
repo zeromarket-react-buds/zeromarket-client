@@ -83,7 +83,7 @@ const apiClient = async (
       throw new ApiError({
         status: 401,
         code: "SESSION_EXPIRED",
-        message: "로그인이 만료되었습니다.",
+        message: "로그인이 만료되었습니다. (토큰 재발급 2회 시도 X)",
       });
     }
 
@@ -105,7 +105,7 @@ const apiClient = async (
       throw new ApiError({
         status: 401,
         code: "SESSION_EXPIRED",
-        message: "로그인이 만료되었습니다.",
+        message: "로그인이 만료되었습니다. (재요청 실패)",
       });
     }
   }
@@ -114,14 +114,9 @@ const apiClient = async (
   if (!response.ok) {
     throw new ApiError({
       status: response.status,
-      code: data?.code || "REQUEST_FAILED",
+      code: data?.errorCode || "REQUEST_FAILED",
       message: data?.message || "요청에 실패했습니다.",
     });
-    // throw new ApiError({
-    //   status: response.status,
-    //   code: data?.code || "REQUEST_FAILED",
-    //   message: data?.message || "요청에 실패했습니다.",
-    // });
   }
 
   // ✅ ky/axios 스타일 반환 구조
