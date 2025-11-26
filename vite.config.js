@@ -9,4 +9,13 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") }, // @/ 별칭
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });

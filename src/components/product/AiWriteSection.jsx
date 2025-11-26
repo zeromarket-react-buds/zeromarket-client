@@ -14,7 +14,7 @@ const AiWriteSection = () => {
           </div>
         </span>
 
-        <div className="flex items-center cursor-pointer  ">
+        <div className="flex items-center cursor-pointer">
           <GreenToggle
             checked={aiWrite}
             onChange={setAiWrite}

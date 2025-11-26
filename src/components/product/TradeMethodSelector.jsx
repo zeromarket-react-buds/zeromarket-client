@@ -3,8 +3,13 @@ import { Button } from "../ui/button";
 import { X, Plus } from "lucide-react";
 import { useState } from "react";
 
-const TradeMethodSelector = () => {
-  const [tradeMethod, setTradeMethod] = useState("delivery");
+const TradeMethodSelector = ({ value, onChange }) => {
+  const [tradeMethod, setTradeMethod] = useState(value || "delivery");
+
+  const handleChange = (method) => {
+    setTradeMethod(method);
+    onChange(method);
+  };
   return (
     <div className="mt-8">
       {/* 거래 방법 */}
@@ -14,15 +19,16 @@ const TradeMethodSelector = () => {
           label="택배거래"
           value="delivery"
           checked={tradeMethod === "delivery"}
-          onChange={setTradeMethod}
+          onChange={() => handleChange("delivery")}
           name="trade-method"
         />
         <p className="text-gray-400 text-sm mt-1 mb-5">배송비 포함(무료배송)</p>
+
         <GreenRadio
           label="직거래"
           value="direct"
           checked={tradeMethod === "direct"}
-          onChange={setTradeMethod}
+          onChange={() => handleChange("direct")}
           name="trade-method"
         />
       </div>

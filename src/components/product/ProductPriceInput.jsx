@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-const ProductPriceInput = () => {
-  const [price, setPrice] = useState("");
+const ProductPriceInput = ({ value, onChange }) => {
+  const [price, setPrice] = useState(value || "");
 
+  //화면 표시용 가격 포맷
   const formatNumber = (value) => {
     const numericValue = value.replace(/[^\d]/g, "");
     if (!numericValue) return "";
@@ -10,8 +11,15 @@ const ProductPriceInput = () => {
   };
 
   const handlePrice = (e) => {
-    const value = e.target.value;
-    setPrice(formatNumber(value));
+    const input = e.target.value;
+
+    //ui용 포맷팅
+    const formatted = formatNumber(input);
+    setPrice(formatted);
+
+    //서버용(콤마X)
+    const numeric = input.replace(/[^\d]/g, "");
+    onChange(numeric);
   };
 
   return (

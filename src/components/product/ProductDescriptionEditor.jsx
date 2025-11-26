@@ -1,4 +1,4 @@
-const ProductDescriptionEditor = () => {
+const ProductDescriptionEditor = ({ value, onChange }) => {
   return (
     <div className="mt-6">
       {/* 상품 설명 */}

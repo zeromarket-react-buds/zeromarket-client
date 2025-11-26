@@ -14,6 +14,85 @@ import ProductPriceInput from "@/components/product/ProductPriceInput";
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
 
+  // 입력 데이터 (DTO 매칭)
+  const [form, setForm] = useState({
+    sellerId: 1, // 로그인 구현 전 임시 값
+    productTitle: "",
+    categoryDepth1: null,
+    categoryDepth2: null,
+    categoryDepth3: null,
+    sellPrice: "",
+    // sellPrice: Number(form.sellPrice.toString().replace(/,/g, "")),
+    productDescription: "",
+    productStatus: "used", //초기값
+    direct: false,
+    delivery: false,
+    sellingArea: "",
+  });
+
+  const handleSubmit = async () => {
+    console.log("상품 등록 요청 시작");
+
+    if (!form.productTitle.trim()) {
+      alert("상품명을 입력해주세요.");
+      return;
+    }
+
+    if (!form.sellPrice) {
+      alert("판매 가격을 입력해주세요.");
+      return;
+    }
+
+    if (!Number(form.categoryDepth3)) {
+      alert("카테고리를 선택해주세요.");
+      return;
+    }
+    const fd = new FormData();
+
+    const jsonData = {
+      sellerId: form.sellerId,
+      productTitle: form.productTitle,
+      categoryDepth1: form.categoryDepth1,
+      categoryDepth2: form.categoryDepth2,
+      categoryDepth3: form.categoryDepth3,
+      sellPrice: form.sellPrice,
+      productDescription: form.productDescription,
+      productStatus: form.productStatus,
+      direct: form.direct,
+      delivery: form.delivery,
+      sellingArea: form.sellingArea,
+    };
+
+    //JSON
+    fd.append(
+      "data",
+      new Blob([JSON.stringify(jsonData)], { type: "application/json" })
+    );
+    //이미지 파일
+    images.forEach((img) => {
+      fd.append("images", img.file);
+    });
+
+    try {
+      const res = await fetch("http://localhost:8080/api/products", {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.log(jsonData);
+        console.error("서버오류 내용:", errorText);
+        alert("상품 등록 실패 (서버오류)");
+        return;
+      }
+
+      const newProductId = await res.json();
+      alert("상품 등록 완료! 상품ID: " + newProductId);
+    } catch (error) {
+      console.error(error);
+      alert("오류 발생");
+    }
+  };
   return (
     <Container>
       {/* <div>상품등록페이지입니다</div> */}
@@ -35,32 +114,76 @@ const ProductCreatePage = () => {
 
           {/* 상품명 */}
           <div>
-            <ProductTitleInput />
+            <ProductTitleInput
+              value={form.productTitle}
+              onChange={(t) => setForm({ ...form, productTitle: t })}
+            />
           </div>
 
           {/* 카테고리 */}
           <div>
-            <CategorySelector />
+            <CategorySelector
+              value={{
+                depth1: form.categoryDepth1,
+                depth2: form.categoryDepth2,
+                depth3: form.categoryDepth3,
+              }}
+              onChange={(depth1, depth2, depth3) =>
+                // setForm({
+                //   ...form,
+                //   categoryDepth1: depth1,
+                //   categoryDepth2: depth2,
+                //   categoryDepth3: depth3,
+                // })
+                setForm((prev) => ({
+                  ...prev,
+                  categoryDepth1:
+                    depth1 != null && depth1 !== "" ? Number(depth1) : null,
+                  categoryDepth2:
+                    depth2 != null && depth2 !== "" ? Number(depth2) : null,
+                  categoryDepth3:
+                    depth3 != null && depth3 !== "" ? Number(depth3) : null,
+                }))
+              }
+            />
           </div>
 
           {/* 판매 가격 */}
           <div>
-            <ProductPriceInput />
+            <ProductPriceInput
+              value={form.sellPrice}
+              onChange={(p) => setForm({ ...form, sellPrice: p })}
+            />
           </div>
 
           {/* 상품 설명 */}
           <div>
-            <ProductDescriptionEditor />
+            <ProductDescriptionEditor
+              value={form.productDescription}
+              onChange={(d) => setForm({ ...form, productDescription: d })}
+            />
           </div>
 
           {/* 상품 상태 */}
           <div>
-            <ProductConditionSelector />
+            <ProductConditionSelector
+              value={form.productStatus}
+              onChange={(s) => setForm({ ...form, productStatus: s })}
+            />
           </div>
 
           {/* 거래 방법 */}
           <div>
-            <TradeMethodSelector />
+            <TradeMethodSelector
+              value={form.isDirect ? "direct" : "delivery"}
+              onChange={(method) => {
+                if (method === "direct") {
+                  setForm({ ...form, isDirect: true, isDelivery: false });
+                } else {
+                  setForm({ ...form, isDirect: false, isDelivery: true });
+                }
+              }}
+            />
           </div>
 
           {/* 환경 점수 - 2,3차 개발*/}
@@ -68,7 +191,8 @@ const ProductCreatePage = () => {
             <ProductEcoScoreSection />
           </div>
         </div>
-        <ActionButtonBar role="WRITER" />
+        <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
+        {/* onSubmit={handleSubmit} */}
       </div>
     </Container>
   );

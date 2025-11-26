@@ -34,7 +34,7 @@ function GreenRadio({
         name={name}
         value={value}
         checked={checked}
-        onChange={() => onChange(value)}
+        onChange={(e) => onChange(e.target.value)}
         className="hidden"
       />
 

@@ -3,7 +3,7 @@ import { CircleX } from "lucide-react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const ProductTitleInput = () => {
+const ProductTitleInput = ({ value, onChange }) => {
   const [title, setTitle] = useState("");
   const inputRef = useRef(null);
 
@@ -18,9 +18,10 @@ const ProductTitleInput = () => {
       <p className="font-medium mb-2 text-lg">상품명</p>
       <div className="relative">
         <input
+          type="text"
           ref={inputRef}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           placeholder="상품명을 입력해 주세요."
           className={cn("w-full border p-3 rounded-lg")}
         />
