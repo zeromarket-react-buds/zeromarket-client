@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getBoards, getBoardById } from "@/common/api";
+import { getBoards, getBoardById } from "@/common/sample_api";
 
 // 전체 게시물 목록 조회용 훅
 const useBoardsQuery = function () {

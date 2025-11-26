@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createBoard, updateBoard, deleteBoard } from "@/common/api";
+import { createBoard, updateBoard, deleteBoard } from "@/common/sample_api";
 
 /**
  * 게시물 생성용 훅
