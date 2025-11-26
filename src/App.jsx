@@ -108,17 +108,37 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "auth",
-        children: [
-          {
-            path: "login",
-            element: <LoginPage />,
+        path: "login",
+        element: <LoginPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: {
+                type: "detail",
+                title: "로그인",
+              },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
           },
-          {
-            path: "signup",
-            element: <SignupPage />,
+        },
+      },
+      {
+        path: "signup",
+        element: <SignupPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { type: "detail", title: "회원가입" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
           },
-        ],
+        },
       },
       // 마이페이지 라우트
       {

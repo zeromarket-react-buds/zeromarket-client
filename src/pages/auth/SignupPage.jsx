@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { registerApi } from "@/common/api/auth.api";
 import Container from "@/components/Container";
 import { checkDuplicateIdApi } from "@/common/api/auth.api";
+import * as validators from "@/utils/validators";
 
 // 검증 시점
 // - 타이핑 중: "형식만" 검사
@@ -13,7 +15,11 @@ import { checkDuplicateIdApi } from "@/common/api/auth.api";
 // - 서버 검증(중복 검사)은 debounce
 // - submit은 최종
 
+// TODO: 서버 에러 시, 테스트
+
 const SignupPage = () => {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     loginId: "",
     password: "",
@@ -25,7 +31,7 @@ const SignupPage = () => {
   });
 
   // 각 필드별 검증 상태
-  // null | 'error' | 'success'
+  // status: null | 'error' | 'success'
   const [validation, setValidation] = useState({
     loginId: { status: null, message: "" },
     password: { status: null, message: "" },
@@ -33,32 +39,27 @@ const SignupPage = () => {
     name: { status: null, message: "" },
     phone: { status: null, message: "" },
     nickname: { status: null, message: "" },
+    email: { status: null, message: "" },
   });
 
   // 아이디 검증 - 우선순위대로
   const validateId = async (value) => {
-    // 1순위: null 체크
-    if (!value && !value.trim()) {
-      setValidation((prev) => ({
-        ...prev,
-        loginId: { status: null, message: "" },
-      }));
-      return false;
-    }
+    const { isValid, message } = validators.validateId(value);
 
-    // 2순위: 형식 체크
-    if (!/^[a-zA-Z0-9]{6,12}$/.test(value)) {
+    // 3순위: 중복 체크 (형식이 맞을 때만 서버 호출)
+    if (!isValid) {
       setValidation((prev) => ({
         ...prev,
         loginId: {
-          status: "error",
-          message: "영문+숫자 6~12자로 입력해주세요.",
+          status:
+            isValid === true ? "success" : isValid === false ? "error" : null,
+          message,
         },
       }));
-      return false;
+
+      return;
     }
 
-    // 3순위: 중복 체크 (형식이 맞을 때만 서버 호출)
     try {
       const data = await checkDuplicateIdApi(value);
       if (data.existsByLoginId) {
@@ -76,6 +77,8 @@ const SignupPage = () => {
         return true;
       }
     } catch (err) {
+      console.error(err);
+
       setValidation((prev) => ({
         ...prev,
         loginId: {
@@ -89,143 +92,93 @@ const SignupPage = () => {
 
   // 비밀번호 검증
   const validatePassword = (value) => {
-    // 1순위: null 체크
-    if (!value.trim()) {
-      setValidation((prev) => ({
-        ...prev,
-        password: { status: null, message: "" },
-      }));
-      return false;
-    }
+    const { isValid, message } = validators.validatePassword(value);
 
-    // 2순위: 길이 체크
-    if (value.length < 8) {
-      setValidation((prev) => ({
-        ...prev,
-        password: { status: "error", message: "8자 이상 입력해주세요." },
-      }));
-      return false;
-    }
-
-    // 3순위: 형식 체크
-    if (!/(?=.*[A-Za-z])(?=.*\d)/.test(value)) {
-      setValidation((prev) => ({
-        ...prev,
-        password: { status: "error", message: "영문+숫자를 포함해주세요." },
-      }));
-      return false;
-    }
-
-    // 성공 상태 변경
     setValidation((prev) => ({
       ...prev,
-      password: { status: "success", message: "사용 가능한 비밀번호입니다." },
+      password: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
     }));
-    return true;
   };
 
   // 비밀번호 확인 검증
   const validatePasswordConfirm = (value, password) => {
-    // 1순위: null 체크
-    if (!value.trim()) {
-      setValidation((prev) => ({
-        ...prev,
-        passwordConfirm: { status: null, message: "" },
-      }));
-      return false;
-    }
-
-    // 2순위: 형식 체크
-    if (value !== password) {
-      setValidation((prev) => ({
-        ...prev,
-        passwordConfirm: {
-          status: "error",
-          message: "비밀번호가 일치하지 않습니다.",
-        },
-      }));
-      return false;
-    }
+    const { isValid, message } = validators.validatePasswordConfirm(
+      value,
+      password
+    );
 
     setValidation((prev) => ({
       ...prev,
-      passwordConfirm: { status: "success", message: "비밀번호가 일치합니다." },
+      passwordConfirm: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
     }));
-    return true;
   };
 
   // 이름 검증
   const validateName = (value) => {
-    if (!value.trim()) {
-      setValidation((prev) => ({
-        ...prev,
-        name: { status: "error", message: "이름을 입력해주세요." },
-      }));
-      return false;
-    }
+    const { isValid, message } = validators.validateName(value);
 
     setValidation((prev) => ({
       ...prev,
-      name: { status: null, message: "" },
+      name: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
     }));
-    return true;
+  };
+
+  // 닉네임 검증
+  const validateNickname = (value) => {
+    const { isValid, message } = validators.validateName(value);
+
+    setValidation((prev) => ({
+      ...prev,
+      nickname: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
+    }));
   };
 
   // 휴대폰 검증
   const validatePhone = (value) => {
-    if (!value.trim()) {
-      setValidation((prev) => ({
-        ...prev,
-        phone: { status: "error", message: "휴대폰 번호를 입력해주세요." },
-      }));
-      return false;
-    }
-
-    if (!/^010-\d{4}-\d{4}$/.test(value)) {
-      setValidation((prev) => ({
-        ...prev,
-        phone: {
-          status: "error",
-          message: "010-0000-0000 형식으로 입력해주세요.",
-        },
-      }));
-      return false;
-    }
+    const { isValid, message } = validators.validatePhone(value);
 
     setValidation((prev) => ({
       ...prev,
-      phone: { status: "success", message: "" },
+      phone: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
     }));
-    return true;
   };
 
-  // // 아이디 중복 체크
-  // const checkDuplicateId = async (id) => {
-  //   if (!id) return;
-
-  //   const data = await checkDuplicateIdApi(id);
-
-  //   // setErrors((prev) => ({ ...prev, [id]: null }));
-
-  //   if (data.existsByLoginId) {
-  //     setIdStatus("error");
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       loginId: "이미 사용 중인 아이디입니다.",
-  //     }));
-  //     // setIdMessage("이미 사용 중인 아이디입니다.");
-  //   } else {
-  //     setIdStatus("success");
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       loginId: "사용 가능한 아이디입니다.",
-  //     }));
-  //     // setIdMessage("사용 가능한 아이디입니다.");
-  //   }
-  // };
+  // 이메일
+  const validateEmail = (value) => {
+    const { isValid, message } = validators.validateEmail(value);
+    // console.log(isValid, message);
+    setValidation((prev) => ({
+      ...prev,
+      email: {
+        status:
+          isValid === true ? "success" : isValid === false ? "error" : null,
+        message,
+      },
+    }));
+  };
 
   // 아이디 입력 시 0.6초(권장) debounce 후 자동 중복 검사
-  // - debounce('입력이 멈췄을 때만 요청'을 보내는 제어 방식)
+  // - debounce ('입력이 멈췄을 때만 요청'을 보내는 제어 방식)
   // - 입력 도중의 모든 요청을 무시, 최종 입력값으로 한 번만 검사하게 만드는 장치
   // - debounce: 튀는(bounce) 신호를 제거(de)해서 '한 번의 안정된 입력'만 남김
   useEffect(() => {
@@ -239,24 +192,11 @@ const SignupPage = () => {
 
     const timer = setTimeout(() => {
       validateId(form.loginId);
+      //   checkDuplicateId(form.loginId);
     }, 600);
 
     return () => clearTimeout(timer);
-    // const timer = setTimeout(() => {
-    //   checkDuplicateId(form.loginId);
-    // }, 600);
-
-    // return () => clearTimeout(timer);
   }, [form.loginId]);
-
-  // // 비밀번호 일치 검사 (실시간 비교)
-  // useEffect(() => {
-  //   if (!form.passwordConfirm) {
-  //     setPwMatch(null);
-  //     return;
-  //   }
-  //   setPwMatch(form.password === form.passwordConfirm);
-  // }, [form.password, form.passwordConfirm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -274,8 +214,12 @@ const SignupPage = () => {
         validatePasswordConfirm(value, updated.password);
       } else if (name === "name") {
         validateName(value);
+      } else if (name === "nickname") {
+        validateNickname(value);
       } else if (name === "phone") {
         validatePhone(value);
+      } else if (name === "email") {
+        validateEmail(value);
       }
 
       return updated;
@@ -286,31 +230,125 @@ const SignupPage = () => {
     e.preventDefault();
 
     // 최종 검증
-    const idValid = await validateId(form.id);
-    const pwValid = validatePassword(form.password);
-    const pwConfirmValid = validatePasswordConfirm(
-      form.passwordConfirm,
-      form.password
-    );
-    const nameValid = validateName(form.name);
-    const phoneValid = validatePhone(form.phone);
+    const { isValid, results } = validators.validateForm(form);
 
-    if (!idValid || !pwValid || !pwConfirmValid || !nameValid || !phoneValid) {
+    // TODO: 최종 입력 시 이메일 값이 NULL이면 검증 생략하기
+    setValidation((prev) => {
+      const next = { ...prev };
+
+      for (const key in next) {
+        const { isValid, message } = results[key] || {};
+
+        next[key] = {
+          status:
+            isValid === true ? "success" : isValid === false ? "error" : "null",
+          message: message ?? "",
+        };
+      }
+
+      return next;
+    });
+    // <더 안전한 패턴>
+    // setValidation((prev) =>
+    //   Object.fromEntries(
+    //     Object.keys(prev).map((key) => {
+    //       const { isValid, message } = results[key] || {};
+
+    //       return [
+    //         key,
+    //         {
+    //           status:
+    //             isValid === true
+    //               ? "success"
+    //               : isValid === false
+    //               ? "error"
+    //               : null,
+    //           message: message ?? "",
+    //         },
+    //       ];
+    //     })
+    //   )
+    // );
+
+    if (!isValid) {
       alert("입력 정보를 다시 확인해주세요.");
       return;
     }
 
     // 3) 여기까지 왔으면 최종 submit 가능 (서버 전송)
-    // console.log("제출 데이터:", form);
-
+    console.log("제출 데이터:", form);
     try {
-      const data = await registerApi(form);
+      const { memberId, message } = await registerApi(form);
       // const data = await registerApi(form.id, form.password);
-      console.log(data);
+      // console.log(data);
+      // alert("회원가입 성공!");
+
+      // 3-1) 폼 상태 초기화
+      setForm({
+        loginId: "",
+        password: "",
+        passwordConfirm: "",
+        name: "",
+        email: "",
+        phone: "",
+        nickname: "",
+      });
+
+      // 3-2) 성공 메시지 노출
+      // TODO: toast로 변경
       alert("회원가입 성공!");
+
+      // 3-3) 다음 페이지로 유도
+      navigate("/login");
     } catch (err) {
-      alert("회원가입 실패");
-      console.error(err);
+      // alert("회원가입 실패");
+      // console.error(err.code);
+      // console.error(err.message);
+
+      // 3-4) 에러 유형별 분기 처리
+      // - 필드별 오류면 -> 해당 input에 직접 표시
+      // - 서버 오류면 ->  toast
+      switch (err.code) {
+        case "LOGINID_ALREADY_EXIST":
+          setValidation((prev) => ({
+            ...prev,
+            loginId: {
+              status: "error",
+              message: error.message,
+            },
+          }));
+          break;
+        case "NICKNAME_ALREADY_EXIST":
+          setValidation((prev) => ({
+            ...prev,
+            nickname: {
+              status: "error",
+              message: error.message,
+            },
+          }));
+          break;
+        case "PHONE_ALREADY_EXIST":
+          setValidation((prev) => ({
+            ...prev,
+            phone: {
+              status: "error",
+              message: error.message,
+            },
+          }));
+          break;
+        case "EMAIL_ALREADY_EXIST":
+          setValidation((prev) => ({
+            ...prev,
+            email: {
+              status: "error",
+              message: error.message,
+            },
+          }));
+          break;
+        default:
+          // TODO: toast로 변경
+          alert(err.message || "회원가입에 실패했습니다.");
+      }
     }
   };
 
@@ -326,16 +364,22 @@ const SignupPage = () => {
 
   return (
     <Container>
-      <div className="max-w-md mx-auto bg-green-200 p-6">
-        <h1 className="text-xl font-bold mb-2 text-center">회원가입</h1>
-        <p className="text-sm text-center text-gray-500 mb-6">
-          나만의 가게를 만들어 볼까요?
-        </p>
-        <p>먼저 회원가입이 필요해요 :)</p>
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="flex flex-col gap-12">
+        {/* banner */}
+        <div className="bg-pink-200">
+          <p className="text-2xl mb-6">
+            나만의 가게를
+            <br />
+            만들어 볼까요?
+          </p>
+          <p className="text-sm">먼저 회원가입이 필요해요 :)</p>
+        </div>
+
+        {/* form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* 아이디 */}
           <div>
-            <label className="block text-sm mb-1">아이디</label>
+            <label className="block text-base mb-1">아이디</label>
             <input
               name="loginId"
               value={form.loginId}
@@ -346,7 +390,7 @@ const SignupPage = () => {
             {/* 에러 메시지 */}
             {validation.loginId.message && (
               <p
-                className={`text-xs mt-1 ${
+                className={`text-sm mt-1 ${
                   validation.loginId.status === "success"
                     ? "text-green-600"
                     : "text-red-500"
@@ -360,7 +404,7 @@ const SignupPage = () => {
 
           {/* 비밀번호 */}
           <div>
-            <label className="block text-sm mb-1">비밀번호</label>
+            <label className="block text-base mb-1">비밀번호</label>
             <input
               type="password"
               name="password"
@@ -371,7 +415,7 @@ const SignupPage = () => {
             />
             {validation.password.message && (
               <p
-                className={`text-xs mt-1 ${
+                className={`text-sm mt-1 ${
                   validation.password.status === "success"
                     ? "text-green-600"
                     : "text-red-500"
@@ -384,7 +428,7 @@ const SignupPage = () => {
 
           {/* 비밀번호 확인 */}
           <div>
-            <label className="block text-sm mb-1">비밀번호 확인</label>
+            <label className="block text-base mb-1">비밀번호 확인</label>
             <input
               type="password"
               name="passwordConfirm"
@@ -395,7 +439,7 @@ const SignupPage = () => {
             />
             {validation.passwordConfirm.message && (
               <p
-                className={`text-xs mt-1 ${
+                className={`text-sm mt-1 ${
                   validation.passwordConfirm.status === "success"
                     ? "text-green-600"
                     : "text-red-500"
@@ -425,7 +469,7 @@ const SignupPage = () => {
 
           {/* 이름 */}
           <div>
-            <label className="block text-sm mb-1">이름</label>
+            <label className="block text-base mb-1">이름</label>
             <input
               name="name"
               value={form.name}
@@ -434,7 +478,7 @@ const SignupPage = () => {
               placeholder="이름"
             />
             {validation.name.message && (
-              <p className="text-xs mt-1 text-red-500">
+              <p className="text-sm mt-1 text-red-500">
                 {validation.name.message}
               </p>
             )}
@@ -442,7 +486,7 @@ const SignupPage = () => {
 
           {/* 닉네임 */}
           <div>
-            <label className="block text-sm mb-1">닉네임</label>
+            <label className="block text-base mb-1">닉네임</label>
             <input
               name="nickname"
               value={form.nickname}
@@ -451,7 +495,7 @@ const SignupPage = () => {
               placeholder="닉네임"
             />
             {validation.nickname.message && (
-              <p className="text-xs mt-1 text-red-500">
+              <p className="text-sm mt-1 text-red-500">
                 {validation.nickname.message}
               </p>
             )}
@@ -459,7 +503,7 @@ const SignupPage = () => {
 
           {/* 휴대폰 번호 */}
           <div>
-            <label className="block text-sm mb-1">휴대폰 번호</label>
+            <label className="block text-base mb-1">휴대폰 번호</label>
             <input
               name="phone"
               value={form.phone}
@@ -469,7 +513,7 @@ const SignupPage = () => {
             />
             {validation.phone.message && (
               <p
-                className={`text-xs mt-1 ${
+                className={`text-sm mt-1 ${
                   validation.phone.status === "success"
                     ? "text-green-600"
                     : "text-red-500"
@@ -480,19 +524,31 @@ const SignupPage = () => {
             )}
           </div>
 
-          {/* 이메일 (필수값 검사 X)*/}
+          {/* 이메일 (선택)*/}
           <div>
-            <label className="block text-sm mb-1">이메일 (선택)</label>
+            <label className="block text-base mb-1">이메일 (선택)</label>
             <input
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="w-full border rounded-md p-2"
+              className={getInputClassName("email")}
+              // className="w-full border rounded-md p-2"
               placeholder="example@email.com"
             />
+            {validation.email.message && (
+              <p
+                className={`text-sm mt-1 ${
+                  validation.email.status === "success"
+                    ? "text-green-600"
+                    : "text-red-500"
+                }`}
+              >
+                {validation.email.message}
+              </p>
+            )}
           </div>
 
-          <div className="text-xs text-gray-500 leading-relaxed">
+          <div className="text-sm text-gray-500 leading-relaxed">
             가입 시 이용약관 및 개인정보 처리방침에 동의하는 것으로 간주됩니다.
           </div>
 
@@ -503,6 +559,32 @@ const SignupPage = () => {
             회원가입
           </button>
         </form>
+
+        {/* OAuth 2.0 */}
+        <div className="space-y-12">
+          <div className="flex gap-2 justify-center items-center">
+            <div className="border-t border-gray-300 flex-grow"></div>
+            <h2 className="text-sm text-gray-500">간편 회원가입</h2>
+            <div className="border-t border-gray-300 flex-grow"></div>
+          </div>
+          <div className="space-y-6">
+            <button className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer">
+              <div className="bg-yellow-300 w-10 h-10 rounded-md flex justify-center items-center text-2xl font-bold">
+                K
+              </div>
+              <div>카카오톡으로 회원가입</div>
+            </button>
+            <button className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer">
+              <div className="bg-green-500 w-10 h-10 rounded-md flex justify-center items-center text-2xl font-bold">
+                N
+              </div>
+              <div>네이버로 회원가입</div>
+            </button>
+          </div>
+          <div className="text-sm text-gray-500 leading-relaxed">
+            가입 시 이용약관 및 개인정보 처리방침에 동의하는 것으로 간주됩니다.
+          </div>
+        </div>
       </div>
     </Container>
   );
