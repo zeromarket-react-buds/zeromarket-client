@@ -25,7 +25,7 @@ const ActionButtonBar = ({ role }) => {
     <div>
       {/* 1. 찜하트 , 채팅하기 , 바로구매 - 구매자*/}
       {role === "BUYER" && (
-        <div className="flex gap-2 mt-5 border p-3">
+        <div className="flex gap-2 mt-15 px-3">
           <div className="py-1 text-brand-green">
             <Heart className="size-7" onClick={showLikeToast} />
           </div>
