@@ -1,4 +1,4 @@
-import { ChevronLeft, Bell, UserRoundPen, Heart, Pen } from "lucide-react";
+import { UserRound, Heart, Pen } from "lucide-react";
 import Container from "@/components/Container";
 
 export default function MyPage() {
@@ -7,7 +7,7 @@ export default function MyPage() {
       {/* 프로필 */}
       <section className="flex items-center gap-4 mb-6">
         <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
-          <UserRoundPen className="text-white" size={30} strokeWidth={2} />
+          <UserRound className="text-brand-ivory size-10" />
         </div>
         <div className="text-lg font-semibold">닉네임 표시란</div>
       </section>
