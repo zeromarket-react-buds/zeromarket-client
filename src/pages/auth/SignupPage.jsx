@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { registerApi } from "@/common/api/auth.api";
 import Container from "@/components/Container";
 import { checkDuplicateIdApi } from "@/common/api/auth.api";
-import * as validators from "@/utils/validators";
+import { Eye, EyeOff } from "lucide-react";
+import { useFormValidation } from "@/hooks/useFormValidation";
+import { toast } from "react-toastify";
 
 // 검증 시점
 // - 타이핑 중: "형식만" 검사
@@ -15,12 +17,10 @@ import * as validators from "@/utils/validators";
 // - 서버 검증(중복 검사)은 debounce
 // - submit은 최종
 
-// TODO: 서버 에러 시, 테스트
-
 const SignupPage = () => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
+  const initialForm = {
     loginId: "",
     password: "",
     passwordConfirm: "",
@@ -28,247 +28,24 @@ const SignupPage = () => {
     email: "",
     phone: "",
     nickname: "",
-  });
-
-  // 각 필드별 검증 상태
-  // status: null | 'error' | 'success'
-  const [validation, setValidation] = useState({
-    loginId: { status: null, message: "" },
-    password: { status: null, message: "" },
-    passwordConfirm: { status: null, message: "" },
-    name: { status: null, message: "" },
-    phone: { status: null, message: "" },
-    nickname: { status: null, message: "" },
-    email: { status: null, message: "" },
-  });
-
-  // 아이디 검증 - 우선순위대로
-  const validateId = async (value) => {
-    const { isValid, message } = validators.validateId(value);
-
-    // 3순위: 중복 체크 (형식이 맞을 때만 서버 호출)
-    if (!isValid) {
-      setValidation((prev) => ({
-        ...prev,
-        loginId: {
-          status:
-            isValid === true ? "success" : isValid === false ? "error" : null,
-          message,
-        },
-      }));
-
-      return;
-    }
-
-    try {
-      const data = await checkDuplicateIdApi(value);
-      if (data.existsByLoginId) {
-        setValidation((prev) => ({
-          ...prev,
-          loginId: { status: "error", message: "이미 사용 중인 아이디입니다." },
-        }));
-        return false;
-      } else {
-        // 성공 상태 변경
-        setValidation((prev) => ({
-          ...prev,
-          loginId: { status: "success", message: "사용 가능한 아이디입니다." },
-        }));
-        return true;
-      }
-    } catch (err) {
-      console.error(err);
-
-      setValidation((prev) => ({
-        ...prev,
-        loginId: {
-          status: "error",
-          message: "중복 확인 중 오류가 발생했습니다.",
-        },
-      }));
-      return false;
-    }
   };
+  const {
+    form,
+    validation,
+    handleChange,
+    validateAll,
+    setForm,
+    updateValidation,
+  } = useFormValidation(initialForm, checkDuplicateIdApi);
 
-  // 비밀번호 검증
-  const validatePassword = (value) => {
-    const { isValid, message } = validators.validatePassword(value);
-
-    setValidation((prev) => ({
-      ...prev,
-      password: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 비밀번호 확인 검증
-  const validatePasswordConfirm = (value, password) => {
-    const { isValid, message } = validators.validatePasswordConfirm(
-      value,
-      password
-    );
-
-    setValidation((prev) => ({
-      ...prev,
-      passwordConfirm: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 이름 검증
-  const validateName = (value) => {
-    const { isValid, message } = validators.validateName(value);
-
-    setValidation((prev) => ({
-      ...prev,
-      name: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 닉네임 검증
-  const validateNickname = (value) => {
-    const { isValid, message } = validators.validateName(value);
-
-    setValidation((prev) => ({
-      ...prev,
-      nickname: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 휴대폰 검증
-  const validatePhone = (value) => {
-    const { isValid, message } = validators.validatePhone(value);
-
-    setValidation((prev) => ({
-      ...prev,
-      phone: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 이메일
-  const validateEmail = (value) => {
-    const { isValid, message } = validators.validateEmail(value);
-    // console.log(isValid, message);
-    setValidation((prev) => ({
-      ...prev,
-      email: {
-        status:
-          isValid === true ? "success" : isValid === false ? "error" : null,
-        message,
-      },
-    }));
-  };
-
-  // 아이디 입력 시 0.6초(권장) debounce 후 자동 중복 검사
-  // - debounce ('입력이 멈췄을 때만 요청'을 보내는 제어 방식)
-  // - 입력 도중의 모든 요청을 무시, 최종 입력값으로 한 번만 검사하게 만드는 장치
-  // - debounce: 튀는(bounce) 신호를 제거(de)해서 '한 번의 안정된 입력'만 남김
-  useEffect(() => {
-    if (form.loginId.length < 4) {
-      setValidation((prev) => ({
-        ...prev,
-        loginId: { status: null, message: "" },
-      }));
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      validateId(form.loginId);
-      //   checkDuplicateId(form.loginId);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [form.loginId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => {
-      const updated = { ...prev, [name]: value };
-
-      // 실시간 기본 검증 (타이핑 중)
-      if (name === "password") {
-        validatePassword(value);
-        // 비밀번호 변경 시 확인란도 재검증
-        if (updated.passwordConfirm) {
-          validatePasswordConfirm(updated.passwordConfirm, value);
-        }
-      } else if (name === "passwordConfirm") {
-        validatePasswordConfirm(value, updated.password);
-      } else if (name === "name") {
-        validateName(value);
-      } else if (name === "nickname") {
-        validateNickname(value);
-      } else if (name === "phone") {
-        validatePhone(value);
-      } else if (name === "email") {
-        validateEmail(value);
-      }
-
-      return updated;
-    });
-  };
+  const [show, setShow] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 최종 검증
-    const { isValid, results } = validators.validateForm(form);
-
-    // TODO: 최종 입력 시 이메일 값이 NULL이면 검증 생략하기
-    setValidation((prev) => {
-      const next = { ...prev };
-
-      for (const key in next) {
-        const { isValid, message } = results[key] || {};
-
-        next[key] = {
-          status:
-            isValid === true ? "success" : isValid === false ? "error" : "null",
-          message: message ?? "",
-        };
-      }
-
-      return next;
-    });
-    // <더 안전한 패턴>
-    // setValidation((prev) =>
-    //   Object.fromEntries(
-    //     Object.keys(prev).map((key) => {
-    //       const { isValid, message } = results[key] || {};
-
-    //       return [
-    //         key,
-    //         {
-    //           status:
-    //             isValid === true
-    //               ? "success"
-    //               : isValid === false
-    //               ? "error"
-    //               : null,
-    //           message: message ?? "",
-    //         },
-    //       ];
-    //     })
-    //   )
-    // );
+    // 전체 검증
+    const isValid = await validateAll();
 
     if (!isValid) {
       alert("입력 정보를 다시 확인해주세요.");
@@ -276,12 +53,8 @@ const SignupPage = () => {
     }
 
     // 3) 여기까지 왔으면 최종 submit 가능 (서버 전송)
-    console.log("제출 데이터:", form);
     try {
       const { memberId, message } = await registerApi(form);
-      // const data = await registerApi(form.id, form.password);
-      // console.log(data);
-      // alert("회원가입 성공!");
 
       // 3-1) 폼 상태 초기화
       setForm({
@@ -296,58 +69,35 @@ const SignupPage = () => {
 
       // 3-2) 성공 메시지 노출
       // TODO: toast로 변경
-      alert("회원가입 성공!");
+      toast.success("회원가입 성공!");
+      // alert("회원가입 성공!");
 
       // 3-3) 다음 페이지로 유도
       navigate("/login");
-    } catch (err) {
-      // alert("회원가입 실패");
-      // console.error(err.code);
-      // console.error(err.message);
+    } catch (error) {
+      const { code, message } = error;
 
       // 3-4) 에러 유형별 분기 처리
       // - 필드별 오류면 -> 해당 input에 직접 표시
       // - 서버 오류면 ->  toast
-      switch (err.code) {
+      switch (code) {
         case "LOGINID_ALREADY_EXIST":
-          setValidation((prev) => ({
-            ...prev,
-            loginId: {
-              status: "error",
-              message: error.message,
-            },
-          }));
+          updateValidation("loginId", false, message);
           break;
         case "NICKNAME_ALREADY_EXIST":
-          setValidation((prev) => ({
-            ...prev,
-            nickname: {
-              status: "error",
-              message: error.message,
-            },
-          }));
+          updateValidation("nickname", false, message);
           break;
         case "PHONE_ALREADY_EXIST":
-          setValidation((prev) => ({
-            ...prev,
-            phone: {
-              status: "error",
-              message: error.message,
-            },
-          }));
+          updateValidation("phone", false, message);
           break;
         case "EMAIL_ALREADY_EXIST":
-          setValidation((prev) => ({
-            ...prev,
-            email: {
-              status: "error",
-              message: error.message,
-            },
-          }));
+          updateValidation("email", false, message);
           break;
         default:
           // TODO: toast로 변경
-          alert(err.message || "회원가입에 실패했습니다.");
+          toast.info(message || "회원가입에 실패했습니다.");
+          // alert(message || "회원가입에 실패했습니다.");
+          break;
       }
     }
   };
@@ -366,7 +116,7 @@ const SignupPage = () => {
     <Container>
       <div className="flex flex-col gap-12">
         {/* banner */}
-        <div className="bg-pink-200">
+        <div>
           <p className="text-2xl mb-6">
             나만의 가게를
             <br />
@@ -403,10 +153,10 @@ const SignupPage = () => {
           </div>
 
           {/* 비밀번호 */}
-          <div>
+          <div className="relative">
             <label className="block text-base mb-1">비밀번호</label>
             <input
-              type="password"
+              type={show ? "text" : "password"}
               name="password"
               value={form.password}
               onChange={handleChange}
@@ -424,13 +174,20 @@ const SignupPage = () => {
                 {validation.password.message}
               </p>
             )}
+            <button
+              type="button"
+              onClick={() => setShow((prev) => !prev)}
+              className="absolute right-1 top-1"
+            >
+              {show ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
 
           {/* 비밀번호 확인 */}
-          <div>
+          <div className="relative">
             <label className="block text-base mb-1">비밀번호 확인</label>
             <input
-              type="password"
+              type={showConfirm ? "text" : "password"}
               name="passwordConfirm"
               value={form.passwordConfirm}
               onChange={handleChange}
@@ -448,23 +205,13 @@ const SignupPage = () => {
                 {validation.passwordConfirm.message}
               </p>
             )}
-            {/* {errors.passwordConfirm ? (
-              <p className="text-xs mt-1 text-red-500">
-                {errors.passwordConfirm}
-              </p>
-            ) : (
-              pwMatch !== null && (
-                <p
-                  className={`text-xs mt-1 ${
-                    pwMatch ? "text-green-600" : "text-red-500"
-                  }`}
-                >
-                  {pwMatch
-                    ? "비밀번호가 일치합니다."
-                    : "비밀번호가 일치하지 않습니다."}
-                </p>
-              )
-            )} */}
+            <button
+              type="button"
+              onClick={() => setShowConfirm((prev) => !prev)}
+              className="absolute right-1 top-1"
+            >
+              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
 
           {/* 이름 */}

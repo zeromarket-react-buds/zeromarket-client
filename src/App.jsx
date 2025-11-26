@@ -107,6 +107,7 @@ const router = createBrowserRouter([
           },
         ],
       },
+      // auth (로그인, 회원가입)
       {
         path: "login",
         element: <LoginPage />,
@@ -126,7 +127,7 @@ const router = createBrowserRouter([
         },
       },
       {
-        path: "signup",
+        path: "join",
         element: <SignupPage />,
         handle: {
           layout: {
