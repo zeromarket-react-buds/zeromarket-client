@@ -2,8 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
 
-const ActionButtonBar = ({ role }) => {
-  const { showLikeToast } = useLikeToast();
+const ActionButtonBar = ({ role, onToggleLike, isWished }) => {
+  const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
+
+  // 찜 목록 추가/삭제 함수
+  const handleHeartClick = () => {
+    if (!isWished) showLikeAddedToast();
+    else showLikeRemovedToast();
+
+    onToggleWish();
+  };
 
   const handleButtonClick = (action) => {
     let confirmation = false;
@@ -27,7 +35,10 @@ const ActionButtonBar = ({ role }) => {
       {role === "BUYER" && (
         <div className="flex gap-2 mt-15 px-3">
           <div className="py-1 text-brand-green">
-            <Heart className="size-7" onClick={showLikeToast} />
+            <Heart
+              className="size-7 cursor-pointer"
+              onClick={handleHeartClick}
+            />
           </div>
 
           <Button
