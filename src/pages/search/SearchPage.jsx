@@ -92,7 +92,8 @@ const SearchPage = () => {
   }, [keyword, sort]);
 
   // sort 관련 함수
-  const handleSort = (value) => {
+  const handleSort = (e) => {
+    const value = e.currentTarget.dataset.sort;
     if (!value || value === sort) return;
     setSort(value);
   };
