@@ -34,11 +34,11 @@ const ProductCard = ({ products, onToggleLike }) => {
           <Card className="border-0 shadow-none w-full max-w-sm p-2">
             <CardHeader className="p-0">
               {/* 상품에 관한 이미지 부분 */}
-              <div className="relative">
+              <div className="relative aspect-square overflow-hidden">
                 {/* 상품 섬네일 */}
                 <img
                   src={p.thumbnailUrl}
-                  className="relative w-[250px] h-[250px] rounded-xl"
+                  className="relative rounded-xl w-full h-full object-cover"
                 />
                 <div className="flex absolute justify-between items-center bottom-0 w-full px-4 py-3">
                   {/* 상품상태  */}

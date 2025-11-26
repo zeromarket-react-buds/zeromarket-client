@@ -16,6 +16,7 @@ import MyPage from "@/pages/me/MyPage";
 import { AuthProvider } from "@/hooks/AuthContext";
 import MySalesPage from "@/pages/me/MySalesPage";
 import MyPurchasesPage from "@/pages/me/MyPurchasesPage";
+import SellerShopPage from "./pages/sellershop/SellerShop";
 
 const router = createBrowserRouter([
   {
@@ -107,6 +108,8 @@ const router = createBrowserRouter([
           },
         ],
       },
+
+      // auth (로그인)
       {
         path: "auth",
         children: [
@@ -114,12 +117,26 @@ const router = createBrowserRouter([
             path: "login",
             element: <LoginPage />,
           },
-          {
-            path: "signup",
-            element: <SignupPage />,
-          },
         ],
       },
+
+      // 회원가입 (/join)
+      {
+        path: "join",
+        element: <SignupPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { type: "detail", title: "회원가입" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
+
       // 마이페이지 라우트
       {
         path: "me",
@@ -167,6 +184,23 @@ const router = createBrowserRouter([
             },
           },
         ],
+      },
+
+      // 셀러샵 페이지 라우터
+      {
+        path: "sellershop",
+        element: <SellerShopPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "셀러 샵" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
       },
     ],
   },
