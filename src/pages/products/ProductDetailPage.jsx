@@ -169,19 +169,21 @@ const ProductDetailPage = () => {
           <div className="flex justify-between items-center mb-1">
             <span className="text-lg font-bold text-brand-green">
               {/* 예약중 */}
-              {detail.salesStatusKr}
+              {detail.salesStatus?.description}
             </span>
             <span className="text-lg font-semibold">{detail.sellPrice}원</span>
           </div>
+
           {/* 카테고리 + n시간전 */}
           <div className="flex justify-between items-center my-3">
-            {/* <span className=" text-gray-600 text-base hover:underline flex items-center">
+            <span className=" text-gray-600 text-base hover:underline flex items-center">
               <span>{detail.categoryDepth1} </span>
               <span className="text- font-semibold">&nbsp;〉</span>
               <span>{detail.categoryDepth2}</span>
               <span className="text- font-semibold">&nbsp;〉</span>
               <span>{detail.categoryDepth3}</span>
-            </span> */}
+            </span>
+
             <span className="text-sm text-gray-500">3시간 전</span>
           </div>
 
@@ -256,11 +258,24 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
-        <ActionButtonBar
-          role="BUYER"
-          isWished={detail.isWished}
-          onToggleWish={toggleWish}
-        />
+        <div className="mt-25 -mb-21">
+          <div className="sticky bottom-20 bg-white border-t  z-50">
+            <ActionButtonBar
+              role="BUYER"
+              // role={userRole}
+              isWished={detail.isWished}
+              onToggleWish={toggleWish}
+            />
+          </div>
+          <div className="sticky bottom-0 bg-white border-t z-50">
+            <ActionButtonBar
+              role="SELLER"
+              // role={userRole}
+              productId={detail.productId}
+            />
+          </div>
+        </div>
+
         {/* <ActionButtonBar role="SELLER" />
         <ActionButtonBar role="SELLER2" />
         <ActionButtonBar role="WRITER" /> */}
