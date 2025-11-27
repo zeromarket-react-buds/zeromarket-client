@@ -198,6 +198,23 @@ const router = createBrowserRouter([
               },
             },
           },
+          {
+            path: "profile",
+            element: <MyProfile />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "프로필 설정",
+                  },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
         ],
       },
 
@@ -229,15 +246,6 @@ const router = createBrowserRouter([
           },
         },
       }, //
-      {
-        path: "me/profile",
-        element: <MyProfile />,
-        handle: {
-          layout: {
-            footer: { component: "DefaultFooter" },
-          },
-        },
-      },
     ],
   },
 ]);
