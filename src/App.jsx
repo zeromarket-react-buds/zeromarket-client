@@ -1,3 +1,14 @@
+import React, { Suspense, lazy } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import RootLayout from "@/layouts/RootLayout";
+import { useState } from "react";
+import Boards from "@/pages/Boards";
+import Board from "@/pages/Board";
+import BoardEdit from "@/pages/BoardEdit";
+import Home from "./pages/Home";
+import SearchPage from "@/pages/search/SearchPage";
+import ProductCreatePage from "@/pages/products/ProductCreatePage";
+import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import { GlobalToast } from "@/components/GlobalToast";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -8,21 +19,24 @@ import MyPurchasesPage from "@/pages/me/MyPurchasesPage";
 import SellerShopPage from "./pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창
 import MyPageLayout from "./layouts/MyPageLayout";
+import MyProfile from "./pages/me/MyProfile";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <GlobalLayout />,
+    element: <RootLayout />,
+    handle: {
+      layout: {
+        header: {
+          component: "DefaultHeader",
+        },
+        footer: {
+          component: "DefaultFooter",
+        },
+      },
+    },
     children: [
       { index: true, element: <Home /> },
-      {
-        path: "search",
-        element: <SearchPage />,
-      },
-      {
-        path: "search",
-        element: <SearchPage />,
-      },
       {
         path: "search",
         element: <SearchPage />,
@@ -56,14 +70,37 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ProductDetailPage />,
+            element: <ProductCreatePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "ProductHeader",
+                  props: { type: "register" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: ":id",
             element: <ProductDetailPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "ProductHeader",
+                  props: { type: "detail" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: "edit",
+            // ProductEditPage
             children: [
               { index: true, element: <ProductDetailPage /> },
               {
@@ -75,9 +112,37 @@ const router = createBrowserRouter([
         ],
       },
 
+      // auth (로그인)
+      {
+        path: "auth",
+        children: [
+          {
+            path: "login",
+            element: <LoginPage />,
+          },
+        ],
+      },
+
+      // 회원가입 (/join)
+      {
+        path: "join",
+        element: <SignupPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { type: "detail", title: "회원가입" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
+
+      // 마이페이지 라우트
       {
         path: "me",
-
         element: <MyPageLayout />,
         children: [
           {
@@ -135,6 +200,44 @@ const router = createBrowserRouter([
           },
         ],
       },
+
+      // 셀러샵 페이지 라우터
+      {
+        path: "sellershop",
+        element: <SellerShopPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: {
+                title: "셀러 샵",
+                rightSlot: (
+                  <MoreVertical
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      // 셀러샵에서 커스텀 이벤트 발생
+                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
+                    }}
+                  />
+                ),
+              },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      }, //
+      {
+        path: "me/profile",
+        element: <MyProfile />,
+        handle: {
+          layout: {
+            footer: { component: "DefaultFooter" },
+          },
+        },
+      },
     ],
   },
 ]);
@@ -144,7 +247,10 @@ const App = function () {
 
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <GlobalToast />
+        <RouterProvider router={router} />
+      </AuthProvider>
     </Suspense>
   );
 };
