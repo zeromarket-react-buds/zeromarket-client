@@ -19,7 +19,8 @@ import { toast } from "react-toastify";
 
 const SignupPage = () => {
   const navigate = useNavigate();
-
+  const [show, setShow] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const initialForm = {
     loginId: "",
     password: "",
@@ -37,9 +38,6 @@ const SignupPage = () => {
     setForm,
     updateValidation,
   } = useFormValidation(initialForm, checkDuplicateIdApi);
-
-  const [show, setShow] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
