@@ -153,7 +153,6 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "마이페이지",
-                    hideRight: true,
                   },
                 },
                 footer: {
