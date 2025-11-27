@@ -18,6 +18,8 @@ import MySalesPage from "@/pages/me/MySalesPage";
 import MyPurchasesPage from "@/pages/me/MyPurchasesPage";
 import SellerShopPage from "./pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창
+import MyPageLayout from "./layouts/MyPageLayout";
+import MyProfile from "./pages/me/MyProfile";
 
 const router = createBrowserRouter([
   {
@@ -141,19 +143,25 @@ const router = createBrowserRouter([
       // 마이페이지 라우트
       {
         path: "me",
-        element: <MyPage />,
-        handle: {
-          layout: {
-            header: {
-              component: "TitleHeader",
-              props: { title: "마이페이지" },
-            },
-            footer: {
-              component: "DefaultFooter",
+        element: <MyPageLayout />,
+        children: [
+          {
+            index: true,
+            element: <MyPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "마이페이지",
+                  },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
             },
           },
-        },
-        children: [
           {
             path: "selling",
             element: <MySalesPage />,
@@ -161,7 +169,10 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { title: "나의 판매내역" },
+                  props: {
+                    title: "나의 판매내역",
+                    hideRight: true,
+                  },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -176,7 +187,10 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { title: "나의 구매내역" },
+                  props: {
+                    title: "나의 구매내역",
+                    hideRight: true,
+                  },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -215,6 +229,15 @@ const router = createBrowserRouter([
           },
         },
       }, //
+      {
+        path: "me/profile",
+        element: <MyProfile />,
+        handle: {
+          layout: {
+            footer: { component: "DefaultFooter" },
+          },
+        },
+      },
     ],
   },
 ]);
