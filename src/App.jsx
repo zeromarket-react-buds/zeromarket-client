@@ -17,6 +17,7 @@ import { AuthProvider } from "@/hooks/AuthContext";
 import MySalesPage from "@/pages/me/MySalesPage";
 import MyPurchasesPage from "@/pages/me/MyPurchasesPage";
 import SellerShopPage from "./pages/sellershop/SellerShop";
+import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창
 
 const router = createBrowserRouter([
   {
@@ -194,14 +195,26 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "셀러 샵" },
+              props: {
+                title: "셀러 샵",
+                rightSlot: (
+                  <MoreVertical
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      // 셀러샵에서 커스텀 이벤트 발생
+                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
+                    }}
+                  />
+                ),
+              },
             },
             footer: {
               component: "DefaultFooter",
             },
           },
         },
-      },
+      }, //
     ],
   },
 ]);
