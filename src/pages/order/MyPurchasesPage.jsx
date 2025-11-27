@@ -2,8 +2,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const MySalesPage = () => {
+const MyPurchasesPage = () => {
+  const navigate = useNavigate();
+  const [keyword, setKeyword] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    goToTradeDetail();
+  };
+
+  const goToTradeDetail = () => {
+    navigate("/:tradeid");
+  };
+
   return (
     <div className="flex flex-col p-2 gap-4 max-w-full">
       <div className="w-full">
@@ -30,7 +44,10 @@ const MySalesPage = () => {
             <span>절대시간</span>
             <XCircle className="w-4.5 h-4.5" />
           </div>
-          <div className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5">
+          <div
+            className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
+            onClick={handleSubmit}
+          >
             <div className="flex flex-row gap-10 items-center">
               <div className="bg-brand-mediumgray w-[100px] h-[100px] rounded-2xl" />
               <div className="flex flex-col gap-1 flex-1">
@@ -52,4 +69,4 @@ const MySalesPage = () => {
   );
 };
 
-export default MySalesPage;
+export default MyPurchasesPage;
