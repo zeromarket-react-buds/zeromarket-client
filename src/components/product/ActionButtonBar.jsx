@@ -33,7 +33,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
     <div>
       {/* 1. 찜하트 , 채팅하기 , 바로구매 - 구매자*/}
       {role === "BUYER" && (
-        <div className="flex gap-2 mt-15 px-3">
+        <div className="flex gap-2 my-3 px-3 py-4 ">
           <div className="py-1 text-brand-green">
             <Heart
               className="size-7 cursor-pointer"
@@ -80,7 +80,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
         </div>
       )}
 
-      {/* 3. 끌올 , 숨기기 , 상품수정 , 상품삭제 -판매자(2차)*/}
+      {/* 3. 끌올 , 숨기기 , 상품수정 , 상품삭제 - 판매자(2차)*/}
       {role === "SELLER2" && (
         <div className="flex gap-1 mt-5 border p-3">
           <Button
@@ -112,7 +112,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
 
       {/* 4. 상품등록-판매하기 버튼*/}
       {role === "WRITER" && (
-        <div className="mt-5 border p-3">
+        <div className="p-3">
           <Button
             className="w-full bg-brand-green text-white py-7 text-lg rounded-lg mt-3"
             // onClick={() => handleButtonClick("판매하기")}

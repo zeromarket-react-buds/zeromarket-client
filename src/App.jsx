@@ -76,7 +76,7 @@ const router = createBrowserRouter([
                   props: { type: "register" },
                 },
                 footer: {
-                  component: "DefaultFooter",
+                  component: null,
                 },
               },
             },
@@ -97,7 +97,7 @@ const router = createBrowserRouter([
             },
           },
           {
-            path: "edit",
+            path: "edit/:id",
             // ProductEditPage
             children: [
               { index: true, element: <ProductDetailPage /> },

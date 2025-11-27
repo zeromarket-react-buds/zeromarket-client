@@ -2,7 +2,7 @@ import { GreenRadio } from "../ui/greenradio";
 import { useState } from "react";
 
 const ProductConditionSelector = ({ value, onChange }) => {
-  const [condition, setCondition] = useState(value || "used");
+  const [condition, setCondition] = useState(value || "USED");
 
   const options = [
     { label: "사용감있음", value: "USED" },

@@ -9,9 +9,11 @@ const CategorySelector = ({ value, onChange }) => {
   useEffect(() => {
     fetch("/api/categories/level1")
       .then((res) => res.json())
-      .then(setLevel1);
+      .then((data) => {
+        console.log("🔥 서버 level1 응답:", data);
+        setLevel1(data);
+      });
   }, []);
-
   const handleLevel1 = (id) => {
     onChange(id, null, null); //부모에게 전달ㄹ
     setLevel2([]);

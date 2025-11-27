@@ -24,7 +24,7 @@ const ProductCreatePage = () => {
     sellPrice: "",
     // sellPrice: Number(form.sellPrice.toString().replace(/,/g, "")),
     productDescription: "",
-    productStatus: "used", //초기값
+    productStatus: "USED", //초기값
     direct: false,
     delivery: false,
     sellingArea: "",
@@ -96,7 +96,7 @@ const ProductCreatePage = () => {
   return (
     <Container>
       {/* <div>상품등록페이지입니다</div> */}
-      <div className="max-w-full mx-auto bg-gray-0 border">
+      <div className="max-w-full mx-auto bg-gray-0 border -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
             <span className="text-lg font-semibold pl-5">상품 정보</span>
@@ -175,12 +175,12 @@ const ProductCreatePage = () => {
           {/* 거래 방법 */}
           <div>
             <TradeMethodSelector
-              value={form.isDirect ? "direct" : "delivery"}
+              value={form.direct ? "direct" : "delivery"}
               onChange={(method) => {
                 if (method === "direct") {
-                  setForm({ ...form, isDirect: true, isDelivery: false });
+                  setForm({ ...form, direct: true, delivery: false });
                 } else {
-                  setForm({ ...form, isDirect: false, isDelivery: true });
+                  setForm({ ...form, direct: false, delivery: true });
                 }
               }}
             />
@@ -191,8 +191,9 @@ const ProductCreatePage = () => {
             <ProductEcoScoreSection />
           </div>
         </div>
-        <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
-        {/* onSubmit={handleSubmit} */}
+        <div className="sticky bottom-0  bg-white shadow-md border-t z-50 ">
+          <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
+        </div>
       </div>
     </Container>
   );
