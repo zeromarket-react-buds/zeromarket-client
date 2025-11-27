@@ -22,7 +22,7 @@ const createValidationResult = (isValid, message = "") => ({
  */
 export const validateId = (value) => {
   if (!value || !value.trim()) {
-    return createValidationResult(false, "");
+    return createValidationResult(false, "아이디를 입력해주세요.");
   }
 
   if (!ID_REGEX.test(value)) {
@@ -39,7 +39,7 @@ export const validateId = (value) => {
  */
 export const validatePassword = (value) => {
   if (!value || !value.trim()) {
-    return createValidationResult(false, "");
+    return createValidationResult(false, "비밀번호를 입력해주세요.");
   }
 
   if (value.length < 8) {
@@ -86,7 +86,7 @@ export const validateName = (value) => {
  */
 export const validateNickname = (value) => {
   if (!value || !value.trim()) {
-    return createValidationResult(false, "");
+    return createValidationResult(false, "닉네임을 입력해주세요.");
   }
 
   if (value.length < 2 || value.length > 10) {
