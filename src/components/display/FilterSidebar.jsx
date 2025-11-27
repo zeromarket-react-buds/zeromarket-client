@@ -5,80 +5,161 @@ import { Search } from "lucide-react";
 import { useRef, useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-const category = [
+const categoryTree = [
   {
-    id: "luxury",
-    name: "수입명품",
+    level1Id: 1,
+    level1Name: "수입명품",
     children: [
       {
-        id: "luxury-women-shoes",
-        name: "여성신발",
+        level2Id: 11,
+        level2Name: "여성신발",
         children: [
-          { id: "sneakers", name: "운동화/스니커즈" },
-          { id: "sandal", name: "샌들/슬리퍼" },
-          { id: "loafer", name: "구두/로퍼" },
+          {
+            level3Id: 111,
+            parentId: 11,
+            level3Name: "운동화/스니커즈",
+          },
+          {
+            level3Id: 112,
+            parentId: 11,
+            level3Name: "샌들/슬리퍼",
+          },
+          {
+            level3Id: 113,
+            parentId: 11,
+            level3Name: "구두/로퍼",
+          },
         ],
       },
     ],
   },
   {
-    id: "men-shoes",
-    name: "남성신발",
+    level1Id: 2,
+    level1Name: "남성신발",
     children: [
       {
-        id: "men-casual",
-        name: "캐주얼화",
+        level2Id: 21,
+        level2Name: "캐주얼화",
         children: [
-          { id: "men-sneakers", name: "운동화/스니커즈" },
-          { id: "men-sandal", name: "샌들/슬리퍼" },
+          {
+            level3Id: 211,
+            parentId: 21,
+            level3Name: "운동화/스니커즈",
+          },
+          {
+            level3Id: 212,
+            parentId: 21,
+            level3Name: "샌들/슬리퍼",
+          },
         ],
       },
       {
-        id: "men-dressshoe",
-        name: "정장구두",
+        level2Id: 22,
+        level2Name: "정장구두",
         children: [
-          { id: "men-dressshoe-ko", name: "국내구두" },
-          { id: "men-sneakers-global", name: "해외구두" },
+          {
+            level3Id: 221,
+            parentId: 22,
+            level3Name: "국내구두",
+          },
+          {
+            level3Id: 222,
+            parentId: 22,
+            level3Name: "해외구두",
+          },
         ],
       },
     ],
   },
 ];
 
-const FilterSideBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [area, setArea] = useState("");
-  const inputRef = useRef(null);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+const FilterSideBar = ({
+  categoryFocusRef,
+  selectedLevel1Id,
+  selectedLevel2Id,
+  selectedLevel3Id,
+  setSelectedLevel1Id,
+  setSelectedLevel2Id,
+  setSelectedLevel3Id,
+  minPrice,
+  maxPrice,
+  setMinPrice,
+  setMaxPrice,
+  area,
+  setArea,
+}) => {
+  const minPriceRef = useRef(null);
+  const maxPriceRef = useRef(null);
+  const areaRef = useRef(null);
 
   // 펼쳐진 1,2차 카테고리
   const [openLevel1Id, setOpenLevel1Id] = useState(null);
   const [openLevel2Id, setOpenLevel2Id] = useState(null);
 
-  // 선택된 카테고리 상태
-  const [selectedLevel1, setSelectedLevel1] = useState(null);
-  const [selectedLevel2, setSelectedLevel2] = useState(null);
-  const [selectedLevel3, setSelectedLevel3] = useState(null);
-
   // 1차 카테고리 클릭 열기/접기
-  const toggleLevel1 = (id) => {
-    setOpenLevel1Id((prev) => (prev === id ? null : id));
+  const toggleLevel1 = (level1Id) => {
+    setOpenLevel1Id((prev) => (prev === level1Id ? null : level1Id));
   };
 
   // 2차 선택, 카테고리 클릭 열기/접기
-  const handleSelectLevel2 = (l1Id, l2Id) => {
-    setOpenLevel2Id((prev) => (prev === l2Id ? null : l2Id));
-    setSelectedLevel1(l1Id);
-    setSelectedLevel2(l2Id);
+  const handleSelectLevel2 = (level1Id, level2Id) => {
+    setOpenLevel2Id((prev) => (prev === level2Id ? null : level2Id));
+    setSelectedLevel1Id(level1Id);
+    setSelectedLevel2Id(level2Id);
   };
 
   // 3차 선택
-  const handleSelectLevel3 = (l1Id, l2Id, l3Id) => {
-    setSelectedLevel1(l1Id);
-    setSelectedLevel2(l2Id);
-    setSelectedLevel3(l3Id);
+  const handleSelectLevel3 = (level1Id, level2Id, level3Id) => {
+    setSelectedLevel1Id(level1Id);
+    setSelectedLevel2Id(level2Id);
+    setSelectedLevel3Id(level3Id);
   };
+
+  const getSelectedCategoryPath = () => {
+    if (
+      selectedLevel1Id == null ||
+      selectedLevel2Id == null ||
+      selectedLevel3Id == null
+    ) {
+      return null;
+    }
+
+    const level1 = categoryTree.find((c) => c.level1Id === selectedLevel1Id);
+    if (!level1) return null;
+
+    const level2 = level1.children?.find(
+      (c) => c.level2Id === selectedLevel2Id
+    );
+    if (!level2) return null;
+
+    const level3 = level2.children?.find(
+      (c) => c.level3Id === selectedLevel3Id
+    );
+    if (!level3) return null;
+
+    return {
+      level1Name: level1.level1Name,
+      level2Name: level2.level2Name,
+      level3Name: level3.level3Name,
+    };
+  };
+
+  const selectedCategory = getSelectedCategoryPath();
+
+  const clearCategory = () => {
+    setSelectedLevel1Id(null);
+    setSelectedLevel2Id(null);
+    setSelectedLevel3Id(null);
+  };
+
+  const hasArea = !!area;
+  const hasPrice = minPrice !== "" || maxPrice !== "";
+  const hasCategory =
+    selectedLevel1Id != null &&
+    selectedLevel2Id != null &&
+    selectedLevel3Id != null;
+
+  const isOpen = hasArea || hasPrice || hasCategory;
 
   const handleMinPrice = (e) => {
     const numeric = e.target.value.replace(/[^0-9]/g, "");
@@ -90,12 +171,12 @@ const FilterSideBar = () => {
     setMaxPrice(numeric);
   };
 
-  const clearInput = (e) => {
+  const clearAreaInput = (e) => {
     e.preventDefault(); // submit 방지
     e.stopPropagation(); // 이벤트버블링 방지
     setArea("");
-    setTimeout(() => inputRef.current?.focus(), 0);
   };
+
   return (
     <div className="flex flex-col gap-2 w-full">
       {/* 카테고리 */}
@@ -105,19 +186,23 @@ const FilterSideBar = () => {
         </div>
 
         {/* 바깥 카테고리 박스 */}
-        <div className="bg-brand-lightgray border -mt-3">
-          {category.map((level1) => {
-            const isOpenCategory2 = openLevel1Id === level1.id;
+        <div
+          className="bg-brand-lightgray border -mt-3"
+          ref={categoryFocusRef}
+          tabIndex={0}
+        >
+          {categoryTree.map((level1) => {
+            const isOpenCategory2 = openLevel1Id === level1.level1Id;
             return (
-              <div key={level1.id} className="border last:border-b-0">
+              <div key={level1.level1Id} className="border last:border-b-0">
                 {/* 1차 카테고리 */}
                 <button
                   type="button"
-                  onClick={() => toggleLevel1(level1.id)}
+                  onClick={() => toggleLevel1(level1.level1Id)}
                   className="flex border-brand-darkgray w-full items-center justify-between px-6 py-2 text-left "
                 >
                   <span className="text-brand-darkgray text-sm">
-                    {level1.name}
+                    {level1.level1Name}
                   </span>
                   {isOpenCategory2 ? (
                     <ChevronUp className="w-4 h-4 text-brand-darkgray" />
@@ -130,20 +215,23 @@ const FilterSideBar = () => {
                 {isOpenCategory2 && (
                   <div className="bg-brand-lightgray px-3 pb-2">
                     {level1.children.map((level2) => {
-                      const isOpenCategory3 = openLevel2Id === level2.id;
+                      const isOpenCategory3 = openLevel2Id === level2.level2Id;
 
                       return (
-                        <div key={level2.id} className="pl-6">
+                        <div key={level2.level2Id} className="pl-6">
                           {/* 2차 */}
                           <button
                             type="button"
                             onClick={() =>
-                              handleSelectLevel2(level1.id, level2.id)
+                              handleSelectLevel2(
+                                level1.level1Id,
+                                level2.level2Id
+                              )
                             }
                             className="flex w-full items-center justify-between py-2 text-left text-sm pr-3"
                           >
                             <span className="text-brand-darkgray text-sm">
-                              {level2.name}
+                              {level2.level2Name}
                             </span>
                             {isOpenCategory3 ? (
                               <ChevronUp className="w-4 h-4 text-brand-darkgray" />
@@ -157,17 +245,17 @@ const FilterSideBar = () => {
                             <div className="pl-5">
                               {level2.children.map((level3) => {
                                 const isSelectedLevel3 =
-                                  selectedLevel3 === level3.id;
+                                  selectedLevel3Id === level3.level3Id;
 
                                 return (
                                   <button
-                                    key={level3.id}
+                                    key={level3.level3Id}
                                     type="button"
                                     onClick={() =>
                                       handleSelectLevel3(
-                                        level1.id,
-                                        level2.id,
-                                        level3.id
+                                        level1.level1Id,
+                                        level2.level2Id,
+                                        level3.level3Id
                                       )
                                     }
                                     className={[
@@ -175,7 +263,7 @@ const FilterSideBar = () => {
                                       isSelectedLevel3 && "font-semibold",
                                     ].join(" ")}
                                   >
-                                    {level3.name}
+                                    {level3.level3Name}
                                   </button>
                                 );
                               })}
@@ -204,6 +292,13 @@ const FilterSideBar = () => {
             value={minPrice}
             className="font-normal"
             placeholder="최소 가격"
+            ref={minPriceRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                maxPriceRef.current?.focus();
+              }
+            }}
           />
           <span>-</span>
           <Input
@@ -212,6 +307,13 @@ const FilterSideBar = () => {
             value={maxPrice}
             className="font-normal"
             placeholder="최대 가격"
+            ref={maxPriceRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                areaRef.current?.focus();
+              }
+            }}
           />
         </div>
       </div>
@@ -222,7 +324,7 @@ const FilterSideBar = () => {
         <div className="relative w-full">
           <Input
             value={area}
-            ref={inputRef}
+            ref={areaRef}
             className="font-normal"
             onChange={(e) => setArea(e.target.value)}
             placeholder="지역을 입력해주세요"
@@ -236,7 +338,7 @@ const FilterSideBar = () => {
           {area && (
             <Button
               type="button"
-              onClick={clearInput}
+              onClick={clearAreaInput}
               className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4"
             >
               <XCircle />
@@ -248,23 +350,52 @@ const FilterSideBar = () => {
 
       {/* 선택한 필터 */}
       {isOpen && (
-        <div className="my-0.5">
+        <div className="my-0.5 flex flex-col">
           <div className="text-base font-semibold border-b border-brand-mediumgray py-2">
             선택한 필터
           </div>
-          <div className="flex flex-row gap-2 py-3">
-            <Button variant="line">
-              <span className="font-normal">역삼동</span>
-              <span className="text-brand-mediumgray">
-                <XCircle />
-              </span>
-            </Button>
-            <Button variant="line">
-              <span className="font-normal">0 - 20,000</span>
-              <span className="text-brand-mediumgray">
-                <XCircle />
-              </span>
-            </Button>
+          <div className="flex py-3 gap-2">
+            {selectedCategory && (
+              <Button variant="line" className="items-center">
+                <span className="font-normal">
+                  {selectedCategory.level3Name}
+                </span>
+                <span className="text-brand-mediumgray" onClick={clearCategory}>
+                  <XCircle />
+                </span>
+              </Button>
+            )}
+
+            {hasPrice && (
+              <Button variant="line" className="items-center">
+                <span className="font-normal">
+                  {minPrice || "0"} - {maxPrice || "상한 없음"}
+                </span>
+                <span
+                  className="text-brand-mediumgray"
+                  onClick={() => {
+                    setMinPrice("");
+                    setMaxPrice("");
+                  }}
+                >
+                  <XCircle />
+                </span>
+              </Button>
+            )}
+
+            {hasArea && (
+              <Button variant="line" className="items-center">
+                <span className="font-normal">{area}</span>
+                <span
+                  className="text-brand-mediumgray"
+                  onClick={() => {
+                    setArea("");
+                  }}
+                >
+                  <XCircle />
+                </span>
+              </Button>
+            )}
           </div>
           <div className="text-sm text-brand-darkgray underline">초기화</div>
         </div>
