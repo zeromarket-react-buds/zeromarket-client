@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -16,6 +16,14 @@ const ProductList = () => {
   // 검색/sort 관련
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("popularity");
+
+  // 필터 관련
+  const [selectedLevel1Id, setSelectedLevel1Id] = useState(null);
+  const [selectedLevel2Id, setSelectedLevel2Id] = useState(null);
+  const [selectedLevel3Id, setSelectedLevel3Id] = useState(null);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [area, setArea] = useState("");
 
   // cursor 관련
   const [cursor, setCursor] = useState(null);
@@ -28,8 +36,22 @@ const ProductList = () => {
 
     try {
       const params = new URLSearchParams();
+
       if (nextCursor !== null) params.set("cursor", nextCursor);
       if (sort) params.set("sort", sort);
+      if (keyword.trim()) params.set("keyword", keyword.trim());
+
+      // 카테고리
+      if (selectedLevel1Id != null) params.set("level1Id", selectedLevel1Id);
+      if (selectedLevel2Id != null) params.set("level2Id", selectedLevel2Id);
+      if (selectedLevel3Id != null) params.set("level3Id", selectedLevel3Id);
+
+      // 가격
+      if (minPrice) params.set("minPrice", minPrice);
+      if (maxPrice) params.set("maxPrice", maxPrice);
+
+      // 지역
+      if (area.trim()) params.set("area", area.trim());
 
       console.log("정렬:", sort, "쿼리스트링:", params.toString());
 
@@ -52,7 +74,7 @@ const ProductList = () => {
 
       setProducts((prev) => {
         // 화면 처음 그려질 때(nextCursor 없을 경우)는 그냥 fetch 요청한거 그대로
-        if (!nextCursor) {
+        if (nextCursor === null) {
           return fetched;
         }
 
@@ -77,7 +99,16 @@ const ProductList = () => {
     setProducts([]);
     setCursor(null);
     fetchHomeProducts(null);
-  }, [sort]);
+  }, [
+    sort,
+    keyword,
+    selectedLevel1Id,
+    selectedLevel2Id,
+    selectedLevel3Id,
+    minPrice,
+    maxPrice,
+    area,
+  ]);
 
   // sort 관련 함수
   const handleSort = (value) => {
@@ -148,6 +179,18 @@ const ProductList = () => {
         keyword={keyword}
         setKeyword={setKeyword}
         sort={sort}
+        selectedLevel1Id={selectedLevel1Id}
+        setSelectedLevel1Id={setSelectedLevel1Id}
+        selectedLevel2Id={selectedLevel2Id}
+        setSelectedLevel2Id={setSelectedLevel2Id}
+        selectedLevel3Id={selectedLevel3Id}
+        setSelectedLevel3Id={setSelectedLevel3Id}
+        minPrice={minPrice}
+        setMinPrice={setMinPrice}
+        maxPrice={maxPrice}
+        setMaxPrice={setMaxPrice}
+        area={area}
+        setArea={setArea}
       />
       <ProductCard products={products} onToggleLike={onToggleLike} />
 
