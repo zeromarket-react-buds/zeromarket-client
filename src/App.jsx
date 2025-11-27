@@ -212,6 +212,9 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "프로필 설정",
+                    showBack: true, // 뒤로가기 버튼 표시
+                    rightButtonText: "완료",
+                    rightButtonEvent: "save-profile", // 이벤트 키 전달
                   },
                 },
                 footer: {

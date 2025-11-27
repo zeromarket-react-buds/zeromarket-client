@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, Camera } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, Camera, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function MyProfile() {
@@ -11,6 +11,17 @@ export default function MyProfile() {
   const [intro, setIntro] = useState("현재 한줄 소개");
 
   const fileInputRef = useRef(null);
+
+  // TitleHeader 오른쪽 버튼("완료") 클릭 이벤트 받기
+  useEffect(() => {
+    const handler = () => {
+      handleSave();
+    };
+
+    window.addEventListener("title-right-click", handler);
+    return () => window.removeEventListener("title-right-click", handler);
+  }, [nickname, intro, profileFile]);
+  //
 
   // 프로필 이미지 업로드 처리
   const handleProfileChange = (e) => {
@@ -42,7 +53,7 @@ export default function MyProfile() {
 
   return (
     <div className="w-full max-w-md mx-auto p-5">
-      {/* 헤더 */}
+      {/* 헤더 
       <header className="flex items-center justify-between mb-8">
         <button
           className="text-brand-green"
@@ -59,7 +70,8 @@ export default function MyProfile() {
         >
           완료
         </button>
-      </header>
+      </header>*/}
+      {/* 🔥🔥 헤더 제거됨 – TitleHeader가 대신 렌더링 */}
 
       {/* 프로필 이미지 */}
       <section className="w-full flex justify-center mb-8 relative">
@@ -69,7 +81,7 @@ export default function MyProfile() {
             onClick={() => fileInputRef.current.click()}
           >
             {!previewImg ? (
-              <div className="text-white text-5xl">👤</div>
+              <UserRound className="text-brand-ivory size-25" />
             ) : (
               <img
                 src={previewImg}
