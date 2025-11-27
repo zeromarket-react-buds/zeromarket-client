@@ -1,8 +1,6 @@
 import Container from "@/components/Container";
 import { UserRound, Heart, Eye, Smile } from "lucide-react";
-import ProductHeader from "@/components/product/ProductHeader";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
-import SimilarProductCard from "@/components/product/SimilarProductCard";
 import { products } from "@/data/product.js";
 import ProductCard from "@/components/display/ProductCard";
 import { useParams } from "react-router-dom";
@@ -23,7 +21,7 @@ const ProductDetailPage = () => {
     thumbnailUrl: p.thumbnail_url,
     createdAt: p.created_at,
     salesStatus: p.sales_status,
-    liked: false, // 필요 시 기본값
+    liked: false,
   }));
 
   // fetch 요청
@@ -47,13 +45,30 @@ const ProductDetailPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProductDetail(null);
-  }, [id]);
+  //찜수
+  const fetchWishCount = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/products/${id}/wish-count`
+      );
 
-  useEffect(() => {
-    increaseViewCount();
-  }, [id]);
+      if (!res.ok) return;
+
+      const data = await res.json(); // { productId, wishCount }
+      setDetail((prev) =>
+        prev ? { ...prev, wishCount: data.wishCount } : prev
+      );
+    } catch (err) {
+      console.error("찜 수 조회 실패:", err);
+    }
+  };
+
+  //조회수
+  const increaseViewCount = async () => {
+    await fetch(`http://localhost:8080/api/products/${id}/view`, {
+      method: "PATCH",
+    });
+  };
 
   const toggleWish = async () => {
     try {
@@ -73,11 +88,12 @@ const ProductDetailPage = () => {
     }
   };
 
-  const increaseViewCount = async () => {
-    await fetch(`http://localhost:8080/api/products/${id}/view`, {
-      method: "PATCH",
-    });
-  };
+  //초기로딩
+  useEffect(() => {
+    fetchProductDetail();
+    increaseViewCount();
+    fetchWishCount();
+  }, [id]);
 
   if (loading) return <div>상품 상세 페이지 불러오는 중...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -258,22 +274,19 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
-        <div className="mt-25 -mb-21">
-          <div className="sticky bottom-20 bg-white border-t  z-50">
-            <ActionButtonBar
-              role="BUYER"
-              // role={userRole}
-              isWished={detail.isWished}
-              onToggleWish={toggleWish}
-            />
-          </div>
-          <div className="sticky bottom-0 bg-white border-t z-50">
-            <ActionButtonBar
-              role="SELLER"
-              // role={userRole}
-              productId={detail.productId}
-            />
-          </div>
+        <div className="mt-20 -mb-21 sticky bottom-10 bg-white border-t  z-50">
+          <ActionButtonBar
+            role="BUYER"
+            // role={userRole}
+            isWished={detail.isWished}
+            onToggleWish={toggleWish}
+          />
+
+          <ActionButtonBar
+            role="SELLER"
+            // role={userRole}
+            productId={detail.productId}
+          />
         </div>
 
         {/* <ActionButtonBar role="SELLER" />
