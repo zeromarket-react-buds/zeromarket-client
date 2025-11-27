@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
+import ProductEditPage from "@/pages/products/ProductEditPage";
 import { GlobalToast } from "@/components/GlobalToast";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -100,14 +101,18 @@ const router = createBrowserRouter([
           },
           {
             path: "edit/:id",
-            // ProductEditPage
-            children: [
-              { index: true, element: <ProductDetailPage /> },
-              {
-                path: ":id",
-                element: <ProductDetailPage />,
+            element: <ProductEditPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "ProductHeader",
+                  props: { type: "edit" },
+                },
+                footer: {
+                  component: null,
+                },
               },
-            ],
+            },
           },
         ],
       },

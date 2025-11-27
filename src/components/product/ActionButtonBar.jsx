@@ -1,16 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
+import { useNavigate } from "react-router-dom";
 
-const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
+const ActionButtonBar = ({
+  role,
+  onToggleLike,
+  isWished,
+  onSubmit,
+  productId,
+}) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
+  const navigate = useNavigate();
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = () => {
     if (!isWished) showLikeAddedToast();
     else showLikeRemovedToast();
 
-    onToggleWish();
+    if (onToggleLike) {
+      onToggleLike();
+    }
   };
 
   const handleButtonClick = (action) => {
@@ -29,11 +39,20 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
     }
   };
 
+  // 상품수정
+  const handleEditClick = () => {
+    if (!productId) {
+      console.warn("productId가 없습니다. 수정 페이지로 이동할 수 없습니다.");
+      return;
+    }
+    navigate(`/products/edit/${productId}`);
+  };
+
   return (
     <div>
       {/* 1. 찜하트 , 채팅하기 , 바로구매 - 구매자*/}
       {role === "BUYER" && (
-        <div className="flex gap-2 my-3 px-3 py-4 ">
+        <div className="flex gap-2 my-0 px-3 py-4 ">
           <div className="py-1 text-brand-green">
             <Heart
               className="size-7 cursor-pointer"
@@ -58,7 +77,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
 
       {/* 2. 숨기기<>숨기기해제 , 상품수정 , 상품삭제 - 판매자*/}
       {role === "SELLER" && (
-        <div className="flex gap-2 mt-5 border p-3">
+        <div className="flex gap-2 my-3 px-3 py-4">
           <Button
             className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
             onClick={() => handleButtonClick("숨기기")}
@@ -67,7 +86,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
           </Button>
           <Button
             className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
-            onClick={() => handleButtonClick("상품수정")}
+            onClick={handleEditClick}
           >
             상품수정
           </Button>
@@ -97,7 +116,7 @@ const ActionButtonBar = ({ role, onToggleLike, isWished, onSubmit }) => {
           </Button>
           <Button
             className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
-            onClick={() => handleButtonClick("상품수정")}
+            onClick={handleEditClick}
           >
             상품수정
           </Button>
