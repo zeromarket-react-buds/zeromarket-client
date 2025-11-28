@@ -71,10 +71,10 @@ export default function MyProfile() {
           완료
         </button>
       </header>*/}
-      {/* 🔥🔥 헤더 제거됨 – TitleHeader가 대신 렌더링 */}
+      {/*  *헤더 제거됨 – TitleHeader가 대신 렌더링 */}
 
       {/* 프로필 이미지 */}
-      <section className="w-full flex justify-center mb-8 relative">
+      <section className="flex flex-col items-center mb-10">
         <div className="relative">
           <div
             className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center overflow-hidden"

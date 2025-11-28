@@ -22,6 +22,7 @@ import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창
 import MyPageLayout from "@/layouts/MyPageLayout";
 import MyProfile from "./pages/me/MyProfile";
 import TradeDetailPage from "@/pages/order/TradeDetailPage";
+import MyProfileEditPage from "./pages/me/MyProfileEditPage";
 
 const router = createBrowserRouter([
   {
@@ -224,6 +225,25 @@ const router = createBrowserRouter([
               },
             },
           },
+
+          // 회원정보 설정
+          {
+            path: "profile-edit",
+            element: <MyProfileEditPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "회원 정보 설정",
+                    showBack: true,
+                    hideRight: true, //오른쪽 벨 제거
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          }, //
         ],
       },
 
@@ -279,7 +299,7 @@ const router = createBrowserRouter([
             },
           },
         },
-      }, //
+      },
     ],
   },
 ]);
