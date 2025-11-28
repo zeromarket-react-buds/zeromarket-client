@@ -3,7 +3,7 @@ import { UserRound, Heart, Eye, Smile } from "lucide-react";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import { products } from "@/data/product.js";
 import ProductCard from "@/components/display/ProductCard";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 
@@ -13,6 +13,8 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
+  const navigate = useNavigate();
+  const [similarProducts, setSimilarProducts] = useState([]);
 
   const formattedProducts = products.map((p) => ({
     productId: p.product_id,
@@ -70,6 +72,33 @@ const ProductDetailPage = () => {
     });
   };
 
+  //비슷상품
+  const fetchSimilarProducts = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/products/${id}/similar`
+      );
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      const formatted = data.map((p) => ({
+        productId: p.productId,
+        productTitle: p.productTitle,
+        sellPrice: p.sellPrice,
+        thumbnailUrl: p.thumbnailUrl,
+        createdAt: p.createdAt,
+        salesStatus: p.salesStatus,
+        liked: false,
+      }));
+
+      setSimilarProducts(formatted);
+    } catch (err) {
+      console.error("비슷한 상품 불러오기 실패:", err);
+    }
+  };
+
   const toggleWish = async () => {
     try {
       const method = detail.isWished ? "DELETE" : "POST";
@@ -93,6 +122,7 @@ const ProductDetailPage = () => {
     fetchProductDetail();
     increaseViewCount();
     fetchWishCount();
+    fetchSimilarProducts();
   }, [id]);
 
   if (loading) return <div>상품 상세 페이지 불러오는 중...</div>;
@@ -195,7 +225,19 @@ const ProductDetailPage = () => {
 
             {/* 카테고리 + n시간전 */}
             <div className="flex justify-between items-center my-3">
-              <span className=" text-gray-600 text-base hover:underline flex items-center">
+              <span
+                className=" text-gray-600 text-base hover:underline flex items-center"
+                onClick={() =>
+                  navigate(
+                    // `/search?keyword=&sort=popularity&level1Id=${detail.level1Id}&level2Id=${detail.level2Id}&level3Id=${detail.level3Id}`
+                    `/search?keyword=&sort=popularity` +
+                      `&level1Id=${detail.level1Id}` +
+                      `&level2Id=${detail.level2Id}` +
+                      `&level3Id=${detail.level3Id}` +
+                      `&categoryName=${detail.categoryDepth3}`
+                  )
+                }
+              >
                 <span>{detail.categoryDepth1} </span>
                 <span className="text- font-semibold">&nbsp;〉</span>
                 <span>{detail.categoryDepth2}</span>
@@ -271,7 +313,7 @@ const ProductDetailPage = () => {
                 ))}
               </div> */}
                 <ProductCard
-                  products={formattedProducts}
+                  products={similarProducts}
                   onToggleLike={onToggleLike}
                 />
               </div>
