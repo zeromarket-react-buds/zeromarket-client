@@ -41,9 +41,8 @@ const ProductCard = ({ products, onToggleLike }) => {
                   className="relative rounded-xl w-full h-full object-cover"
                 />
                 <div className="flex absolute justify-between items-center bottom-0 w-full px-4 py-3">
-                  {/* 상품상태  */}
-                  {p.salesStatus === "RESERVED" ? (
-                    <Badge>예약중</Badge>
+                  {p.salesStatus?.description === "예약됨" ? (
+                    <Badge>{p.salesStatus.description}</Badge>
                   ) : (
                     <div></div>
                   )}
