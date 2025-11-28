@@ -277,14 +277,20 @@ const ProductDetailPage = () => {
               </div>
             </div>
           </div>
-          <div className="fixed bottom-0 w-xl bg-white border-t z-50">
+          <div className="sticky bottom-0 bg-white border-t z-50">
             <ActionButtonBar
               role="BUYER"
               // role={userRole}
               isWished={detail.isWished}
               onToggleWish={toggleWish}
             />
-
+            {/* <div className="fixed bottom-0 w-xl bg-white border-t z-50">
+            <ActionButtonBar
+              role="BUYER"
+              // role={userRole}
+              isWished={detail.isWished}
+              onToggleWish={toggleWish}
+            /> */}
             {/* <ActionButtonBar
           role="SELLER"
           // role={userRole}

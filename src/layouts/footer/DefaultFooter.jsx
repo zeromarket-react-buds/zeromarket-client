@@ -6,7 +6,7 @@ const DefaultFooter = () => {
   return (
     <footer className="mt-16 py-8 bg-gray-50 border-gray-200 flex items-center px-4 border-t">
       <Container>
-        <div className="flex space-x-3 mb-10">
+        <div className="flex space-x-3 ">
           <div className="flex-grow space-y-8">
             <div className="flex space-x-16 items-center">
               <Link to="/" className="h-[50px] shrink-0">
