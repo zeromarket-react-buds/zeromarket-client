@@ -25,19 +25,19 @@ const ProductList = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [area, setArea] = useState("");
 
-  // cursor 관련
-  const [cursor, setCursor] = useState(null);
+  // offset 관련
+  const [offset, setOffset] = useState(null);
   const [hasNext, setHasNext] = useState(true);
 
   // 검색 fetch 요청 함수
-  const fetchHomeProducts = async (nextCursor = null) => {
+  const fetchHomeProducts = async (nextOffset = null) => {
     if (loading) return;
     setLoading(true);
 
     try {
       const params = new URLSearchParams();
 
-      if (nextCursor !== null) params.set("cursor", nextCursor);
+      if (nextOffset !== null) params.set("offset", nextOffset);
       if (sort) params.set("sort", sort);
       if (keyword.trim()) params.set("keyword", keyword.trim());
 
@@ -69,12 +69,12 @@ const ProductList = () => {
       console.log("서버 응답:", data);
 
       const fetched = data.content;
-      const cursor = data.cursor;
+      const offset = data.offset;
       const hasNext = data.hasNext;
 
       setProducts((prev) => {
-        // 화면 처음 그려질 때(nextCursor 없을 경우)는 그냥 fetch 요청한거 그대로
-        if (nextCursor === null) {
+        // 화면 처음 그려질 때(nextOffset 없을 경우)는 그냥 fetch 요청한거 그대로
+        if (nextOffset === null) {
           return fetched;
         }
 
@@ -86,7 +86,7 @@ const ProductList = () => {
 
         return [...prev, ...duplicateRemove];
       });
-      setCursor(cursor);
+      setOffset(offset);
       setHasNext(hasNext);
     } catch (err) {
       console.error("상품 목록 불러오기 실패:", err);
@@ -97,7 +97,7 @@ const ProductList = () => {
 
   useEffect(() => {
     setProducts([]);
-    setCursor(null);
+    setOffset(null);
     fetchHomeProducts(null);
   }, [
     sort,
@@ -199,7 +199,7 @@ const ProductList = () => {
         <Button
           variant="green"
           className="px-4 py-2"
-          onClick={() => fetchHomeProducts(cursor)}
+          onClick={() => fetchHomeProducts(offset)}
           disabled={loading}
         >
           {loading ? "로딩중..." : "더 보기"}

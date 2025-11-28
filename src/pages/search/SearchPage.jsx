@@ -32,22 +32,22 @@ const SearchPage = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [area, setArea] = useState("");
 
-  // cursor 관련
-  const [cursor, setCursor] = useState(null);
+  // offset 관련
+  const [offset, setOffset] = useState(null);
   const [hasNext, setHasNext] = useState(true);
 
   // 스크롤 하단 감지용 ref
   const loaderRef = useRef(null);
 
   // 검색 fetch 요청 함수
-  const fetchProducts = async (nextCursor = null) => {
+  const fetchProducts = async (nextOffset = null) => {
     if (loading) return;
     setLoading(true);
 
     try {
       const params = new URLSearchParams();
 
-      if (nextCursor !== null) params.set("cursor", nextCursor);
+      if (nextOffset !== null) params.set("offset", nextOffset);
       if (sort) params.set("sort", sort);
       if (keyword.trim()) params.set("keyword", keyword.trim());
 
@@ -77,12 +77,12 @@ const SearchPage = () => {
 
       const data = await res.json();
       const fetched = data.content;
-      const next = data.cursor;
+      const offset = data.offset;
       const nextHas = data.hasNext;
 
       setProducts((prev) => {
-        // 화면 처음 그려질 때(nextCursor 없을 경우)는 그냥 fetch 요청한거 그대로
-        if (nextCursor === null) {
+        // 화면 처음 그려질 때(nextOffset 없을 경우)는 그냥 fetch 요청한거 그대로
+        if (nextOffset === null) {
           return fetched;
         }
 
@@ -94,7 +94,7 @@ const SearchPage = () => {
 
         return [...prev, ...duplicateRemove];
       });
-      setCursor(next);
+      setOffset(offset);
       setHasNext(nextHas);
     } catch (e) {
       console.error("상품 목록 불러오기 실패:", e);
@@ -106,7 +106,7 @@ const SearchPage = () => {
   // 다시 그려지는 기준
   useEffect(() => {
     setProducts([]);
-    setCursor(null);
+    setOffset(null);
     setHasNext(true);
     fetchProducts(null);
   }, [
@@ -128,10 +128,10 @@ const SearchPage = () => {
     // 상태 변경
     setSort(value);
 
-    // 현재 URL 기준으로 sort만 교체, cursor 제거
+    // 현재 URL 기준으로 sort만 교체, offset 제거
     const params = new URLSearchParams(location.search);
     params.set("sort", value);
-    params.delete("cursor"); // 페이지를 처음부터 다시 보기 위해
+    params.delete("offset"); // 페이지를 처음부터 다시 보기 위해
 
     navigate({
       pathname: "/search",
@@ -139,7 +139,7 @@ const SearchPage = () => {
     });
   };
 
-  // cursor 관련 무한스크롤
+  // offset 관련 무한스크롤
   useEffect(() => {
     const target = loaderRef.current;
     if (!target) return;
@@ -148,14 +148,14 @@ const SearchPage = () => {
       const entry = entries[0];
 
       if (entry.isIntersecting && hasNext && !loading) {
-        fetchProducts(cursor);
+        fetchProducts(offset);
       }
     });
 
     observer.observe(target);
 
     return () => observer.disconnect();
-  }, [cursor, sort, hasNext, loading]);
+  }, [offset, sort, hasNext, loading]);
 
   // 글등록 페이지 이동
   const goProductCreatePage = () => {
