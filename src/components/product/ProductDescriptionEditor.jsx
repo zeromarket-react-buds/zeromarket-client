@@ -1,4 +1,15 @@
+import { useState, useRef } from "react";
+
 const ProductDescriptionEditor = ({ value, onChange }) => {
+  // const [description, setDescription] = useState(value || "");
+  const inputRef = useRef(null);
+  const maxLength = 2000;
+
+  const handlePrice = (e) => {
+    const input = e.target.value;
+    const formatted = formatNumber(input);
+    setDescription(formatted);
+  };
   return (
     <div className="mt-6">
       {/* 상품 설명 */}
@@ -10,6 +21,10 @@ const ProductDescriptionEditor = ({ value, onChange }) => {
       </div>
       <div className="relative">
         <textarea
+          ref={inputRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={maxLength}
           className="w-full border p-3 rounded-lg h-32 text-sm overflow-x-auto"
           placeholder="상품명
 사용(유효) 기간
@@ -17,7 +32,7 @@ const ProductDescriptionEditor = ({ value, onChange }) => {
 실제 촬영한 사진과 함께 상세 정보를 입력해 주세요."
         />
         <div className="absolute bottom-2 right-3 py-2 text-right text-brand-mediumgray text-sm ">
-          0 / 2000
+          {value.length}/ {maxLength}
         </div>
       </div>
     </div>

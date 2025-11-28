@@ -13,6 +13,7 @@ import ProductPriceInput from "@/components/product/ProductPriceInput";
 
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
+  const [description, setDescription] = useState("");
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
