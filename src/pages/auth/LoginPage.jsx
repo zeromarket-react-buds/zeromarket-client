@@ -131,16 +131,17 @@ function LoginPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
             {/* 공통 에러 메시지 */}
             {commonError && (
               <div className="text-sm text-red-500">{commonError}</div>
             )}
 
             {/* 로그인 상태 유지 */}
-            <div className="inline-flex items-center text-sm text-gray-700"></div>
+            {/* <div className="inline-flex items-center text-sm text-gray-700"></div> */}
 
+            {/* 아이디 인풋 */}
             <div>
               <label className="block text-base mb-1">아이디</label>
               <input
@@ -165,6 +166,7 @@ function LoginPage() {
               )}
             </div>
 
+            {/* 비밀번호 인풋 */}
             <div>
               <label className="block text-base mb-1">비밀번호</label>
               <input
@@ -187,37 +189,40 @@ function LoginPage() {
                 </p>
               )}
             </div>
-          </div>
 
-          <div className="flex justify-center gap-2">
-            <span className="text-sm text-gray-400 cursor-pointer">
-              아이디 찾기
-            </span>
-            <span className="w-0 h-5 border border-gray-400"></span>
-            <span className="text-sm text-gray-400 cursor-pointer">
-              비밀번호 찾기
-            </span>
-          </div>
+            {/* 아이디/비밀번호 찾기 */}
+            <div className="flex justify-center gap-2">
+              <span className="text-sm text-gray-400 cursor-pointer">
+                아이디 찾기
+              </span>
+              <span className="w-0 h-5 border border-gray-400"></span>
+              <span className="text-sm text-gray-400 cursor-pointer">
+                비밀번호 찾기
+              </span>
+            </div>
 
-          <button
-            type="submit"
-            className="w-full bg-green-700 text-white py-3 rounded-md font-semibold cursor-pointer"
-          >
-            로그인
-          </button>
+            {/* 로그인 */}
+            <button
+              type="submit"
+              className="w-full bg-green-700 text-white py-3 rounded-md font-semibold cursor-pointer"
+            >
+              로그인
+            </button>
 
-          <div
-            onClick={() => {
-              navigate("/");
-            }}
-            className="text-center text-sm text-gray-400 cursor-pointer"
-          >
-            비회원으로 둘러보기
+            {/* 비회원으로 둘러보기 */}
+            <div
+              onClick={() => {
+                navigate("/");
+              }}
+              className="text-center text-sm text-gray-400 cursor-pointer"
+            >
+              비회원으로 둘러보기
+            </div>
           </div>
         </form>
 
         {/* Social login */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* 헤더 */}
           <div className="flex justify-center items-center gap-6">
             <span className="flex-grow border-t border-gray-400"></span>
@@ -225,7 +230,7 @@ function LoginPage() {
             <span className="flex-grow border-t border-gray-400"></span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-6">
             <button className="w-full flex items-center justify-center border rounded-md py-2 cursor-pointer">
               <div className="w-4 h-4 bg-yellow-400 rounded-full mr-2" />
               카카오톡으로 로그인

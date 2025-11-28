@@ -38,7 +38,7 @@ function AuthProvider({ children }) {
       try {
         const res = await refreshTokenApi(refreshToken);
         localStorage.setItem("accessToken", res.accessToken);
-        localStorage.setItem("refreshToken", res.refreshToken);
+        // localStorage.setItem("refreshToken", res.refreshToken);
 
         const userData = await getMyInfoApi();
         setUser(userData);
@@ -58,17 +58,22 @@ function AuthProvider({ children }) {
   async function login(loginId, password) {
     const data = await loginApi(loginId, password);
 
+    // TODO: refresh token --> httpOnly cookie
+    // 1) 토큰 저장
     localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
+    // localStorage.setItem("refreshToken", data.refreshToken);
 
+    // 2) 사용자 정보 조회
     const userData = await getMyInfoApi();
+
+    // 2) 전역 상태 갱신
     setUser(userData);
   }
 
   // ✅ 로그아웃
   function logout() {
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    // localStorage.removeItem("refreshToken");
     setUser(null);
   }
 
