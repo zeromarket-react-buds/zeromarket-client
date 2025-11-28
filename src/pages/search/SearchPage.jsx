@@ -20,6 +20,14 @@ const SearchPage = () => {
   const keywordFromUrl = searchParams.get("keyword") || "";
   const sortFromUrl = searchParams.get("sort") ?? "popularity";
 
+  const categoryFromUrl = searchParams.get("category");
+  const minPriceFromUrl = searchParams.get("minPrice");
+  const maxPriceFromUrl = searchParams.get("maxPrice");
+  const areaFromUrl = searchParams.get("area");
+
+  // navigate에서 넘긴 state (없을 수도 있어서 기본값 처리)
+  const navState = location.state || {};
+
   // 실제 서버 요청에 쓰이는 확정된 상태
   const [keyword, setKeyword] = useState(keywordFromUrl);
   const [sort, setSort] = useState(sortFromUrl);
@@ -27,10 +35,12 @@ const SearchPage = () => {
   // 필터 관련
   const [selectedLevel1Id, setSelectedLevel1Id] = useState(null);
   const [selectedLevel2Id, setSelectedLevel2Id] = useState(null);
-  const [selectedLevel3Id, setSelectedLevel3Id] = useState(null);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [area, setArea] = useState("");
+  const [selectedLevel3Id, setSelectedLevel3Id] = useState(
+    categoryFromUrl ? Number(categoryFromUrl) : null
+  );
+  const [minPrice, setMinPrice] = useState(minPriceFromUrl ?? "");
+  const [maxPrice, setMaxPrice] = useState(maxPriceFromUrl ?? "");
+  const [area, setArea] = useState(areaFromUrl ?? "");
 
   // offset 관련
   const [offset, setOffset] = useState(null);
@@ -100,6 +110,27 @@ const SearchPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!location.state) return;
+
+    const s = location.state;
+
+    setSelectedLevel1Id(s.level1Id ?? null);
+    setSelectedLevel2Id(s.level2Id ?? null);
+    setSelectedLevel3Id(
+      s.level3Id ?? (categoryFromUrl ? Number(categoryFromUrl) : null)
+    );
+    setMinPrice(s.minPrice ?? minPriceFromUrl ?? "");
+    setMaxPrice(s.maxPrice ?? maxPriceFromUrl ?? "");
+    setArea(s.area ?? areaFromUrl ?? "");
+  }, [
+    location.state,
+    categoryFromUrl,
+    minPriceFromUrl,
+    maxPriceFromUrl,
+    areaFromUrl,
+  ]);
 
   // 다시 그려지는 기준
   useEffect(() => {

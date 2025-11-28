@@ -36,10 +36,7 @@ const FilterSideBar = ({
   const hasPrice =
     (minPrice !== null && minPrice !== "") ||
     (maxPrice !== null && maxPrice !== "");
-  const hasCategory =
-    selectedLevel1Id != null &&
-    selectedLevel2Id != null &&
-    selectedLevel3Id != null;
+  const hasCategory = selectedLevel3Id != null;
 
   const isOpen = hasArea || hasPrice || hasCategory;
 

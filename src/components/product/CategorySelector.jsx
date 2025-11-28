@@ -6,6 +6,78 @@ const CategorySelector = ({ value, onChange, showTitle = true }) => {
   const [level2, setLevel2] = useState([]);
   const [level3, setLevel3] = useState([]);
 
+  // 이미 세팅된 value로부터 labels를 초기화했는지 여부
+  const [initializedFromValue, setInitializedFromValue] = useState(false);
+
+  // depth1 값이 이미 있을 때 level2 자동 로딩
+  useEffect(() => {
+    if (!value.depth1) {
+      // 1차가 비어 있으면 2, 3차는 초기화
+      setLevel2([]);
+      setLevel3([]);
+      return;
+    }
+
+    fetch(`/api/categories/level2?parentId=${value.depth1}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setLevel2(data);
+      })
+      .catch((err) => {
+        console.error("level2 자동 로딩 실패:", err);
+      });
+  }, [value.depth1]);
+
+  // depth2 값이 이미 있을 때 level3 자동 로딩
+  useEffect(() => {
+    if (!value.depth2) {
+      setLevel3([]);
+      return;
+    }
+
+    fetch(`/api/categories/level3?parentId=${value.depth2}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setLevel3(data);
+      })
+      .catch((err) => {
+        console.error("level3 자동 로딩 실패:", err);
+      });
+  }, [value.depth2]);
+
+  // level1/2/3 목록과 depth1/2/3 값이 모두 준비되었을 때
+  // 한 번만 onChange를 호출해서 labels를 부모로 올려줌
+  useEffect(() => {
+    if (initializedFromValue) return;
+
+    if (!value.depth1 || !value.depth2 || !value.depth3) return;
+    if (!level1.length || !level2.length || !level3.length) return;
+
+    const l1 = level1.find((c) => c.id === value.depth1) || null;
+    const l2 = level2.find((c) => c.id === value.depth2) || null;
+    const l3 = level3.find((c) => c.id === value.depth3) || null;
+
+    if (!l3) return;
+
+    const labels = {
+      level1Name: l1?.name ?? null,
+      level2Name: l2?.name ?? null,
+      level3Name: l3?.name ?? null,
+    };
+
+    onChange(value.depth1, value.depth2, value.depth3, labels);
+    setInitializedFromValue(true);
+  }, [
+    initializedFromValue,
+    value.depth1,
+    value.depth2,
+    value.depth3,
+    level1,
+    level2,
+    level3,
+    onChange,
+  ]);
+
   useEffect(() => {
     fetch("/api/categories/level1")
       .then((res) => res.json())

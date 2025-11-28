@@ -67,7 +67,16 @@ const ProductFilter = ({
     // 지역
     if (area.trim()) params.set("area", area.trim());
 
-    navigate(`/search?${params.toString()}`);
+    navigate(`/search?${params.toString()}`, {
+      state: {
+        level1Id: selectedLevel1Id,
+        level2Id: selectedLevel2Id,
+        level3Id: selectedLevel3Id,
+        minPrice,
+        maxPrice,
+        area: area.trim(),
+      },
+    });
     onClose();
   };
 
