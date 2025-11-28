@@ -1,5 +1,6 @@
 import { UserRound, Heart, Pen } from "lucide-react";
 import Container from "@/components/Container";
+import { Link } from "react-router-dom";
 
 export default function MyPage() {
   return (
@@ -34,17 +35,21 @@ export default function MyPage() {
 
       {/* 한줄 소개 */}
       <section className="mb-6">
-        <h2 className="font-semibold mb-2 text-[16px]">한줄 소개</h2>
-        <div className="border rounded-2xl p-3 text-gray-700 text-[16px]">
+        <h2 className="font-semibold mb-2">한줄 소개</h2>
+        <div className="border rounded-2xl p-3 text-gray-700">
           빠른 확인 가능합니다
         </div>
       </section>
 
       {/* 메뉴 리스트 */}
       <section className="border rounded-2xl p-4 mb-6">
-        <ul className="space-y-4 text-gray-800 text-[18px]">
-          <li>프로필 설정</li>
-          <li>회원 정보 설정</li>
+        <ul className="space-y-4 text-gray-800 ">
+          <li>
+            <Link to="/me/profile">프로필 설정</Link>
+          </li>
+          <li>
+            <Link to="/me/profile-edit">회원 정보 설정</Link>
+          </li>
           <li>판매 내역</li>
           <li>구매 내역</li>
           <li>채팅 목록</li>
@@ -82,7 +87,7 @@ export default function MyPage() {
 
       {/*  로그아웃 / 탈퇴 */}
       <section className="border rounded-2xl p-4 mt-6">
-        <ul className="space-y-4 text-gray-800 text-[18px]">
+        <ul className="space-y-4 text-gray-800">
           <li className="cursor-pointer">로그아웃</li>
           <li className="cursor-pointer">탈퇴</li>
         </ul>

@@ -23,6 +23,7 @@ import MyPageLayout from "@/layouts/MyPageLayout";
 import MyProfile from "./pages/me/MyProfile";
 import TradeDetailPage from "@/pages/order/TradeDetailPage";
 import MyProfileEditPage from "./pages/me/MyProfileEditPage";
+import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
 
 const router = createBrowserRouter([
   {
@@ -244,6 +245,25 @@ const router = createBrowserRouter([
               },
             },
           }, //
+
+          // 알림 설정
+          {
+            path: "notifications",
+            element: <MyNotificationsPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "알림 설정",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
         ],
       },
 
