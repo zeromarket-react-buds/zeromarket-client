@@ -18,12 +18,13 @@ import { AuthProvider } from "@/hooks/AuthContext";
 import MySalesPage from "@/pages/order/MySalesPage";
 import MyPurchasesPage from "@/pages/order/MyPurchasesPage";
 import SellerShopPage from "./pages/sellershop/SellerShop";
-import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창
+import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창 //확인필요
 import MyPageLayout from "@/layouts/MyPageLayout";
 import MyProfile from "./pages/me/MyProfile";
 import TradeDetailPage from "@/pages/order/TradeDetailPage";
 import MyProfileEditPage from "./pages/me/MyProfileEditPage";
 import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
+import MyWishListPage from "./pages/me/MyWishListPage";
 
 const router = createBrowserRouter([
   {
@@ -256,6 +257,25 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "알림 설정",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+
+          // 찜 목록 페이지
+          {
+            path: "wishlist",
+            element: <MyWishListPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "찜 목록",
                     showBack: true,
                     hideRight: true,
                   },

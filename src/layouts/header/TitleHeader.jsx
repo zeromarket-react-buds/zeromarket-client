@@ -10,7 +10,8 @@ const TitleHeader = ({
   rightButtonEvent,
 }) => {
   return (
-    <Container>
+    //Header를 z-20으로 올려서 모달 등이 Header 아래에 깔리는 현상 방지<- 마이페이지 찜목록 링크 가려지는 문제 해결
+    <Container className="relative z-20">
       <header className="flex items-center justify-between mb-6">
         {/* 왼쪽: 뒤로가기 */}
         {showBack ? (

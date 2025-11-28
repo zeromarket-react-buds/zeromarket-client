@@ -58,8 +58,11 @@ export default function MyPage() {
       </section>
 
       {/* 찜 & 후기 */}
-      <section className="border rounded-2xl p-4 flex justify-around text-center">
-        <div className="flex flex-col items-center">
+      <section className="border rounded-2xl p-4 flex justify-around ">
+        <Link
+          to="/me/wishlist"
+          className="flex flex-col items-center cursor-pointer"
+        >
           <Heart
             color="var(--color-brand-green)"
             size={32}
@@ -70,7 +73,7 @@ export default function MyPage() {
             <span className="font-bold text-brand-green">1</span>
             <span className="text-black">건</span>
           </div>
-        </div>
+        </Link>
         <div className="flex flex-col items-center">
           <Pen
             color="var(--color-brand-green)"
