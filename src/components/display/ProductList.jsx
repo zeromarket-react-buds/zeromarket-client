@@ -42,9 +42,7 @@ const ProductList = () => {
       if (keyword.trim()) params.set("keyword", keyword.trim());
 
       // 카테고리
-      if (selectedLevel1Id != null) params.set("level1Id", selectedLevel1Id);
-      if (selectedLevel2Id != null) params.set("level2Id", selectedLevel2Id);
-      if (selectedLevel3Id != null) params.set("level3Id", selectedLevel3Id);
+      if (selectedLevel3Id != null) params.set("category", selectedLevel3Id);
 
       // 가격
       if (minPrice) params.set("minPrice", minPrice);
