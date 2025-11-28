@@ -55,10 +55,10 @@ const ProductFilter = ({
     params.set("keyword", trimmedKeyword);
     if (sort) params.set("sort", sort);
 
-    // 카테고리 1/2/3
-    if (selectedLevel1Id != null) params.set("level1Id", selectedLevel1Id);
-    if (selectedLevel2Id != null) params.set("level2Id", selectedLevel2Id);
-    if (selectedLevel3Id != null) params.set("level3Id", selectedLevel3Id);
+    // 카테고리
+    if (selectedLevel3Id != null) {
+      params.set("category", selectedLevel3Id);
+    }
 
     // 가격
     if (minPrice) params.set("minPrice", minPrice);
@@ -95,7 +95,7 @@ const ProductFilter = ({
               </Button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="relative w-full py-2 mb-2">
+              <div className="relative w-full pt-4 pb-2 mb-2">
                 <Input
                   placeholder="어떤 상품을 찾으시나요?"
                   className="font-normal"
@@ -136,6 +136,12 @@ const ProductFilter = ({
                 area={area}
                 setArea={setArea}
               />
+              {/* 하단 버튼 */}
+              <div className="border-t pb-2 pt-4">
+                <Button type="submit" variant="green" className="w-full">
+                  검색
+                </Button>
+              </div>
             </form>
           </div>
         </div>

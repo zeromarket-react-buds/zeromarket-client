@@ -74,16 +74,12 @@ const FilterSideBar = ({
   return (
     <div className="flex flex-col gap-2 w-full">
       {/* 카테고리 */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <div className="text-base font-semibold border-b border-brand-mediumgray py-2">
           카테고리
         </div>
 
-        <div
-          ref={categoryFocusRef}
-          tabIndex={0}
-          className="flex flex-col gap-3"
-        >
+        <div ref={categoryFocusRef} tabIndex={0} className="-mt-4">
           <CategorySelector
             showTitle={false}
             value={{
@@ -107,7 +103,7 @@ const FilterSideBar = ({
       </div>
 
       {/* 가격 */}
-      <div className="flex flex-col gap-3 my-0.5">
+      <div className="flex flex-col gap-4 my-0.5">
         <div className="text-base font-semibold border-b border-brand-mediumgray py-2">
           가격
         </div>
@@ -145,7 +141,7 @@ const FilterSideBar = ({
       </div>
 
       {/* 지역 */}
-      <div className="flex flex-col text-base font-semibold gap-3 my-0.5">
+      <div className="flex flex-col text-base font-semibold gap-4 mt-0.5 mb-3">
         <div className="border-b border-brand-mediumgray py-2">지역</div>
         <div className="relative w-full">
           <Input
@@ -176,7 +172,7 @@ const FilterSideBar = ({
 
       {/* 선택한 필터 */}
       {isOpen && (
-        <div className="my-0.5 flex flex-col">
+        <div className="my-0.5 flex flex-col mb-4">
           <div className="text-base font-semibold border-b border-brand-mediumgray py-2">
             선택한 필터
           </div>
@@ -240,13 +236,6 @@ const FilterSideBar = ({
           )}
         </div>
       )}
-
-      {/* 하단 버튼 */}
-      <div className="border-t py-2">
-        <Button type="submit" variant="green" className="w-full">
-          검색
-        </Button>
-      </div>
     </div>
   );
 };
