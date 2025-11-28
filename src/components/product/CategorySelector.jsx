@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const CategorySelector = ({ value, onChange }) => {
+const CategorySelector = ({ value, onChange, showTitle = true }) => {
   const [level1, setLevel1] = useState([]);
   const [level2, setLevel2] = useState([]);
   const [level3, setLevel3] = useState([]);
@@ -15,7 +15,16 @@ const CategorySelector = ({ value, onChange }) => {
       });
   }, []);
   const handleLevel1 = (id) => {
-    onChange(id, null, null); //부모에게 전달ㄹ
+    const selected = level1.find((category) => category.id === id) || null;
+
+    // 부모에게 id랑 카테고리값 같이 전달 (labels)
+    const labels = {
+      level1Name: selected?.name ?? null,
+      level2Name: null,
+      level3Name: null,
+    };
+
+    onChange(id || null, null, null, labels);
     setLevel2([]);
     setLevel3([]);
 
@@ -27,7 +36,16 @@ const CategorySelector = ({ value, onChange }) => {
   };
 
   const handleLevel2 = (id) => {
-    onChange(value.depth1, id, null);
+    const selected = level2.find((category) => category.id === id) || null;
+
+    const labels = {
+      level1Name:
+        level1.find((category) => category.id === value.depth1)?.name ?? null,
+      level2Name: selected?.name ?? null,
+      level3Name: null,
+    };
+
+    onChange(value.depth1, id || null, null, labels);
     setLevel3([]);
 
     if (!id) return;
@@ -38,7 +56,17 @@ const CategorySelector = ({ value, onChange }) => {
   };
 
   const handleLevel3 = (id) => {
-    onChange(value.depth1, value.depth2, id);
+    const selected = level3.find((category) => category.id === id) || null;
+
+    const labels = {
+      level1Name:
+        level1.find((category) => category.id === value.depth1)?.name ?? null,
+      level2Name:
+        level2.find((category) => category.id === value.depth2)?.name ?? null,
+      level3Name: selected?.name ?? null,
+    };
+
+    onChange(value.depth1, value.depth2, id || null, labels);
   };
 
   // const handleDepth1 = (id) => onChange(id, null, null);
@@ -71,7 +99,7 @@ const CategorySelector = ({ value, onChange }) => {
 
   return (
     <div className="mt-5">
-      <p className="font-medium mb-2 text-lg">카테고리</p>
+      {showTitle && <p className="font-medium mb-2 text-lg">카테고리</p>}
 
       {/* 1차 카테고리 */}
       <div className="relative w-full mb-3 ">
