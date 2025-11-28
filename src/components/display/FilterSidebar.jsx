@@ -33,7 +33,9 @@ const FilterSideBar = ({
   };
 
   const hasArea = !!area;
-  const hasPrice = minPrice !== "" || maxPrice !== "";
+  const hasPrice =
+    (minPrice !== null && minPrice !== "") ||
+    (maxPrice !== null && maxPrice !== "");
   const hasCategory =
     selectedLevel1Id != null &&
     selectedLevel2Id != null &&
@@ -89,11 +91,10 @@ const FilterSideBar = ({
               depth2: selectedLevel2Id,
               depth3: selectedLevel3Id,
             }}
-            onChange={(d1, d2, d3, labels) => {
-              // 선택 해제 시 0 같은 값 들어오면 null로 통일
-              setSelectedLevel1Id(d1 || null);
-              setSelectedLevel2Id(d2 || null);
-              setSelectedLevel3Id(d3 || null);
+            onChange={(c1, c2, c3, labels) => {
+              setSelectedLevel1Id(c1);
+              setSelectedLevel2Id(c2);
+              setSelectedLevel3Id(c3);
 
               // UI용 이름
               const name = labels?.level3Name;
