@@ -7,7 +7,7 @@ export async function loginApi(loginId, password) {
     body: { loginId, password },
   });
 
-  return data; // { accessToken, refreshToken }
+  return data; // { accessToken }
 }
 
 // 회원가입
@@ -32,7 +32,7 @@ export async function refreshTokenApi(refreshToken) {
 
 // 내 정보 조회
 export async function getMyInfoApi() {
-  const { data } = await apiClient("/api/users/me");
+  const { data } = await apiClient("/api/members/me");
   return data;
 }
 

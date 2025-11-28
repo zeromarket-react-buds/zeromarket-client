@@ -54,6 +54,7 @@ const apiClient = async (
       },
       body: hasBody ? JSON.stringify(body) : undefined,
       signal: controller.signal,
+      credentials: "include",
     });
   } catch (error) {
     // 네트워크 자체 실패(연결 불가, 타임아웃, CORS 차단 등) & 요청 자체가 abort 됨
