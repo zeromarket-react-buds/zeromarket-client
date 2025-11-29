@@ -121,18 +121,23 @@ const router = createBrowserRouter([
         ],
       },
 
-      // auth (로그인)
+      // 로그인
       {
-        path: "auth",
-        children: [
-          {
-            path: "login",
-            element: <LoginPage />,
+        path: "login",
+        element: <LoginPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { type: "detail", title: "로그인" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
           },
-        ],
+        },
       },
-
-      // 회원가입 (/join)
+      // 회원가입
       {
         path: "join",
         element: <SignupPage />,
