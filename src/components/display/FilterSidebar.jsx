@@ -42,12 +42,12 @@ const FilterSideBar = ({
 
   const handleMinPrice = (e) => {
     const numeric = e.target.value.replace(/[^0-9]/g, "");
-    setMinPrice(numeric);
+    setMinPrice(numeric === "" ? "" : Number(numeric)); // 입력받은 값을 숫자로
   };
 
   const handleMaxPrice = (e) => {
     const numeric = e.target.value.replace(/[^0-9]/g, "");
-    setMaxPrice(numeric);
+    setMaxPrice(numeric === "" ? "" : Number(numeric));
   };
 
   const clearAreaInput = (e) => {
@@ -108,7 +108,7 @@ const FilterSideBar = ({
           <Input
             onChange={handleMinPrice}
             inputMode="numeric"
-            value={minPrice}
+            value={minPrice !== "" ? minPrice.toLocaleString() : ""}
             className="font-normal"
             placeholder="최소 가격"
             ref={minPriceRef}
@@ -123,7 +123,7 @@ const FilterSideBar = ({
           <Input
             onChange={handleMaxPrice}
             inputMode="numeric"
-            value={maxPrice}
+            value={maxPrice !== "" ? maxPrice.toLocaleString() : ""}
             className="font-normal"
             placeholder="최대 가격"
             ref={maxPriceRef}
