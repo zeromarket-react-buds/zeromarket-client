@@ -1,30 +1,32 @@
 import Container from "@/components/Container";
 import { UserRound, Heart, Eye, Smile } from "lucide-react";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
-import { products } from "@/data/product.js";
 import ProductCard from "@/components/display/ProductCard";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
+import { products } from "@/data/product.js";
 
 const ProductDetailPage = () => {
-  const { onToggleLike } = useLikeToggle([]);
+  const navigate = useNavigate();
   const { id } = useParams();
+  const { onToggleLike } = useLikeToggle([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
-  const navigate = useNavigate();
+
   const [similarProducts, setSimilarProducts] = useState([]);
 
-  const formattedProducts = products.map((p) => ({
-    productId: p.product_id,
-    productTitle: p.product_title,
-    sellPrice: p.sell_price,
-    thumbnailUrl: p.thumbnail_url,
-    createdAt: p.created_at,
-    salesStatus: p.sales_status,
-    liked: false,
-  }));
+  //목데이터
+  // const formattedProducts = products.map((p) => ({
+  //   productId: p.product_id,
+  //   productTitle: p.product_title,
+  //   sellPrice: p.sell_price,
+  //   thumbnailUrl: p.thumbnail_url,
+  //   createdAt: p.created_at,
+  //   salesStatus: p.sales_status,
+  //   liked: false,
+  // }));
 
   // fetch 요청
   const fetchProductDetail = async () => {
@@ -33,7 +35,14 @@ const ProductDetailPage = () => {
 
       if (!res.ok) {
         const text = await res.text();
-        console.log("상품 정보를 가져오지 못함", text);
+
+        if (res.status === 404) {
+          setError("숨김 처리된 상품이거나 존재하지 않는 상품입니다.");
+        } else {
+          console.log("상품 정보를 가져오지 못함", text);
+          setError("상품 정보를 가져오지 못했습니다.");
+        }
+        setDetail(null);
         return;
       }
 
@@ -45,31 +54,6 @@ const ProductDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  //찜수
-  const fetchWishCount = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/products/${id}/wish-count`
-      );
-
-      if (!res.ok) return;
-
-      const data = await res.json(); // { productId, wishCount }
-      setDetail((prev) =>
-        prev ? { ...prev, wishCount: data.wishCount } : prev
-      );
-    } catch (err) {
-      console.error("찜 수 조회 실패:", err);
-    }
-  };
-
-  //조회수
-  const increaseViewCount = async () => {
-    await fetch(`http://localhost:8080/api/products/${id}/view`, {
-      method: "PATCH",
-    });
   };
 
   //비슷상품
@@ -120,8 +104,6 @@ const ProductDetailPage = () => {
   //초기로딩
   useEffect(() => {
     fetchProductDetail();
-    increaseViewCount();
-    fetchWishCount();
     fetchSimilarProducts();
   }, [id]);
 
@@ -215,7 +197,7 @@ const ProductDetailPage = () => {
             {/* 가격 & 판매상태 */}
             <div className="flex justify-between items-center mb-1">
               <span className="text-lg font-bold text-brand-green">
-                {/* 예약중 */}
+                {/* 판매중/예약중/거래완료 */}
                 {detail.salesStatus?.description}
               </span>
               <span className="text-lg font-semibold">
@@ -251,7 +233,7 @@ const ProductDetailPage = () => {
             {/* 상품상태 */}
             <div className="flex justify-between items-center my-5 w-full border rounded-lg px-3 py-2 text-sm">
               <span>상품상태</span>
-              <span>{detail.productStatusKr}</span>
+              <span>{detail.productStatus?.description}</span>
             </div>
 
             {/* 설명 */}
