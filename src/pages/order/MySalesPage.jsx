@@ -1,9 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LongProductCard from "./LongProductCard";
 
 const MySalesPage = () => {
   const navigate = useNavigate();
@@ -48,17 +48,7 @@ const MySalesPage = () => {
             className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
             onClick={handleSubmit}
           >
-            <div className="flex flex-row gap-10 items-center">
-              <div className="bg-brand-mediumgray w-[100px] h-[100px] rounded-2xl" />
-              <div className="flex flex-col gap-1 flex-1">
-                <div className="font-semibold">판매 게시글</div>
-                <div className="font-semibold">가격</div>
-                <div className="flex w-full flex-row items-center justify-between">
-                  <div className="text-brand-mediumgray">거래방법</div>
-                  <Badge>거래완료</Badge>
-                </div>
-              </div>
-            </div>
+            <LongProductCard />
             <div className="text-center">상태바</div>
             <div className="text-center">상태바 설명</div>
             <Button variant="ivory">후기 보내기</Button>
