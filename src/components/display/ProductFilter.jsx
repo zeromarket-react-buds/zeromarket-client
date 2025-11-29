@@ -65,8 +65,21 @@ const ProductFilter = ({
       alert("키워드는 필수입니다");
       return;
     }
-    setKeyword(trimmedKeyword); // submit 후 keyword 확정
 
+    // 가격 검증
+    const hasMin = tempMinPrice !== null && tempMinPrice !== "";
+    const hasMax = tempMaxPrice !== null && tempMaxPrice !== "";
+
+    // 둘 다 값이 있을 때만 검사
+    if (hasMin && hasMax && tempMaxPrice <= tempMinPrice) {
+      alert("최소 금액은 최대 금액보다 작아야 합니다.");
+      return;
+    }
+
+    // 지역 문자열 정리
+    const trimmedArea = tempArea?.trim() ?? "";
+
+    //쿼리스트링 생성 및 키워드/sort 세팅
     const params = new URLSearchParams();
     params.set("keyword", trimmedKeyword);
     if (sort) params.set("sort", sort);
@@ -77,12 +90,21 @@ const ProductFilter = ({
     }
 
     // 가격
-    if (tempMinPrice) params.set("minPrice", tempMinPrice);
-    if (tempMaxPrice) params.set("maxPrice", tempMaxPrice);
+    if (hasMin) params.set("minPrice", tempMinPrice);
+    if (hasMax) params.set("maxPrice", tempMaxPrice);
 
     // 지역
-    const trimmedArea = tempArea?.trim() ?? "";
     if (trimmedArea) params.set("area", trimmedArea);
+
+    setKeyword(trimmedKeyword); // 검증된 최종 키워드를 임시 입력값이 아닌 실제 검색 키워드로 확정
+
+    // 임시 값을 부모컴포넌트의 필터값으로 실제 반영
+    setSelectedLevel1Id(tempLevel1Id);
+    setSelectedLevel2Id(tempLevel2Id);
+    setSelectedLevel3Id(tempLevel3Id);
+    setMinPrice(tempMinPrice);
+    setMaxPrice(tempMaxPrice);
+    setArea(trimmedArea);
 
     navigate(`/search?${params.toString()}`, {
       state: {
@@ -94,14 +116,6 @@ const ProductFilter = ({
         area: trimmedArea,
       },
     });
-
-    // 임시 값을 부모컴포넌트의 필터값으로 실제 반영
-    setSelectedLevel1Id(tempLevel1Id);
-    setSelectedLevel2Id(tempLevel2Id);
-    setSelectedLevel3Id(tempLevel3Id);
-    setMinPrice(tempMinPrice);
-    setMaxPrice(tempMaxPrice);
-    setArea(trimmedArea);
 
     onClose();
   };
