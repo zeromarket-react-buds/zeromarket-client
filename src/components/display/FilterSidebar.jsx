@@ -91,7 +91,6 @@ const FilterSideBar = ({
 
               // UI용 이름
               const name = labels?.level3Name;
-              null;
 
               setSelectedCategoryName(name);
             }}
@@ -199,7 +198,8 @@ const FilterSideBar = ({
                 className="items-center"
               >
                 <span className="font-normal">
-                  {minPrice || "0"} - {maxPrice || "상한 없음"}
+                  {minPrice.toLocaleString() || "0"} -{" "}
+                  {maxPrice.toLocaleString() || "상한 없음"}
                 </span>
                 <span className="text-brand-mediumgray">
                   <XCircle />
