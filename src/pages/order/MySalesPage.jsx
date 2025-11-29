@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LongProductCard from "./LongProductCard";
+import LongProductCard from "@/components/order/LongProductCard";
 
 const MySalesPage = () => {
   const navigate = useNavigate();
