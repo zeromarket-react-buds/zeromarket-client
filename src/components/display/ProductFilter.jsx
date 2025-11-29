@@ -24,17 +24,33 @@ const ProductFilter = ({
   area,
   setArea,
 }) => {
-  const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
   const keywordRef = useRef(null);
   const categoryFocusRef = useRef(null);
   const navigate = useNavigate();
 
+  // 필터 값들에 대한 임시 상태값
+  const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
+  const [tempLevel1Id, setTempLevel1Id] = useState(selectedLevel1Id);
+  const [tempLevel2Id, setTempLevel2Id] = useState(selectedLevel2Id);
+  const [tempLevel3Id, setTempLevel3Id] = useState(selectedLevel3Id);
+  const [tempMinPrice, setTempMinPrice] = useState(minPrice);
+  const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
+  const [tempArea, setTempArea] = useState(area);
+
+  //현재 부모 컴포넌트가 들고 있는 필터 상태값을 모달 내부의 임시 값으로 복사해서 초기값으로 세팅
   useEffect(() => {
     if (isOpen) {
       setTempKeyword(keyword ?? "");
+      setTempLevel1Id(selectedLevel1Id);
+      setTempLevel2Id(selectedLevel2Id);
+      setTempLevel3Id(selectedLevel3Id);
+      setTempMinPrice(minPrice);
+      setTempMaxPrice(maxPrice);
+      setTempArea(area);
+
       setTimeout(() => keywordRef.current?.focus(), 0);
     }
-  }, [isOpen, keyword]);
+  }, [isOpen]);
 
   const clearKeywordInput = () => {
     setTempKeyword("");
@@ -56,27 +72,37 @@ const ProductFilter = ({
     if (sort) params.set("sort", sort);
 
     // 카테고리
-    if (selectedLevel3Id != null) {
-      params.set("category", selectedLevel3Id);
+    if (tempLevel3Id != null) {
+      params.set("category", tempLevel3Id);
     }
 
     // 가격
-    if (minPrice) params.set("minPrice", minPrice);
-    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (tempMinPrice) params.set("minPrice", tempMinPrice);
+    if (tempMaxPrice) params.set("maxPrice", tempMaxPrice);
 
     // 지역
-    if (area.trim()) params.set("area", area.trim());
+    const trimmedArea = tempArea?.trim() ?? "";
+    if (trimmedArea) params.set("area", trimmedArea);
 
     navigate(`/search?${params.toString()}`, {
       state: {
-        level1Id: selectedLevel1Id,
-        level2Id: selectedLevel2Id,
-        level3Id: selectedLevel3Id,
-        minPrice,
-        maxPrice,
-        area: area.trim(),
+        level1Id: tempLevel1Id,
+        level2Id: tempLevel2Id,
+        level3Id: tempLevel3Id,
+        minPrice: tempMinPrice,
+        maxPrice: tempMaxPrice,
+        area: trimmedArea,
       },
     });
+
+    // 임시 값을 부모컴포넌트의 필터값으로 실제 반영
+    setSelectedLevel1Id(tempLevel1Id);
+    setSelectedLevel2Id(tempLevel2Id);
+    setSelectedLevel3Id(tempLevel3Id);
+    setMinPrice(tempMinPrice);
+    setMaxPrice(tempMaxPrice);
+    setArea(trimmedArea);
+
     onClose();
   };
 
@@ -104,7 +130,7 @@ const ProductFilter = ({
               </Button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="relative w-full pt-4 pb-2 mb-2">
+              <div className="relative w-full pt-2 pb-2 my-2">
                 <Input
                   placeholder="어떤 상품을 찾으시나요?"
                   className="font-normal"
@@ -132,18 +158,18 @@ const ProductFilter = ({
               </div>
               <FilterSideBar
                 categoryFocusRef={categoryFocusRef}
-                selectedLevel1Id={selectedLevel1Id}
-                selectedLevel2Id={selectedLevel2Id}
-                selectedLevel3Id={selectedLevel3Id}
-                setSelectedLevel1Id={setSelectedLevel1Id}
-                setSelectedLevel2Id={setSelectedLevel2Id}
-                setSelectedLevel3Id={setSelectedLevel3Id}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                setMinPrice={setMinPrice}
-                setMaxPrice={setMaxPrice}
-                area={area}
-                setArea={setArea}
+                selectedLevel1Id={tempLevel1Id}
+                selectedLevel2Id={tempLevel2Id}
+                selectedLevel3Id={tempLevel3Id}
+                setSelectedLevel1Id={setTempLevel1Id}
+                setSelectedLevel2Id={setTempLevel2Id}
+                setSelectedLevel3Id={setTempLevel3Id}
+                minPrice={tempMinPrice}
+                maxPrice={tempMaxPrice}
+                setMinPrice={setTempMinPrice}
+                setMaxPrice={setTempMaxPrice}
+                area={tempArea}
+                setArea={setTempArea}
               />
               {/* 하단 버튼 */}
               <div className="border-t pb-2 pt-4">
