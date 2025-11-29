@@ -10,6 +10,7 @@ import TradeMethodSelector from "@/components/product/TradeMethodSelector";
 import ProductConditionSelector from "@/components/product/ProductConditionSelector";
 import ProductTitleInput from "@/components/product/ProductTitleInput";
 import ProductPriceInput from "@/components/product/ProductPriceInput";
+import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
@@ -28,7 +29,7 @@ const ProductCreatePage = () => {
     productStatus: "USED", //초기값
     direct: false,
     delivery: false,
-    sellingArea: "",
+    sellingArea: "서울 관악구",
   });
 
   const handleSubmit = async () => {
