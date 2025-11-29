@@ -53,9 +53,9 @@ const CategorySelector = ({ value, onChange, showTitle = true }) => {
     if (!value.depth1 || !value.depth2 || !value.depth3) return;
     if (!level1.length || !level2.length || !level3.length) return;
 
-    const l1 = level1.find((c) => c.id === value.depth1) || null;
-    const l2 = level2.find((c) => c.id === value.depth2) || null;
-    const l3 = level3.find((c) => c.id === value.depth3) || null;
+    const l1 = level1.find((category) => category.id === value.depth1) || null;
+    const l2 = level2.find((category) => category.id === value.depth2) || null;
+    const l3 = level3.find((category) => category.id === value.depth3) || null;
 
     if (!l3) return;
 
