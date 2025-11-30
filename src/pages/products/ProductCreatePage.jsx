@@ -63,6 +63,8 @@ const ProductCreatePage = () => {
       direct: form.direct,
       delivery: form.delivery,
       sellingArea: form.sellingArea,
+      imageUrls: uploadUrls,
+      mainImageIndex: mainIndex,
     };
 
     //JSON
@@ -98,7 +100,7 @@ const ProductCreatePage = () => {
   return (
     <Container>
       {/* <div>상품등록페이지입니다</div> */}
-      <div className="max-w-full mx-auto bg-gray-0 border -mb-4 ">
+      <div className="max-w-full mx-auto bg-gray-0  -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
             <span className="text-lg font-semibold pl-5">상품 정보</span>
@@ -193,7 +195,7 @@ const ProductCreatePage = () => {
             <ProductEcoScoreSection />
           </div>
         </div>
-        <div className="sticky bottom-0  bg-white shadow-md border-t z-50 ">
+        <div className="sticky bottom-0  bg-white border-t z-50 ">
           <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
         </div>
       </div>

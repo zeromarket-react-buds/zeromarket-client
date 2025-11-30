@@ -77,7 +77,7 @@ const ActionButtonBar = ({
 
       {/* 2. 숨기기<>숨기기해제 , 상품수정 , 상품삭제 - 판매자*/}
       {role === "SELLER" && (
-        <div className="flex gap-2 my-3 px-3 py-4">
+        <div className="flex gap-2  my-0 px-3 pt-7 py-7">
           <Button
             className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
             onClick={() => handleButtonClick("숨기기")}
@@ -138,6 +138,19 @@ const ActionButtonBar = ({
             onClick={onSubmit}
           >
             판매하기
+          </Button>
+        </div>
+      )}
+
+      {/* 5. 상품수정시 수정완료 버튼*/}
+      {role === "EDITOR" && (
+        <div className="p-3 ">
+          <Button
+            className="w-full bg-brand-green text-white py-7 pt-7 text-lg rounded-lg mb-3 mt-6"
+            onClick={() => handleButtonClick("수정완료")}
+            // onClick={onSubmit}
+          >
+            수정 완료
           </Button>
         </div>
       )}
