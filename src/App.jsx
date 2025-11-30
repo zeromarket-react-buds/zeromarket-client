@@ -294,11 +294,11 @@ const router = createBrowserRouter([
 
       // 마이페이지 - 거래내역
       {
-        path: ":tradeid",
+        path: "trades",
         element: <MyPageLayout />,
         children: [
           {
-            index: true,
+            path: ":tradeId",
             element: <TradeDetailPage />,
             handle: {
               layout: {

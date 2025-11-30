@@ -4,6 +4,26 @@ import { Filter, Search, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LongProductCard from "@/components/order/LongProductCard";
+import TradeStatusBar from "@/components/order/TradeStatusBar";
+import { tradeFlowLabels } from "@/components/order/tradeFlow";
+
+const mockTrade = {
+  tradeId: 1,
+  ProductId: 1,
+  sellPrice: 300000,
+  productTitle: "노트북",
+  buyerId: 2,
+  tradeType: "DIRECT",
+  tradeStatus: "COMPLETED",
+  isDirect: true,
+  isDelivery: false,
+  sellerDeleted: null,
+  buyerDeleted: null,
+  createdAt: "2025.11.29.",
+  uptdateAt: null,
+  completedAt: null,
+  canceledAt: null,
+};
 
 const MyPurchasesPage = () => {
   const navigate = useNavigate();
@@ -15,7 +35,7 @@ const MyPurchasesPage = () => {
   };
 
   const goToTradeDetail = () => {
-    navigate("/:tradeid");
+    navigate(`/trades/${mockTrade.tradeId}`);
   };
 
   return (
@@ -41,16 +61,64 @@ const MyPurchasesPage = () => {
         </span>
         <div>
           <div className="flex flex-row justify-between p-2 items-center">
-            <span>절대시간</span>
+            <span>{mockTrade.createdAt}</span>
             <XCircle className="w-4.5 h-4.5" />
           </div>
           <div
             className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
             onClick={handleSubmit}
           >
-            <LongProductCard />
-            <div className="text-center">상태바</div>
-            <div className="text-center">상태바 설명</div>
+            <LongProductCard
+              productTitle={mockTrade.productTitle}
+              sellPrice={mockTrade.sellPrice}
+              tradeType={mockTrade.tradeType}
+              tradeStatus={mockTrade.tradeStatus}
+            />
+            <div className="flex justify-center py-3">
+              <TradeStatusBar
+                flowType={tradeFlowLabels({
+                  isDelivery: mockTrade.isDelivery,
+                  isDirect: mockTrade.isDirect,
+                })}
+                status={mockTrade.tradeStatus}
+                className="w-[35em]"
+              />
+            </div>
+
+            {/* 예약중/결제완료 상태 */}
+            <div className="flex flex-row w-full gap-2">
+              <Button variant="green" className="flex-1 py-5">
+                주문 취소 요청
+              </Button>
+            </div>
+
+            {/* 거래완료 상태 */}
+            <div className="flex flex-row ">
+              <Button variant="green" className="w-full py-5">
+                후기 보내기
+              </Button>{" "}
+            </div>
+            <div className="flex flex-row w-full gap-2">
+              <Button variant="green" className="flex-1 py-5">
+                후기 보내기
+              </Button>
+              <Button variant="ivory" className="flex-1 py-5">
+                받은 후기 보기
+              </Button>
+            </div>
+            <div className="flex flex-row w-full">
+              <Button variant="ivory" className="w-full py-5">
+                받은 후기 보기
+              </Button>{" "}
+            </div>
+            <div className="flex flex-row w-full gap-2">
+              <Button variant="ivory" className="flex-1 py-5">
+                보낸 후기 보기
+              </Button>
+              <Button variant="ivory" className="flex-1 py-5">
+                받은 후기 보기
+              </Button>
+            </div>
             <Button variant="ivory">후기 보내기</Button>
           </div>
         </div>
