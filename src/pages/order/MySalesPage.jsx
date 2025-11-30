@@ -1,57 +1,105 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LongProductCard from "@/components/order/LongProductCard";
 import TradeStatusBar from "@/components/order/TradeStatusBar";
-import { tradeFlowLabels } from "@/components/order/tradeFlow";
+import { tradeFlowLabels, tradeFlows } from "@/components/order/tradeFlow";
 
-const mockTrade = {
-  tradeId: 1,
-  ProductId: 1,
-  sellPrice: 300000,
-  productTitle: "노트북",
-  buyerId: 2,
-  tradeType: "DIRECT",
-  tradeStatus: "COMPLETED",
-  isDirect: false,
-  isDelivery: true,
-  sellerDeleted: null,
-  buyerDeleted: null,
-  createdAt: "2025.11.29.",
-  uptdateAt: null,
-  completedAt: null,
-  canceledAt: null,
+// 라벨에서 키로 매핑
+const statusKeyByLabel = Object.values(tradeFlows).reduce((acc, steps) => {
+  steps.forEach((step) => {
+    acc[step.label] = step.key;
+  });
+  return acc;
+}, {});
+
+// tradeStatus enum을 화면용 라벨로
+const getStatusLabelFromTradeStatus = (tradeStatus) => {
+  if (!tradeStatus) return "";
+  if (typeof tradeStatus === "object" && tradeStatus.description) {
+    return tradeStatus.description;
+  }
+  return String(tradeStatus);
+};
+
+// tradeType enum을 화면용 라벨로
+const getTypeLabelFromTradeType = (tradeType) => {
+  if (!tradeType) return "";
+  if (typeof tradeType === "object" && tradeType.description) {
+    return tradeType.description;
+  }
+  return String(tradeType);
 };
 
 const MySalesPage = () => {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
+  const [tradeList, setTradeList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const flowType = tradeFlowLabels({
-    isDelivery: mockTrade.isDelivery,
-    isDirect: mockTrade.isDirect,
-  });
+  const fetchTradeList = async () => {
+    if (loading) return;
+    setLoading(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    goToTradeDetail();
+    try {
+      const params = new URLSearchParams();
+
+      if (keyword.trim()) params.set("keyword", keyword.trim());
+
+      const res = await fetch(
+        `http://localhost:8080/api/trades?${params.toString()}`
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.log("비정상 응답:", text);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("서버 응답:", data);
+
+      const fetched = Array.isArray(data) ? data : data.content ?? [];
+
+      setTradeList(fetched);
+    } catch (err) {
+      console.error("상품 목록 불러오기 실패:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const goToTradeDetail = () => {
-    navigate(`/trades/${mockTrade.tradeId}`);
+  //처음 들어왔을 때 한번 호출
+  useEffect(() => {
+    fetchTradeList(); // 첫 목록 조회
+  }, []);
+
+  // 검색폼 제출 시 서버 호출
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchTradeList();
+  };
+
+  const goToTradeDetail = (tradeId) => {
+    navigate(`/trades/${tradeId}`);
   };
 
   return (
     <div className="flex flex-col p-2 gap-4 max-w-full">
       <div className="w-full">
-        <form className="relative" onClick={handleSubmit}>
+        <form className="relative" onSubmit={handleSubmit}>
           <Input
             placeholder="상품명을 검색해주세요"
+            value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
-          <Button className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4">
+          <Button
+            type="button"
+            className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4"
+            onClick={() => setKeyword("")}
+          >
             <XCircle className="h-4 w-4" />
           </Button>
           <Button
@@ -61,138 +109,165 @@ const MySalesPage = () => {
             <Search className="h-4 w-4" />
           </Button>
         </form>
+
         <span className="flex flex-row gap-2 py-3">
           <Filter /> 전체
         </span>
-        <div>
-          <div className="flex flex-row justify-between p-2 items-center">
-            <span>{mockTrade.createdAt}</span>
-            <XCircle className="w-4.5 h-4.5" />
-          </div>
-          <div
-            className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
-            onClick={handleSubmit}
-          >
-            <LongProductCard
-              productTitle={mockTrade.productTitle}
-              sellPrice={mockTrade.sellPrice}
-              tradeType={mockTrade.tradeType}
-              tradeStatus={mockTrade.tradeStatus}
-            />
-            <div className="flex justify-center py-3">
-              <TradeStatusBar
-                flowType={tradeFlowLabels({
-                  isDelivery: mockTrade.isDelivery,
-                  isDirect: mockTrade.isDirect,
-                })}
-                status={mockTrade.tradeStatus}
-                className="w-[35em]"
-              />
-            </div>
 
-            {/* 바로결제 - 결제완료 상태 */}
-            {mockTrade.tradeStatus === "PENDING" &&
-              (flowType === "INSTANT_DELIVERY" ||
-                flowType === "INSTANT_DIRECT") && (
-                <div>
-                  <div className="flex flex-row w-full gap-2">
-                    <Button variant="ivory" className="flex-1 py-5">
-                      주문 확인으로 변경
-                    </Button>
-                    <Button variant="green" className="flex-1 py-5">
-                      거래 취소
-                    </Button>
+        <div className="flex flex-col gap-4">
+          {tradeList.map((trade) => {
+            const flowType = tradeFlowLabels({
+              isDelivery: trade.isDelivery,
+              isDirect: trade.isDirect,
+            });
+
+            // 라벨 추출
+            const statusLabel = getStatusLabelFromTradeStatus(
+              trade.tradeStatus
+            );
+            const typeLabel = getTypeLabelFromTradeType(trade.tradeType);
+
+            // 여기서 라벨을 키로 변환
+            const statusKey = statusKeyByLabel[statusLabel] || statusLabel;
+
+            return (
+              <div key={trade.tradeId}>
+                <div className="flex flex-row justify-between p-2 items-center">
+                  <span>{trade.createdAt?.split("T")[0]}</span>
+                  <XCircle className="w-4.5 h-4.5" />
+                </div>
+
+                <div
+                  className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
+                  onClick={() => goToTradeDetail(trade.tradeId)}
+                >
+                  <LongProductCard
+                    productTitle={trade.productTitle}
+                    sellPrice={trade.sellPrice}
+                    tradeType={typeLabel}
+                    tradeStatus={statusLabel}
+                    thumbnailUrl={trade.thumbnailUrl}
+                  />
+
+                  <div className="flex justify-center py-3">
+                    <TradeStatusBar
+                      flowType={flowType}
+                      status={statusKey}
+                      className="w-[35em]"
+                    />
                   </div>
-                </div>
-              )}
 
-            {/* 채팅 - 예약중 상태 */}
-            {mockTrade.tradeStatus === "PENDING" &&
-              flowType === "CHAT_DIRECT" && (
-                <div>
-                  <div className="flex flex-row w-full gap-2">
-                    <Button
-                      variant="ivory"
-                      type="button"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex-1 py-5"
-                    >
-                      거래 완료로 변경
-                    </Button>
-                    <Button
-                      variant="green"
-                      type="button"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex-1 py-5"
-                    >
-                      거래 취소
-                    </Button>
-                  </div>
-                </div>
-              )}
+                  {/* 바로결제 - 결제완료 상태 */}
+                  {statusKey === "PENDING" &&
+                    (flowType === "INSTANT_DELIVERY" ||
+                      flowType === "INSTANT_DIRECT") && (
+                      <div className="flex flex-row w-full gap-2">
+                        <Button
+                          variant="ivory"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          주문 확인으로 변경
+                        </Button>
+                        <Button
+                          variant="green"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          거래 취소
+                        </Button>
+                      </div>
+                    )}
 
-            {/* 거래완료 상태 */}
-            {mockTrade.tradeStatus === "COMPLETED" && (
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row ">
-                  <Button
-                    variant="green"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full py-5"
-                  >
-                    후기 보내기
-                  </Button>{" "}
-                </div>
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="green"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 py-5"
-                  >
-                    후기 보내기
-                  </Button>
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 py-5"
-                  >
-                    받은 후기 보기
-                  </Button>
-                </div>
-                <div className="flex flex-row w-full">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full py-5"
-                  >
-                    받은 후기 보기
-                  </Button>{" "}
-                </div>
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 py-5"
-                  >
-                    보낸 후기 보기
-                  </Button>
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 py-5"
-                  >
-                    받은 후기 보기
-                  </Button>
+                  {/* 채팅 - 예약중 상태 */}
+                  {statusKey === "PENDING" && flowType === "CHAT_DIRECT" && (
+                    <div className="flex flex-row w-full gap-2">
+                      <Button
+                        variant="ivory"
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-5"
+                      >
+                        거래 완료로 변경
+                      </Button>
+                      <Button
+                        variant="green"
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-5"
+                      >
+                        거래 취소
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* 거래완료 상태 */}
+                  {statusKey === "COMPLETED" && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row ">
+                        <Button
+                          variant="green"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full py-5"
+                        >
+                          후기 보내기
+                        </Button>
+                      </div>
+                      <div className="flex flex-row w-full gap-2">
+                        <Button
+                          variant="green"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          후기 보내기
+                        </Button>
+                        <Button
+                          variant="ivory"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          받은 후기 보기
+                        </Button>
+                      </div>
+                      <div className="flex flex-row w-full">
+                        <Button
+                          variant="ivory"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full py-5"
+                        >
+                          받은 후기 보기
+                        </Button>
+                      </div>
+                      <div className="flex flex-row w-full gap-2">
+                        <Button
+                          variant="ivory"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          보낸 후기 보기
+                        </Button>
+                        <Button
+                          variant="ivory"
+                          type="button"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-5"
+                        >
+                          받은 후기 보기
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
