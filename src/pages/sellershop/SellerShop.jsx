@@ -59,19 +59,17 @@ const SellerShopPage = () => {
               <div className="w-14 h-14 bg-brand-green rounded-full flex items-center justify-center">
                 <UserRound className="text-brand-ivory size-10" />
               </div>
-              <span className="font-semibold text-brand-green text-2xl">
-                {detail.sellerNickName}
-              </span>
+              <span className="text-2xl">{detail.sellerNickName}</span>
             </div>
 
             <Heart className="size-7 text-brand-green cursor-pointer" />
           </div>
 
           {/* ---------- 점수 ---------- */}
-          <div className="border rounded-2xl p-4 mb-2">
-            <div className="flex justify-between mb-3">
+          <div className="border rounded-2xl p-4 mb-5">
+            <div className="flex justify-between mb-2">
               <span>신뢰점수</span>
-              <span className="text-brand-green font-bold text-xl">
+              <span className="text-brand-green text-xl">
                 {detail.trustScore}
               </span>
             </div>
@@ -84,27 +82,25 @@ const SellerShopPage = () => {
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 text-center mb-6">
-            점수는 최신 기준으로 산정됩니다.
-          </p>
-
           {/* ---------- 한줄 소개 ---------- */}
           <div className="mb-6">
-            <h2 className="font-semibold mb-2 text-[16px]">한줄 소개</h2>
-            <div className="border rounded-2xl p-3 text-gray-700 text-[16px]">
+            <h2 className="mb-3 text-[16px]">한줄 소개</h2>
+            <div className="border rounded-2xl p-4 text-gray-700 text-[16px]">
               {detail.introduction}
             </div>
           </div>
 
           {/* 이런 점이 좋았어요 */}
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold text-[16px]">
-                이런 점이 좋았어요
-              </span>
-              {/*건수증가*/}
-              <span className="text-gray-600 text-sm">
-                {detail.goodReviews.length}건
+          <div className="mb-5">
+            <div className="flex justify-between items-center mb-3">
+              <span className=" text-[16px]">이런 점이 좋았어요</span>
+              {/*건수증가, 건텍스트 크기*/}
+              <span className=" text-[16px]">
+                {/*증가 숫자 색상크기 지정*/}
+                <span className="text-brand-green text-lg font-semibold">
+                  {detail.bestReviews.length}
+                </span>
+                건
               </span>
             </div>
 
@@ -115,18 +111,21 @@ const SellerShopPage = () => {
                   <li key={i}>{r}</li>
                 ))}
               </ul>
-              <button className="text-brand-green text-sm mt-2">더 보기</button>
+            </div>
+            <div className="flex justify-center mt-2">
+              <p className="text-sm">더 보기</p>
             </div>
           </div>
 
           {/* 이런 점이 최고예요  */}
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold text-[16px]">
-                이런 점이 최고예요
-              </span>
-              <span className="text-gray-600 text-sm">
-                {detail.bestReviews.length}건
+          <div className="mb-6">
+            <div className="flex justify-between mb-3">
+              <span className=" text-[16px]">이런 점이 최고예요</span>
+              <span className="text-[16px]">
+                <span className="text-brand-green text-lg font-semibold">
+                  {detail.bestReviews.length}
+                </span>
+                건
               </span>
             </div>
 
@@ -137,11 +136,13 @@ const SellerShopPage = () => {
                   <li key={i}>{r}</li>
                 ))}
               </ul>
-              <button className="text-brand-green text-sm mt-2">더 보기</button>
+            </div>
+            <div className="flex justify-center mt-2">
+              <p className="text-sm">더 보기</p>
             </div>
           </div>
 
-          <p className="text-gray-400 text-14 -mt-7">
+          <p className="text-gray-400 text-[14px] -mt-1">
             후기는 최신순으로 3건만 보입니다
           </p>
 
