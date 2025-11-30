@@ -15,8 +15,8 @@ const mockTrade = {
   buyerId: 2,
   tradeType: "DIRECT",
   tradeStatus: "COMPLETED",
-  isDirect: true,
-  isDelivery: false,
+  isDirect: false,
+  isDelivery: true,
   sellerDeleted: null,
   buyerDeleted: null,
   createdAt: "2025.11.29.",
@@ -28,6 +28,11 @@ const mockTrade = {
 const MySalesPage = () => {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
+
+  const flowType = tradeFlowLabels({
+    isDelivery: mockTrade.isDelivery,
+    isDirect: mockTrade.isDirect,
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,7 +46,7 @@ const MySalesPage = () => {
   return (
     <div className="flex flex-col p-2 gap-4 max-w-full">
       <div className="w-full">
-        <form className="relative">
+        <form className="relative" onClick={handleSubmit}>
           <Input
             placeholder="상품명을 검색해주세요"
             onChange={(e) => setKeyword(e.target.value)}
@@ -86,52 +91,107 @@ const MySalesPage = () => {
             </div>
 
             {/* 바로결제 - 결제완료 상태 */}
-            <div className="flex flex-row w-full gap-2">
-              <Button variant="ivory" className="flex-1 py-5">
-                주문 확인으로 변경
-              </Button>
-              <Button variant="green" className="flex-1 py-5">
-                거래 취소
-              </Button>
-            </div>
+            {mockTrade.tradeStatus === "PENDING" &&
+              (flowType === "INSTANT_DELIVERY" ||
+                flowType === "INSTANT_DIRECT") && (
+                <div>
+                  <div className="flex flex-row w-full gap-2">
+                    <Button variant="ivory" className="flex-1 py-5">
+                      주문 확인으로 변경
+                    </Button>
+                    <Button variant="green" className="flex-1 py-5">
+                      거래 취소
+                    </Button>
+                  </div>
+                </div>
+              )}
 
             {/* 채팅 - 예약중 상태 */}
-            <div className="flex flex-row w-full gap-2">
-              <Button variant="ivory" className="flex-1 py-5">
-                거래 완료로 변경
-              </Button>
-              <Button variant="green" className="flex-1 py-5">
-                거래 취소
-              </Button>
-            </div>
+            {mockTrade.tradeStatus === "PENDING" &&
+              flowType === "CHAT_DIRECT" && (
+                <div>
+                  <div className="flex flex-row w-full gap-2">
+                    <Button
+                      variant="ivory"
+                      type="button"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 py-5"
+                    >
+                      거래 완료로 변경
+                    </Button>
+                    <Button
+                      variant="green"
+                      type="button"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 py-5"
+                    >
+                      거래 취소
+                    </Button>
+                  </div>
+                </div>
+              )}
 
             {/* 거래완료 상태 */}
-            <div className="flex flex-row ">
-              <Button variant="green" className="w-full py-5">
-                후기 보내기
-              </Button>{" "}
-            </div>
-            <div className="flex flex-row w-full gap-2">
-              <Button variant="green" className="flex-1 py-5">
-                후기 보내기
-              </Button>
-              <Button variant="ivory" className="flex-1 py-5">
-                받은 후기 보기
-              </Button>
-            </div>
-            <div className="flex flex-row w-full">
-              <Button variant="ivory" className="w-full py-5">
-                받은 후기 보기
-              </Button>{" "}
-            </div>
-            <div className="flex flex-row w-full gap-2">
-              <Button variant="ivory" className="flex-1 py-5">
-                보낸 후기 보기
-              </Button>
-              <Button variant="ivory" className="flex-1 py-5">
-                받은 후기 보기
-              </Button>
-            </div>
+            {mockTrade.tradeStatus === "COMPLETED" && (
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row ">
+                  <Button
+                    variant="green"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full py-5"
+                  >
+                    후기 보내기
+                  </Button>{" "}
+                </div>
+                <div className="flex flex-row w-full gap-2">
+                  <Button
+                    variant="green"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 py-5"
+                  >
+                    후기 보내기
+                  </Button>
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 py-5"
+                  >
+                    받은 후기 보기
+                  </Button>
+                </div>
+                <div className="flex flex-row w-full">
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full py-5"
+                  >
+                    받은 후기 보기
+                  </Button>{" "}
+                </div>
+                <div className="flex flex-row w-full gap-2">
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 py-5"
+                  >
+                    보낸 후기 보기
+                  </Button>
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 py-5"
+                  >
+                    받은 후기 보기
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
