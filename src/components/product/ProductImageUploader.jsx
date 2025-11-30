@@ -6,9 +6,9 @@ const ProductImageUploader = ({ images, setImages }) => {
   const fileInputRef = useRef(null);
   const [mainIndex, setMainIndex] = useState(null);
 
-  const handleUploadClick = () => {
-    fileInputRef.current.click();
-  };
+  // const handleUploadClick = () => {
+  //   fileInputRef.current.click();
+  // };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -29,28 +29,42 @@ const ProductImageUploader = ({ images, setImages }) => {
       });
     }
 
-    if (validFiles.length > 0) {
-      setImages((prev) => [...prev, ...validFiles].slice(0, 5));
+    if (validFiles.length === 0) return;
 
-      if (images.length === 0) {
-        setMainIndex(0);
-      }
-    }
+    setImages((prev) => {
+      const merged = [...prev, ...validFiles].slice(0, 5);
+
+      return merged.map((img, idx) => ({
+        ...img,
+        sortOrder: idx,
+        isMain: idx === 0,
+      }));
+    });
 
     fileInputRef.current.value = "";
   };
 
+  //대표 사진 선택
+  const setAsMain = (index) => {
+    setImages((prev) =>
+      prev.map((img, i) => ({
+        ...img,
+        isMain: i === index,
+      }))
+    );
+  };
+
+  //첨부대기중 이미지 삭제
   const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-
-    if (mainIndex === index) {
-      setMainIndex(null);
-    }
-    fileInputRef.current.value = "";
-  };
-
-  const selectMain = (index) => {
-    setMainIndex(index);
+    setImages((prev) => {
+      const filtered = prev.filter((_, i) => i !== index);
+      //sortorder 재정렬
+      return filtered.map((img, idx) => ({
+        ...img,
+        sortOrder: idx,
+        isMain: idx === 0, //삭제후 첫번째 이미지가 자동으로 대표
+      }));
+    });
   };
 
   return (
@@ -63,7 +77,8 @@ const ProductImageUploader = ({ images, setImages }) => {
         <button
           type="button"
           className="shrink-0 relative w-20 h-20 border rounded-xl flex items-center justify-center bg-gray-200 text-brand-darkgray text-sm"
-          onClick={handleUploadClick}
+          onClick={() => fileInputRef.current.click()}
+          // onClick={handleUploadClick}
         >
           <div className="absolute left-6.5 top-2/5 -translate-y-1/2">
             <Upload className="size-7" />
@@ -83,13 +98,13 @@ const ProductImageUploader = ({ images, setImages }) => {
           onChange={handleFileChange}
         />
 
-        {/* 업로드 된 이미지들 */}
+        {/* 미리보기 상태 이미지들 */}
         <div className="flex gap-1.5 items-center h-22">
           {images.map((img, idx) => (
             <div
               key={idx}
-              className="relative w-20 h-20 "
-              onClick={() => selectMain(idx)}
+              className="relative w-20 h-20 cursor-pointer"
+              onClick={() => setAsMain(idx)}
             >
               <div className="relative w-full h-full overflow-hidden border rounded-xl ">
                 <img
@@ -97,7 +112,7 @@ const ProductImageUploader = ({ images, setImages }) => {
                   alt=""
                   className="w-full h-full object-cover"
                 />
-                {mainIndex === idx && (
+                {img.isMain && (
                   <div className="absolute bottom-0 left-0 w-full bg-black opacity-80 text-white text-xs text-center py-0.5">
                     대표사진
                   </div>

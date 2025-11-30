@@ -14,7 +14,7 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
-  const [description, setDescription] = useState("");
+  // const [description, setDescription] = useState("");
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -33,8 +33,6 @@ const ProductCreatePage = () => {
   });
 
   const handleSubmit = async () => {
-    console.log("상품 등록 요청 시작");
-
     if (!form.productTitle.trim()) {
       alert("상품명을 입력해주세요.");
       return;
@@ -49,39 +47,51 @@ const ProductCreatePage = () => {
       alert("카테고리를 선택해주세요.");
       return;
     }
-    const fd = new FormData();
+
+    console.log("상품 등록 요청 시작");
+
+    //supabase 이미지 업로드
+    const uploadedImages = [];
+    for (const img of images) {
+      const imageUrl = await uploadToSupabase(img.file);
+
+      uploadedImages.push({
+        imageUrl,
+        sortOrder: img.sortOrder,
+        isMain: img.isMain,
+      });
+    }
+
+    //서버로 전송용 JSON DTO 생성
+    // const jsonData = {
+    //   sellerId: form.sellerId,
+    //   productTitle: form.productTitle,
+    //   categoryDepth1: form.categoryDepth1,
+    //   categoryDepth2: form.categoryDepth2,
+    //   categoryDepth3: form.categoryDepth3,
+    //   sellPrice: form.sellPrice,
+    //   productDescription: form.productDescription,
+    //   productStatus: form.productStatus,
+    //   direct: form.direct,
+    //   delivery: form.delivery,
+    //   sellingArea: form.sellingArea,
+    //   images: uploadedImages,
+    // };
 
     const jsonData = {
-      sellerId: form.sellerId,
-      productTitle: form.productTitle,
-      categoryDepth1: form.categoryDepth1,
-      categoryDepth2: form.categoryDepth2,
-      categoryDepth3: form.categoryDepth3,
-      sellPrice: form.sellPrice,
-      productDescription: form.productDescription,
-      productStatus: form.productStatus,
-      direct: form.direct,
-      delivery: form.delivery,
-      sellingArea: form.sellingArea,
-      imageUrls: uploadUrls,
-      mainImageIndex: mainIndex,
+      ...form,
+      images: uploadedImages,
     };
-
-    //JSON
-    fd.append(
-      "data",
-      new Blob([JSON.stringify(jsonData)], { type: "application/json" })
-    );
-    //이미지 파일
-    images.forEach((img) => {
-      fd.append("images", img.file);
-    });
 
     try {
       const res = await fetch("http://localhost:8080/api/products", {
         method: "POST",
-        body: fd,
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify(jsonData),
       });
+
       if (!res.ok) {
         const errorText = await res.text();
         console.log(jsonData);
@@ -89,12 +99,12 @@ const ProductCreatePage = () => {
         alert("상품 등록 실패 (서버오류)");
         return;
       }
-
-      const newProductId = await res.json();
-      alert("상품 등록 완료! 상품ID: " + newProductId);
+      const response = await res.json();
+      // const newProductId = await res.json();
+      alert(`상품 등록 완료! 상품ID: ${response.productId}`);
     } catch (error) {
       console.error(error);
-      alert("오류 발생");
+      alert("네트워크 오류 발생");
     }
   };
   return (
@@ -176,7 +186,9 @@ const ProductCreatePage = () => {
             />
           </div>
 
-          {/* 거래 방법 */}
+          {/* 거래 방법 
+          직거래 택배거래 둘다 가능하게 변경예정, radio에서 checkbox로 변경예정 
+          */}
           <div>
             <TradeMethodSelector
               value={form.direct ? "direct" : "delivery"}
@@ -195,6 +207,7 @@ const ProductCreatePage = () => {
             <ProductEcoScoreSection />
           </div>
         </div>
+        {/* 하단 버튼 */}
         <div className="sticky bottom-0  bg-white border-t z-50 ">
           <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
         </div>
