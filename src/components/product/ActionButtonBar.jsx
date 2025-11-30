@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLikeToast } from "@/components/GlobalToast";
 import { useNavigate } from "react-router-dom";
+import { chatRoomIdApi } from "@/common/api/chat.api";
 
 const ActionButtonBar = ({
   role,
@@ -25,18 +26,40 @@ const ActionButtonBar = ({
 
   const handleButtonClick = (action) => {
     let confirmation = false;
+    let mention = "";
+
     if (action === "끌어 올리기") {
-      confirmation = window.confirm("이 상품을 끌어올리시겠습니까?");
-    } else if (action === "상품삭제") {
-      confirmation = window.confirm("정말로 상품을 삭제하시겠습니까?");
+      mention = "이 상품을 끌어올리시겠습니까?";
     }
+
+    if (action === "상품삭제") {
+      mention = "정말로 상품을 삭제하시겠습니까?";
+    }
+
+    if (action === "채팅하기") {
+      enterChatRoom();
+      return;
+    }
+
+    confirmation = mention ? window.confirm(mention) : false;
+
     if (confirmation) {
       console.log(`${action} 버튼 클릭됨!`);
-    } else if (action === "끌어 올리기" || action === "상품삭제") {
-      console.log(`${action} 취소됨`);
-    } else {
-      console.log(`${action} 버튼 클릭됨!`);
+      return;
     }
+    if (!confirmation && ["끌어 올리기", "상품삭제"].includes(action)) {
+      console.log(`${action} 취소됨`);
+      return;
+    }
+
+    console.log(`${action} 버튼 클릭됨!`);
+  };
+
+  const enterChatRoom = async () => {
+    // 채팅 있는지 조회 후 있으면 채팅방 번호 리턴. 없으면 생성해서 리턴. 오류나면 예외처리
+    const chatRoomId = await chatRoomIdApi(productId);
+    console.log(chatRoomId);
+    navigate(`/chats/${chatRoomId}`); // :roomId
   };
 
   // 상품수정

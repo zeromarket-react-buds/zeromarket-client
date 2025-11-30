@@ -25,6 +25,8 @@ import TradeDetailPage from "@/pages/order/TradeDetailPage";
 import MyProfileEditPage from "./pages/me/MyProfileEditPage";
 import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
 import MyWishListPage from "./pages/me/MyWishListPage";
+import ChatListPage from "./pages/chat/ChatListPage";
+import ChatRoomPage from "./pages/chat/ChatRoomPage";
 
 const router = createBrowserRouter([
   {
@@ -117,6 +119,25 @@ const router = createBrowserRouter([
                 },
               },
             },
+          },
+        ],
+      },
+
+      // chats(채팅)
+      {
+        path: "chats",
+        children: [
+          {
+            index: true,
+            element: <ChatListPage />,
+            // API: GET /api/chats
+          },
+          {
+            path: ":chatRoomId",
+            element: <ChatRoomPage />,
+            // API: GET /api/chats/:roomId
+            //      GET /api/chats/:roomId/messages
+            //      POST /api/chats/:roomId/messages
           },
         ],
       },

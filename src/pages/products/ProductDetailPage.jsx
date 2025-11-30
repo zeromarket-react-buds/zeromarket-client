@@ -307,6 +307,7 @@ const ProductDetailPage = () => {
               // role={userRole}
               isWished={detail.isWished}
               onToggleWish={toggleWish}
+              productId={detail.productId}
             />
           </div>
           <div className="sticky bottom-0 bg-white border-t z-50">
