@@ -20,7 +20,7 @@ const SearchPage = () => {
   const keywordFromUrl = searchParams.get("keyword") || "";
   const sortFromUrl = searchParams.get("sort") ?? "popularity";
 
-  const categoryFromUrl = searchParams.get("category");
+  const categoryFromUrl = searchParams.get("categoryId");
   const minPriceFromUrl = searchParams.get("minPrice");
   const maxPriceFromUrl = searchParams.get("maxPrice");
   const areaFromUrl = searchParams.get("area");
@@ -62,7 +62,7 @@ const SearchPage = () => {
       if (keyword.trim()) params.set("keyword", keyword.trim());
 
       // 카테고리
-      if (selectedLevel3Id != null) params.set("category", selectedLevel3Id);
+      if (selectedLevel3Id != null) params.set("categoryId", selectedLevel3Id);
 
       // 가격
       if (minPrice) params.set("minPrice", minPrice);

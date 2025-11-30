@@ -86,7 +86,7 @@ const ProductFilter = ({
 
     // 카테고리
     if (tempLevel3Id != null) {
-      params.set("category", tempLevel3Id);
+      params.set("categoryId", tempLevel3Id);
     }
 
     // 가격
