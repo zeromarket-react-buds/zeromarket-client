@@ -1,40 +1,40 @@
-import { GreenRadio } from "../ui/greenradio";
+import { GreenCheckBox } from "../ui/greencheckbox";
 import { Button } from "../ui/button";
 import { X, Plus } from "lucide-react";
-import { useState } from "react";
 
 const TradeMethodSelector = ({ value, onChange }) => {
-  const [tradeMethod, setTradeMethod] = useState(value || "delivery");
+  const delivery = value?.delivery ?? false;
+  const direct = value?.direct ?? false;
 
-  const handleChange = (method) => {
-    setTradeMethod(method);
-    onChange(method);
+  const handleChange = (type) => (checked) => {
+    const next = {
+      delivery,
+      direct,
+      [type]: checked,
+    };
+    onChange?.(next); //부모로변경사항전달
   };
+
   return (
     <div className="mt-8">
       {/* 거래 방법 */}
-      <p className="font-bold mb-2 border-b py-1 text-lg">거래 방법</p>
-      <div className=" mt-3">
-        <GreenRadio
+      <p className="font-bold mb-2 border-b py-2 text-lg">거래 방법</p>
+      <div className=" mt-4 space-y-2">
+        <GreenCheckBox
           label="택배거래"
-          value="delivery"
-          checked={tradeMethod === "delivery"}
-          onChange={() => handleChange("delivery")}
-          name="trade-method"
+          checked={delivery}
+          onChange={handleChange("delivery")}
         />
         <p className="text-gray-400 text-sm mt-1 mb-5">배송비 포함(무료배송)</p>
-
-        <GreenRadio
+        <GreenCheckBox
           label="직거래"
-          value="direct"
-          checked={tradeMethod === "direct"}
-          onChange={() => handleChange("direct")}
-          name="trade-method"
+          checked={direct}
+          onChange={handleChange("direct")}
         />
       </div>
 
       {/* 직거래 선택시 뜨는 장소 */}
-      {tradeMethod === "direct" && (
+      {direct && (
         <div className="flex gap-2 flex-wrap mt-2 ">
           <Button className="bg-gray-200 text-black rounded-3xl">
             <span>역삼2동</span>

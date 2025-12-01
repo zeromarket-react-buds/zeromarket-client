@@ -186,19 +186,13 @@ const ProductCreatePage = () => {
             />
           </div>
 
-          {/* 거래 방법 
-          직거래 택배거래 둘다 가능하게 변경예정, radio에서 checkbox로 변경예정 
-          */}
+          {/* 거래 방법*/}
           <div>
             <TradeMethodSelector
-              value={form.direct ? "direct" : "delivery"}
-              onChange={(method) => {
-                if (method === "direct") {
-                  setForm({ ...form, direct: true, delivery: false });
-                } else {
-                  setForm({ ...form, direct: false, delivery: true });
-                }
-              }}
+              value={{ delivery: form.delivery, direct: form.direct }}
+              onChange={({ delivery, direct }) =>
+                setForm((prev) => ({ ...prev, delivery, direct }))
+              }
             />
           </div>
 
