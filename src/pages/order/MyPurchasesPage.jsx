@@ -111,7 +111,9 @@ const MyPurchasesPage = () => {
             return (
               <div key={trade.tradeId}>
                 <div className="flex flex-row justify-between p-2 items-center">
-                  <span>{trade.createdAt?.split("T")[0]}</span>
+                  <span>
+                    {trade.createdAt?.split("T")[0]?.replaceAll("-", ".")}
+                  </span>
                   <XCircle className="w-4.5 h-4.5" />
                 </div>
                 <div
@@ -128,7 +130,7 @@ const MyPurchasesPage = () => {
                   />
 
                   {trade.tradeStatus.description === "취소" ? (
-                    <div></div>
+                    <div className="-my-1"></div>
                   ) : (
                     <div className="flex justify-center py-3">
                       <TradeStatusBar
