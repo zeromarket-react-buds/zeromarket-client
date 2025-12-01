@@ -8,30 +8,12 @@ import TradeStatusBar from "@/components/order/TradeStatusBar";
 import { tradeFlowLabels, tradeFlows } from "@/components/order/tradeFlow";
 
 // 라벨에서 키로 매핑
-const statusKeyByLabel = Object.values(tradeFlows).reduce((acc, steps) => {
+const TradestatusKeyByLabel = Object.values(tradeFlows).reduce((acc, steps) => {
   steps.forEach((step) => {
     acc[step.label] = step.key;
   });
   return acc;
 }, {});
-
-// tradeStatus enum을 화면용 라벨로
-const getStatusLabelFromTradeStatus = (tradeStatus) => {
-  if (!tradeStatus) return "";
-  if (typeof tradeStatus === "object" && tradeStatus.description) {
-    return tradeStatus.description;
-  }
-  return String(tradeStatus);
-};
-
-// tradeType enum을 화면용 라벨로
-const getTypeLabelFromTradeType = (tradeType) => {
-  if (!tradeType) return "";
-  if (typeof tradeType === "object" && tradeType.description) {
-    return tradeType.description;
-  }
-  return String(tradeType);
-};
 
 const MyPurchasesPage = () => {
   const navigate = useNavigate();
@@ -122,14 +104,9 @@ const MyPurchasesPage = () => {
               isDirect: trade.isDirect,
             });
 
-            // 라벨 추출
-            const statusLabel = getStatusLabelFromTradeStatus(
-              trade.tradeStatus
-            );
-            const typeLabel = getTypeLabelFromTradeType(trade.tradeType);
-
             // 여기서 라벨을 키로 변환
-            const statusKey = statusKeyByLabel[statusLabel] || statusLabel;
+            const tradeStatusKey =
+              TradestatusKeyByLabel[trade.tradeStatus.description];
 
             return (
               <div key={trade.tradeId}>
@@ -142,22 +119,28 @@ const MyPurchasesPage = () => {
                   onClick={() => goToTradeDetail(trade.tradeId)}
                 >
                   <LongProductCard
+                    productId={trade.productId}
                     productTitle={trade.productTitle}
                     sellPrice={trade.sellPrice}
-                    tradeType={typeLabel}
-                    tradeStatus={statusLabel}
+                    tradeType={trade.tradeType.description}
+                    tradeStatus={trade.tradeStatus.description}
                     thumbnailUrl={trade.thumbnailUrl}
                   />
-                  <div className="flex justify-center py-3">
-                    <TradeStatusBar
-                      flowType={flowType}
-                      status={statusKey}
-                      className="w-[35em]"
-                    />
-                  </div>
+
+                  {trade.tradeStatus.description === "취소" ? (
+                    <div></div>
+                  ) : (
+                    <div className="flex justify-center py-3">
+                      <TradeStatusBar
+                        flowType={flowType}
+                        status={tradeStatusKey}
+                        className="w-[35em]"
+                      />
+                    </div>
+                  )}
 
                   {/* 예약중/결제완료 상태 */}
-                  {statusKey === "PENDING" && (
+                  {tradeStatusKey === "PENDING" && (
                     <div>
                       <div className="flex flex-row w-full gap-2">
                         <Button
@@ -173,7 +156,7 @@ const MyPurchasesPage = () => {
                   )}
 
                   {/* 거래완료 상태 */}
-                  {statusKey === "COMPLETED" && (
+                  {tradeStatusKey === "COMPLETED" && (
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-row ">
                         <Button
