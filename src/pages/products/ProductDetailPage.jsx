@@ -6,6 +6,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { products } from "@/data/product.js";
+import ProductImageCarousel from "@/components/product/ProductImageCarousel";
+import dayjs from "@/utils/time";
 
 const ProductDetailPage = () => {
   const navigate = useNavigate();
@@ -47,6 +49,7 @@ const ProductDetailPage = () => {
       }
 
       const data = await res.json();
+      console.log("📌 detail.images 불러온 직후:", data.images);
       setDetail(data);
     } catch (err) {
       setError(err.message);
@@ -86,7 +89,6 @@ const ProductDetailPage = () => {
   const toggleWish = async () => {
     try {
       const method = detail.isWished ? "DELETE" : "POST";
-
       await fetch(`http://localhost:8080/api/products/${id}/wish`, {
         method,
       });
@@ -111,30 +113,24 @@ const ProductDetailPage = () => {
   if (error) return <div>Error: {error}</div>;
   if (!detail) return <div>데이터 없음</div>;
 
-  // 이미지 배열
-  const images = detail.images || [];
-  // const mainImage = images[currentIndex]?.imageUrl;
+  //상품이미지 정렬
+  const sortedImages = [...detail.images].sort((a, b) => {
+    const aMain = Boolean(a.main);
+    const bMain = Boolean(b.main);
+    //메인먼저
+    if (aMain && !bMain) return -1;
+    if (!aMain && bMain) return 1;
+    return a.sortOrder - b.sortOrder; // 둘다 메인 아니면 sort order순
+  });
+
   return (
     <div>
       <Container>
         {/* <div>상품상세페이지입니다</div> */}
         <div className="max-w-full mx-auto bg-gray-0 ">
-          <div className="relative">
-            {/* 사진 영역 */}
-            <div className="bg-gray-200 w-full h-90 flex items-center justify-center text-gray-600">
-              {detail.images?.map((img) => (
-                <img
-                  key={img.imageId}
-                  src={img.imageUrl}
-                  className="object-cover w-full h-full"
-                />
-              ))}
-              {/* 사진 */}
-            </div>
-            <div className="absolute bottom-2 right-2 m-5 font-">
-              <span>{/* {detail.mainImageIndex + 1}  */}</span>{" "}
-              <span>1/ 5</span>
-            </div>
+          {/* 사진 영역 */}
+          <div>
+            <ProductImageCarousel images={sortedImages} />
           </div>
           <div className="px-6">
             {/* 사진 아래영역 */}
@@ -188,9 +184,7 @@ const ProductDetailPage = () => {
             </div>
 
             {/* 상품명 */}
-
             <div className="text-2xl font-bold mb-2 ">
-              {/* 상품명 */}
               {detail.productTitle}
             </div>
 
@@ -211,7 +205,6 @@ const ProductDetailPage = () => {
                 className=" text-gray-600 text-base hover:underline flex items-center"
                 onClick={() =>
                   navigate(
-                    // `/search?keyword=&sort=popularity&level1Id=${detail.level1Id}&level2Id=${detail.level2Id}&level3Id=${detail.level3Id}`
                     `/search?keyword=&sort=popularity` +
                       `&level1Id=${detail.level1Id}` +
                       `&level2Id=${detail.level2Id}` +
@@ -227,7 +220,9 @@ const ProductDetailPage = () => {
                 <span>{detail.categoryDepth3}</span>
               </span>
 
-              <span className="text-sm text-gray-500">3시간 전</span>
+              <span className="text-sm text-gray-500">
+                {dayjs(detail.createdAt).fromNow()}
+              </span>
             </div>
 
             {/* 상품상태 */}
@@ -260,12 +255,16 @@ const ProductDetailPage = () => {
             <div className=" my-5 text-sm text-brand-darkgray ">
               <div className="flex justify-between mb-4">
                 <span>거래방법</span>
-                {/* <div>
-                <span>직거래</span> | <span>택배거래 가능</span>
-              </div> */}
                 <div>
-                  {detail.direct && <span>직거래</span>}
-                  {detail.delivery && <span> | 택배거래 가능</span>}
+                  {detail.direct && detail.delivery && (
+                    <span>직거래 가능 | 택배거래 가능</span>
+                  )}
+                  {!detail.direct && detail.delivery && (
+                    <span>택배거래 가능</span>
+                  )}
+                  {detail.direct && !detail.delivery && (
+                    <span>직거래 가능</span>
+                  )}
                 </div>
               </div>
               <div className="flex justify-between mb-4">
@@ -288,12 +287,6 @@ const ProductDetailPage = () => {
                 <h3 className="text-lg font-semibold text-gray-800 my-3">
                   비슷한 물품
                 </h3>
-
-                {/* <div className="grid grid-cols-2 gap-1">
-                {products.map((p) => (
-                  <SimilarProductCard key={p.id} />
-                ))}
-              </div> */}
                 <ProductCard
                   products={similarProducts}
                   onToggleLike={onToggleLike}
