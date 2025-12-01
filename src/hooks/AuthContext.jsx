@@ -7,7 +7,12 @@ import {
   useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyInfoApi, loginApi, refreshTokenApi } from "@/common/api/auth.api";
+import {
+  getMyInfoApi,
+  loginApi,
+  refreshTokenApi,
+  logoutApi,
+} from "@/common/api/auth.api";
 
 /*
 전역으로 관리할 상태 
@@ -17,6 +22,9 @@ import { getMyInfoApi, loginApi, refreshTokenApi } from "@/common/api/auth.api";
 - logout()
 - loading : 인증상태 초기화 중 여부 
 */
+
+// TODO: refreshTokenApi -> refreshAccessToken (token.js) 변경해야 하는지 확인
+// TODO: 로그아웃 요청 보내기 (기존: 로컬 스토리지 accessToken 삭제)
 
 const AuthContext = createContext(null);
 
@@ -64,16 +72,19 @@ function AuthProvider({ children }) {
     // localStorage.setItem("refreshToken", data.refreshToken);
 
     // 2) 사용자 정보 조회
-    const userData = await getMyInfoApi();
+    // const userData = await getMyInfoApi();
 
     // 2) 전역 상태 갱신
-    setUser(userData);
+    // setUser(userData);
   }
 
   // ✅ 로그아웃
-  function logout() {
+  async function logout() {
+    const data = await logoutApi();
+    console.log("로그아웃: ", data);
     localStorage.removeItem("accessToken");
     // localStorage.removeItem("refreshToken");
+
     setUser(null);
   }
 
