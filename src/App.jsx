@@ -27,6 +27,7 @@ import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
 import MyWishListPage from "./pages/me/MyWishListPage";
 import ChatListPage from "./pages/chat/ChatListPage";
 import ChatRoomPage from "./pages/chat/ChatRoomPage";
+import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 
 const router = createBrowserRouter([
   {
@@ -173,6 +174,11 @@ const router = createBrowserRouter([
             },
           },
         },
+      },
+      // 리뷰
+      {
+        path: "reviews",
+        element: <ReviewCreatePage />,
       },
 
       // 마이페이지 라우트
