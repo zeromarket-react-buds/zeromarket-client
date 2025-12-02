@@ -6,6 +6,7 @@ const TitleHeader = ({
   title,
   titleAlign = "center", // ⭐ 새로 추가 (optional)
   rightSlot,
+  hideLeft = false,
   hideRight = false,
   showBack = true,
   rightButtonText, // 기존 단일 버튼 유지
@@ -66,7 +67,9 @@ const TitleHeader = ({
         }`}
       >
         {/* 왼쪽: 뒤로가기 */}
-        {showBack ? (
+        {hideLeft ? (
+          <div className="w-6" />
+        ) : showBack ? (
           <button onClick={() => window.history.back()}>
             <ChevronLeft size={24} />
           </button>
