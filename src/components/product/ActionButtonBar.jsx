@@ -10,9 +10,45 @@ const ActionButtonBar = ({
   isWished,
   onSubmit,
   productId,
+  isHidden,
 }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
   const navigate = useNavigate();
+
+  //상품 숨기기
+  const requestHide = async () => {
+    await fetch(`http://localhost:8080/api/products/${productId}/hide`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hidden: true }),
+    });
+    alert("상품이 숨김 처리 되었습니다.");
+    window.location.reload(); //같은 url 그대로 다시 불러오는 새로고침(라우터 개입X,hard refresh)
+  };
+
+  //상품 숨기기 해제
+  const requestUnhide = async () => {
+    await fetch(`http://localhost:8080/api/products/${productId}/hide`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hidden: false }),
+    });
+    alert("숨김이 해제되었습니다.");
+    window.location.reload();
+  };
+
+  //상품 삭제하기(soft)
+  const requestDelete = async () => {
+    const res = await fetch(`http://localhost:8080/api/products/${productId}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      alert("삭제 중 오류가 발생했습니다.");
+      return;
+    }
+    alert("상품이 삭제되었습니다.");
+    window.location.href = "/"; //url을 변경해(지금 페이지를 벗어나) /로 이동(라우터를 무시,브라우저가 직접 페이지전환)
+  };
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = () => {
@@ -26,31 +62,51 @@ const ActionButtonBar = ({
 
   const handleButtonClick = (action) => {
     let confirmation = false;
-    let mention = "";
-
-    if (action === "끌어 올리기") {
-      mention = "이 상품을 끌어올리시겠습니까?";
-    }
-
-    if (action === "상품삭제") {
-      mention = "정말로 상품을 삭제하시겠습니까?";
-    }
 
     if (action === "채팅하기") {
       enterChatRoom();
       return;
     }
 
-    confirmation = mention ? window.confirm(mention) : false;
+    if (action === "숨기기") {
+      if (window.confirm("상품을 숨기시겠습니까?")) {
+        requestHide();
+      }
+      return;
+    }
 
-    if (confirmation) {
-      console.log(`${action} 버튼 클릭됨!`);
+    if (action === "상품삭제") {
+      if (window.confirm("정말로 상품을 삭제하시겠습니까?")) {
+        requestDelete();
+      }
       return;
     }
-    if (!confirmation && ["끌어 올리기", "상품삭제"].includes(action)) {
-      console.log(`${action} 취소됨`);
+
+    let mention = "";
+
+    if (action === "끌어 올리기") {
+      mention = "이 상품을 끌어올리시겠습니까?"; //mention 문자열만 설정, 아래에서 한번에 처리하는 구조
+    }
+
+    // confirmation = mention ? window.confirm(mention) : false;
+
+    if (mention) {
+      if (window.confirm(mention)) {
+        console.log(`${action} 실행됨`);
+      } else {
+        console.log(`${action} 취소됨`);
+      }
       return;
     }
+
+    // if (confirmation) {
+    //   console.log(`${action} 버튼 클릭됨!`); //메세지를 세팅만하고,실제 행동은 아래 공통로직에서
+    //   return;
+    // }
+    // if (!confirmation && ["끌어 올리기", "상품삭제"].includes(action)) {
+    //   console.log(`${action} 취소됨`);
+    //   return;
+    // }
 
     console.log(`${action} 버튼 클릭됨!`);
   };
@@ -101,12 +157,26 @@ const ActionButtonBar = ({
       {/* 2. 숨기기<>숨기기해제 , 상품수정 , 상품삭제 - 판매자*/}
       {role === "SELLER" && (
         <div className="flex gap-2  my-0 px-3 pt-7 py-7">
-          <Button
-            className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
-            onClick={() => handleButtonClick("숨기기")}
-          >
-            숨기기
-          </Button>
+          {isHidden ? (
+            <Button
+              onClick={() => {
+                if (window.confirm("숨김을 해제하시겠습니까?")) {
+                  requestUnhide();
+                }
+              }}
+              className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2"
+            >
+              숨기기 해제
+            </Button>
+          ) : (
+            <Button
+              onClick={() => handleButtonClick("숨기기")}
+              className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2"
+            >
+              숨기기
+            </Button>
+          )}
+
           <Button
             className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
             onClick={handleEditClick}

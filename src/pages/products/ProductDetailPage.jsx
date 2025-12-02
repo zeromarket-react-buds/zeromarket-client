@@ -35,24 +35,45 @@ const ProductDetailPage = () => {
     try {
       const res = await fetch(`http://localhost:8080/api/products/${id}`);
 
+      //상태코드별 예외처리
       if (!res.ok) {
-        const text = await res.text();
+        // let errorMessage = "상품 정보를 불러오지 못했습니다.";
+        // const text = await res.text();
 
-        if (res.status === 404) {
-          setError("숨김 처리된 상품이거나 존재하지 않는 상품입니다.");
-        } else {
-          console.log("상품 정보를 가져오지 못함", text);
-          setError("상품 정보를 가져오지 못했습니다.");
+        if (res.status === 403) {
+          setError("HIDDEN");
+          alert("숨겨진 게시글이에요.");
+          // navigate(-1);
+
+          //로그인권한 구현 전 숨김화면에서 숨김해제 버튼표시용, 추후 삭제예정
+          setDetail({
+            productId: id,
+            images: [],
+            seller: {},
+            isHidden: true,
+          });
+
+          return;
         }
-        setDetail(null);
+
+        if (res.status === 404 || res.status === 410) {
+          setError("상품이 삭제되었거나 존재하지 않습니다.");
+          return;
+        }
+
+        // if (res.status === 410) {
+        //   errorMessage = "삭제된 상품입니다.";
+        // }
+        setError("상품 정보를 불러오지 못했습니다.");
+        // setDetail(null);
         return;
       }
 
       const data = await res.json();
-      console.log("📌 detail.images 불러온 직후:", data.images);
+      console.log("detail.images", data.images);
       setDetail(data);
     } catch (err) {
-      setError(err.message);
+      setError("네트워크 오류가 발생했습니다.");
       console.error("상품 상세 페이지 불러오기 실패 : ", err);
     } finally {
       setLoading(false);
@@ -109,9 +130,24 @@ const ProductDetailPage = () => {
     fetchSimilarProducts();
   }, [id]);
 
-  if (loading) return <div>상품 상세 페이지 불러오는 중...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!detail) return <div>데이터 없음</div>;
+  if (loading)
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white text-gray-700 text-lg">
+        상품 상세 페이지 불러오는 중...
+      </div>
+    );
+  if (error && error !== "HIDDEN")
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white text-gray-700 text-lg">
+        Error: {error}
+      </div>
+    );
+  if (!detail)
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white text-gray-700 text-lg">
+        데이터 없음
+      </div>
+    );
 
   //상품이미지 정렬
   const sortedImages = [...detail.images].sort((a, b) => {
@@ -163,7 +199,7 @@ const ProductDetailPage = () => {
                   {/* 관심수 */}
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-semibold text-brand-green">
-                      5{detail.wishCount}
+                      {detail.wishCount}
                     </span>
                     <span className="text-sm  text-brand-mediumgray">
                       <Heart className="size-4" />
@@ -173,7 +209,7 @@ const ProductDetailPage = () => {
                   {/* 신뢰점수 :) */}
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-semibold text-brand-green">
-                      5
+                      0
                     </span>
                     <span className=" text-brand-mediumgray">
                       <Smile className="size-4" />
@@ -310,6 +346,7 @@ const ProductDetailPage = () => {
               productId={detail.productId}
               isWished={detail.isWished}
               onToggleWish={toggleWish}
+              isHidden={detail.isHidden}
             />
           </div>
         </div>

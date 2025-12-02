@@ -2,12 +2,19 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const ProductImageCarousel = ({ images }) => {
-  const extendedImages = [
-    //무한루프용 클론이미지 생성
-    images[images.length - 1],
-    ...images,
-    images[0],
-  ];
+  const sageImages = Array.isArray(images)
+    ? images.filter((img) => img && img.imageUrl)
+    : [];
+
+  const extendedImages =
+    sageImages.length > 0
+      ? [
+          //무한루프용 클론이미지 생성
+          images[images.length - 1],
+          ...images,
+          images[0],
+        ]
+      : [];
   const [current, setCurrent] = useState(1);
   const [transition, setTransition] = useState(true);
   const total = images.length;
@@ -86,15 +93,18 @@ const ProductImageCarousel = ({ images }) => {
         }`}
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {extendedImages?.map((img, idx) => (
-          <img
-            key={idx}
-            src={img.imageUrl}
-            // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
-            className=" w-full h-full object-cover inline-block"
-            draggable={false}
-          />
-        ))}
+        {extendedImages.map((img, idx) => {
+          if (!img || !img.imageUrl) return null;
+          return (
+            <img
+              key={idx}
+              src={img.imageUrl}
+              // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
+              className=" w-full h-full object-cover inline-block"
+              draggable={false}
+            />
+          );
+        })}
       </div>
       {/* 이미지 2개부터 좌우 버튼표시 */}
       {total > 1 && (
