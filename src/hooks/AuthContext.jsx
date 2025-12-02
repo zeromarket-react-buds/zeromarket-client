@@ -10,9 +10,10 @@ import { useNavigate } from "react-router-dom";
 import {
   getMyInfoApi,
   loginApi,
-  refreshTokenApi,
+  // refreshTokenApi,
   logoutApi,
 } from "@/common/api/auth.api";
+import { refreshAccessToken } from "@/common/token";
 
 /*
 전역으로 관리할 상태 
@@ -37,15 +38,16 @@ function AuthProvider({ children }) {
   // ✅ 앱 시작(로드) 시 로그인 상태 복구
   useEffect(() => {
     async function initAuth() {
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        setLoading(false); // 로딩 끝 -> 비로그인 상태
-        return;
-      }
+      // const refreshToken = localStorage.getItem("refreshToken");
+      // if (!refreshToken) {
+      //   setLoading(false); // 로딩 끝 -> 비로그인 상태
+      //   return;
+      // }
 
       try {
-        const res = await refreshTokenApi(refreshToken);
-        localStorage.setItem("accessToken", res.accessToken);
+        await refreshAccessToken();
+        // const res = await refreshTokenApi(refreshToken);
+        // localStorage.setItem("accessToken", res.accessToken);
         // localStorage.setItem("refreshToken", res.refreshToken);
 
         const userData = await getMyInfoApi();

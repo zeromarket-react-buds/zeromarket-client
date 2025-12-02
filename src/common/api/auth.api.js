@@ -21,18 +21,18 @@ export async function registerApi(form) {
 }
 
 // refresh token 요청 (일반적으로 직접 호출할 일은 거의 없음)
-export async function refreshTokenApi(refreshToken) {
-  const { data } = await apiClient("/api/auth/refresh", {
-    method: "POST",
-    body: { refreshToken },
-  });
+// export async function refreshTokenApi(refreshToken) {
+//   const { data } = await apiClient("/api/auth/refresh", {
+//     method: "POST",
+//     body: { refreshToken },
+//   });
 
-  return data; // { accessToken }
-}
+//   return data; // { accessToken }
+// }
 
 // 내 정보 조회
 export async function getMyInfoApi() {
-  const { data } = await apiClient("/api/auth/me");
+  const { data } = await apiClient("/api/members/me");
   return data;
 }
 

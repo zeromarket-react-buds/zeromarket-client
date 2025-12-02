@@ -1,3 +1,5 @@
+import { ApiError } from "./error";
+
 let isRefreshing = false;
 let refreshPromise = null;
 const API_BASE = "http://localhost:8080";
@@ -17,7 +19,8 @@ export async function refreshAccessToken() {
 
   refreshPromise = (async () => {
     try {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
+      // console.log("refresh token api 시작");
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // 쿠키 전달
@@ -25,13 +28,17 @@ export async function refreshAccessToken() {
         // body: JSON.stringify({ refreshToken }),
       });
 
-      if (!res.ok) throw new Error("Refresh failed");
+      if (!res.ok) throw new ApiError({ message: "refresh 실패" });
 
       const { accessToken } = await res.json();
 
       if (!accessToken) {
-        throw new Error("Server did not return accessToken");
+        throw new ApiError({
+          message: "서버가 엑세스 토큰을 발급하지 않았습니다.",
+        });
       }
+
+      // console.log("refresh token + 재요청 성공", accessToken);
 
       localStorage.setItem("accessToken", accessToken);
       return accessToken;
