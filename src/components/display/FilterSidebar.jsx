@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { XCircle } from "lucide-react";
 import { Search } from "lucide-react";
 import { useRef, useState } from "react";
-import CategorySelector from "@/components/product/CategorySelector";
+import CategorySelector from "@/components/product/create/CategorySelector";
 
 const FilterSideBar = ({
   categoryFocusRef,

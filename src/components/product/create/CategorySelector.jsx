@@ -82,7 +82,7 @@ const CategorySelector = ({ value, onChange, showTitle = true }) => {
     fetch("/api/categories/level1")
       .then((res) => res.json())
       .then((data) => {
-        console.log("🔥 서버 level1 응답:", data);
+        // console.log("서버 level1 응답:", data);
         setLevel1(data);
       });
   }, []);
@@ -225,26 +225,6 @@ const CategorySelector = ({ value, onChange, showTitle = true }) => {
         </select>
         <ChevronDown className="absolute right-4 top-6 -translate-y-1/2 text-gray-500 pointer-events-none" />
       </div>
-
-      {/* {categories.map((item) => (
-        <div className="relative w-full mb-3" key={item.id}>
-          <select
-            className=" w-full border rounded-lg px-3 py-3 appearance-none text-sm"
-            value={selectedCategories[`category${item.id}`]}
-            onChange={(e) =>
-              setSelectedCategories((prev) => ({
-                ...prev,
-                [`category${item.id}`]: e.target.value,
-              }))
-            }
-          >
-            {item.options.map((option, i) => (
-              <option key={i}>{option}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-4 top-6 -translate-y-1/2 text-gray-500 pointer-events-none" />
-        </div>
-      ))} */}
     </div>
   );
 };

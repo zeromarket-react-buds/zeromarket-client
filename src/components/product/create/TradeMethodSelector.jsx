@@ -1,5 +1,5 @@
-import { GreenCheckBox } from "../ui/greencheckbox";
-import { Button } from "../ui/button";
+import { GreenCheckBox } from "@/components/ui/greencheckbox";
+import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 
 const TradeMethodSelector = ({ value, onChange }) => {

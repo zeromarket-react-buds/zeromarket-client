@@ -1,20 +1,19 @@
 import { useState } from "react";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
-import ProductImageUploader from "@/components/product/ProductImageUploader";
-import AiWriteSection from "@/components/product/AiWriteSection";
-import CategorySelector from "@/components/product/CategorySelector";
-import ProductDescriptionEditor from "@/components/product/ProductDescriptionEditor";
-import ProductEcoScoreSection from "@/components/product/EcoScoreSection";
-import TradeMethodSelector from "@/components/product/TradeMethodSelector";
-import ProductConditionSelector from "@/components/product/ProductConditionSelector";
-import ProductTitleInput from "@/components/product/ProductTitleInput";
-import ProductPriceInput from "@/components/product/ProductPriceInput";
+import ProductImageUploader from "@/components/product/create/ProductImageUploader";
+import AiWriteSection from "@/components/product/create/AiWriteSection";
+import CategorySelector from "@/components/product/create/CategorySelector";
+import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
+import EcoScoreSection from "@/components/product/create/EcoScoreSection";
+import TradeMethodSelector from "@/components/product/create/TradeMethodSelector";
+import ProductConditionSelector from "@/components/product/create/ProductConditionSelector";
+import ProductTitleInput from "@/components/product/create/ProductTitleInput";
+import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
-  // const [description, setDescription] = useState("");
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -24,7 +23,6 @@ const ProductCreatePage = () => {
     categoryDepth2: null,
     categoryDepth3: null,
     sellPrice: "",
-    // sellPrice: Number(form.sellPrice.toString().replace(/,/g, "")),
     productDescription: "",
     productStatus: "USED", //초기값
     direct: false,
@@ -62,22 +60,6 @@ const ProductCreatePage = () => {
       });
     }
 
-    //서버로 전송용 JSON DTO 생성
-    // const jsonData = {
-    //   sellerId: form.sellerId,
-    //   productTitle: form.productTitle,
-    //   categoryDepth1: form.categoryDepth1,
-    //   categoryDepth2: form.categoryDepth2,
-    //   categoryDepth3: form.categoryDepth3,
-    //   sellPrice: form.sellPrice,
-    //   productDescription: form.productDescription,
-    //   productStatus: form.productStatus,
-    //   direct: form.direct,
-    //   delivery: form.delivery,
-    //   sellingArea: form.sellingArea,
-    //   images: uploadedImages,
-    // };
-
     const jsonData = {
       ...form,
       images: uploadedImages,
@@ -109,7 +91,6 @@ const ProductCreatePage = () => {
   };
   return (
     <Container>
-      {/* <div>상품등록페이지입니다</div> */}
       <div className="max-w-full mx-auto bg-gray-0  -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
@@ -143,12 +124,6 @@ const ProductCreatePage = () => {
                 depth3: form.categoryDepth3,
               }}
               onChange={(depth1, depth2, depth3) =>
-                // setForm({
-                //   ...form,
-                //   categoryDepth1: depth1,
-                //   categoryDepth2: depth2,
-                //   categoryDepth3: depth3,
-                // })
                 setForm((prev) => ({
                   ...prev,
                   categoryDepth1:
@@ -198,7 +173,7 @@ const ProductCreatePage = () => {
 
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <ProductEcoScoreSection />
+            <EcoScoreSection />
           </div>
         </div>
         {/* 하단 버튼 */}

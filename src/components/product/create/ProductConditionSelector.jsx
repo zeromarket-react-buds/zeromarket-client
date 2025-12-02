@@ -1,4 +1,4 @@
-import { GreenRadio } from "../ui/greenradio";
+import { GreenRadio } from "@/components/ui/greenradio";
 import { useState } from "react";
 
 const ProductConditionSelector = ({ value, onChange }) => {

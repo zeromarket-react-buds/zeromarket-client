@@ -2,15 +2,15 @@ import Container from "@/components/Container";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
-import ProductImageUploader from "@/components/product/ProductImageUploader";
-import AiWriteSection from "@/components/product/AiWriteSection";
-import CategorySelector from "@/components/product/CategorySelector";
-import ProductDescriptionEditor from "@/components/product/ProductDescriptionEditor";
-import ProductEcoScoreSection from "@/components/product/EcoScoreSection";
-import TradeMethodSelector from "@/components/product/TradeMethodSelector";
-import ProductConditionSelector from "@/components/product/ProductConditionSelector";
-import ProductTitleInput from "@/components/product/ProductTitleInput";
-import ProductPriceInput from "@/components/product/ProductPriceInput";
+import ProductImageUploader from "@/components/product/create/ProductImageUploader";
+import AiWriteSection from "@/components/product/create/AiWriteSection";
+import CategorySelector from "@/components/product/create/CategorySelector";
+import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
+import EcoScoreSection from "@/components/product/create/EcoScoreSection";
+import TradeMethodSelector from "@/components/product/create/TradeMethodSelector";
+import ProductConditionSelector from "@/components/product/create/ProductConditionSelector";
+import ProductTitleInput from "@/components/product/create/ProductTitleInput";
+import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductEditPage = () => {
@@ -196,7 +196,7 @@ const ProductEditPage = () => {
 
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <ProductEcoScoreSection />
+            <EcoScoreSection />
           </div>
         </div>
         <div className="sticky bottom-0  bg-white border-t z-50 ">

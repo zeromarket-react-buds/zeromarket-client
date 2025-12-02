@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { CircleX } from "lucide-react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
