@@ -369,6 +369,7 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "거래내역 상세",
+                    hideLeft: true,
                   },
                 },
                 footer: {
