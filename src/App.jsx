@@ -132,10 +132,32 @@ const router = createBrowserRouter([
             index: true,
             element: <ChatListPage />,
             // API: GET /api/chats
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { type: "detail", title: "채팅 목록" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: ":chatRoomId",
             element: <ChatRoomPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { type: "detail", title: "채팅방" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
             // API: GET /api/chats/:roomId
             //      GET /api/chats/:roomId/messages
             //      POST /api/chats/:roomId/messages

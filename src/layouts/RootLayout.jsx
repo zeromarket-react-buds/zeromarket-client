@@ -1,8 +1,9 @@
-import { Outlet, useLocation, useMatches } from "react-router-dom";
+import { Outlet, useMatches } from "react-router-dom";
 import Container from "@/components/Container";
 import ScrollToTop from "@/components/ScrollToTop";
 import clsx from "clsx";
 import { useState, useEffect } from "react";
+import { HeaderProvider, useHeader } from "@/hooks/HeaderContext";
 
 import DefaultHeader from "@/layouts/header/DefaultHeader";
 import TitleHeader from "@/layouts/header/TitleHeader";
@@ -83,14 +84,27 @@ const footerMap = {
   DefaultFooter,
 };
 
+const HeaderWrapper = ({ HeaderComponent, headerConfig }) => {
+  const { headerState } = useHeader();
+
+  const baseProps = headerConfig?.props || {};
+
+  const headerProps = {
+    ...baseProps,
+    ...headerState,
+  };
+
+  if (!HeaderComponent) return null;
+
+  return <HeaderComponent {...headerProps} />;
+};
+
 const RootLayout = function () {
   const matches = useMatches();
-  // 뒤에서부터 순회하면서 handle.layout이 정의된 라우트를 찾기
-  const layoutFromMatches =
-    [...matches].reverse().find((m) => m.handle && m.handle.layout)?.handle
-      .layout || null;
 
-  // 하나도 없으면 최종 안전장치용 기본값
+  const layoutFromMatches =
+    [...matches].reverse().find((m) => m.handle?.layout)?.handle.layout || null;
+
   const layout = layoutFromMatches || {
     header: { component: "DefaultHeader" },
     footer: { component: "DefaultFooter" },
@@ -99,28 +113,36 @@ const RootLayout = function () {
   const headerConfig = layout.header || null;
   const footerConfig = layout.footer || null;
 
-  const HeaderComponent =
-    headerConfig && headerConfig.component
-      ? headerMap[headerConfig.component]
-      : null;
+  const HeaderComponent = headerConfig?.component
+    ? headerMap[headerConfig.component]
+    : null;
 
-  const FooterComponent =
-    footerConfig && footerConfig.component
-      ? footerMap[footerConfig.component]
-      : null;
+  const FooterComponent = footerConfig?.component
+    ? footerMap[footerConfig.component]
+    : null;
 
   return (
-    <div className="flex flex-col w-full min-h-screen">
-      {HeaderComponent && <HeaderComponent {...(headerConfig.props || {})} />}
-      <main className="flex-grow">
-        <ScrollToTop />
-        <Outlet />
-      </main>
-      {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
-      <div className="fixed bottom-24 right-6 z-50">
-        <ToTheTop />
+    <HeaderProvider>
+      <div className="flex flex-col w-full min-h-screen">
+        {HeaderComponent && (
+          <HeaderWrapper
+            HeaderComponent={HeaderComponent}
+            headerConfig={headerConfig}
+          />
+        )}
+
+        <main className="flex-grow">
+          <ScrollToTop />
+          <Outlet />
+        </main>
+
+        {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
+
+        <div className="fixed bottom-24 right-6 z-50">
+          <ToTheTop />
+        </div>
       </div>
-    </div>
+    </HeaderProvider>
   );
 };
 
