@@ -1,9 +1,7 @@
-// /reviews/complete
-
 import { useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, Mail } from "lucide-react";
 
-const ReviewComplete = () => {
+const ReviewDetailPage = () => {
   const { reviewId } = useParams();
   const location = useLocation();
   const { ratingLabel, content } = location.state || {};
@@ -34,4 +32,4 @@ const ReviewComplete = () => {
   );
 };
 
-export default ReviewComplete;
+export default ReviewDetailPage;

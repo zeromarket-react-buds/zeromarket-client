@@ -28,6 +28,7 @@ import MyWishListPage from "./pages/me/MyWishListPage";
 import ChatListPage from "./pages/chat/ChatListPage";
 import ChatRoomPage from "./pages/chat/ChatRoomPage";
 import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
+import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 
 const router = createBrowserRouter([
   {
@@ -178,7 +179,20 @@ const router = createBrowserRouter([
       // 리뷰
       {
         path: "reviews",
-        element: <ReviewCreatePage />,
+        children: [
+          {
+            path: "create/:tradeId", // /trades/:tradeId/review (후기 작성 페이지)
+            element: <ReviewCreatePage />,
+          },
+          {
+            path: ":reviewId",
+            element: <ReviewDetailPage />,
+          },
+          // {
+          //   index: true, // /users/:userId/reviews (후기 조회 페이지)
+          //   delement: <ReviewListPage />
+          // }
+        ],
       },
 
       // 마이페이지 라우트
