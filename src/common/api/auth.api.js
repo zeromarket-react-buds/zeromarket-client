@@ -32,7 +32,7 @@ export async function refreshTokenApi(refreshToken) {
 
 // 내 정보 조회
 export async function getMyInfoApi() {
-  const { data } = await apiClient("/api/members/me");
+  const { data } = await apiClient("/api/auth/me");
   return data;
 }
 
