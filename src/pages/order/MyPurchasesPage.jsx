@@ -100,8 +100,7 @@ const MyPurchasesPage = () => {
         <div className="flex flex-col gap-4">
           {tradeList.map((trade) => {
             const flowType = tradeFlowLabels({
-              isDelivery: trade.isDelivery,
-              isDirect: trade.isDirect,
+              tradeType: trade.tradeType,
             });
 
             // 여기서 라벨을 키로 변환
@@ -121,7 +120,6 @@ const MyPurchasesPage = () => {
                   onClick={() => goToTradeDetail(trade.tradeId)}
                 >
                   <LongProductCard
-                    productId={trade.productId}
                     productTitle={trade.productTitle}
                     sellPrice={trade.sellPrice}
                     tradeType={trade.tradeType.description}
