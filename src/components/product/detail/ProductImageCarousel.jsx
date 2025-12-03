@@ -2,37 +2,42 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const ProductImageCarousel = ({ images }) => {
-  const sageImages = Array.isArray(images)
+  const validImages = Array.isArray(images)
     ? images.filter((img) => img && img.imageUrl)
     : [];
 
+  const total = validImages.length;
+
   const extendedImages =
-    sageImages.length > 0
+    total > 1
       ? [
           //무한루프용 클론이미지 생성
-          images[images.length - 1],
-          ...images,
-          images[0],
+          validImages[total - 1],
+          ...validImages,
+          validImages[0],
         ]
-      : [];
-  const [current, setCurrent] = useState(1);
+      : validImages;
+
+  const [current, setCurrent] = useState(total > 1 ? 1 : 0);
   const [transition, setTransition] = useState(true);
-  const total = images.length;
 
   // 드래그/스와이프 관련
   const startX = useRef(0);
   const isDragging = useRef(false);
 
   const handleStart = (e) => {
+    if (total <= 1) return;
     isDragging.current = true;
     startX.current = e.touches ? e.touches[0].clientX : e.clientX;
   };
 
   const handleMove = (e) => {
+    if (total <= 1) return;
     if (!isDragging.current) return;
   };
 
   const handleEnd = (e) => {
+    if (total <= 1) return;
     if (!isDragging.current) return;
     isDragging.current = false;
 
@@ -46,16 +51,20 @@ const ProductImageCarousel = ({ images }) => {
     }
   };
   const prev = () => {
+    if (total <= 1) return;
     setTransition(true);
     setCurrent((c) => c - 1);
   };
   const next = () => {
+    if (total <= 1) return;
     setTransition(true);
     setCurrent((c) => c + 1);
   };
 
   useEffect(() => {
-    if (!transition) return;
+    if (total <= 1) return;
+    // if (!transition) return;
+
     if (current === total + 1) {
       setTimeout(() => {
         setTransition(false);
@@ -69,11 +78,17 @@ const ProductImageCarousel = ({ images }) => {
         setCurrent(total);
       }, 500);
     }
-  }, [current]);
+  }, [current, total]);
 
   //사진 순서 표기 조정
   const displayIndex =
-    current === 0 ? total : current === total + 1 ? 1 : current;
+    total <= 1
+      ? 1 // 이미지 1장일때 무한루프 끄기
+      : current === 0
+      ? total
+      : current === total + 1
+      ? 1
+      : current;
 
   return (
     <div
