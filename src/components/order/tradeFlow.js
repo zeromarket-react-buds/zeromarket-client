@@ -1,17 +1,19 @@
 // trade 테이블만 사용해서 쓰는 임시용
-export const tradeFlowLabels = ({ isDelivery, isDirect }) => {
-  if (isDelivery && !isDirect) {
-    // 택배만 가능한 경우: 바로결제 택배 플로우로 처리
+export const tradeFlowLabels = ({ tradeType }) => {
+  const key = tradeType.description;
+
+  // 택배거래: 바로구매 - 택배거래(5단계)
+  if (key === "택배거래") {
     return "INSTANT_DELIVERY";
   }
 
-  if (!isDelivery && isDirect) {
-    // 직거래만 가능한 경우: 채팅 직거래 플로우로 처리
-    return "CHAT_DIRECT";
+  // 직거래: 바로구매 - 직거래(3단계)로 가정
+  if (key === "직거래") {
+    return "INSTANT_DIRECT";
   }
 
-  // 둘 다 true거나 둘 다 false: 바로결제 직거래 플로우로 처리
-  return "INSTANT_DIRECT";
+  // 그 외: 채팅 - 직거래(2단계)
+  return "CHAT_DIRECT";
 };
 
 export const tradeFlows = {
