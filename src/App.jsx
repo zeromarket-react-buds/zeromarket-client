@@ -205,10 +205,32 @@ const router = createBrowserRouter([
           {
             path: "create/:tradeId", // /trades/:tradeId/review (후기 작성 페이지)
             element: <ReviewCreatePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { type: "detail", title: "후기 작성" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: ":reviewId",
             element: <ReviewDetailPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { type: "detail", title: "후기 보기" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           // {
           //   index: true, // /users/:userId/reviews (후기 조회 페이지)
