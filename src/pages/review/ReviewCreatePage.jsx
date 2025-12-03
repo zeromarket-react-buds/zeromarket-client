@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Angry, Annoyed, Meh, Smile, Laugh } from "lucide-react";
 import Container from "@/components/Container";
 import { getTradeInfoForReviewApi } from "@/common/api/trade.api";
 import { createReviewApi } from "@/common/api/review.api";
@@ -8,18 +8,18 @@ import { ApiError } from "@/common/error";
 import { useAuth } from "@/hooks/AuthContext";
 
 const ratingOptions = [
-  { rating: 5, label: "최고예요", icon: <ThumbsUp className="w-6 h-6" /> },
-  { rating: 4, label: "좋아요", icon: <ThumbsUp className="w-6 h-6" /> },
+  { rating: 5, label: "최고예요", icon: <Laugh className="w-6 h-6" /> },
+  { rating: 4, label: "좋아요", icon: <Smile className="w-6 h-6" /> },
   {
     rating: 3,
     label: "보통이에요",
-    icon: <ThumbsDown className="w-6 h-6" />,
+    icon: <Meh className="w-6 h-6" />,
   },
-  { rating: 2, label: "별로예요", icon: <ThumbsDown className="w-6 h-6" /> },
+  { rating: 2, label: "별로예요", icon: <Annoyed className="w-6 h-6" /> },
   {
     rating: 1,
     label: "정말 별로예요",
-    icon: <ThumbsDown className="w-6 h-6" />,
+    icon: <Angry className="w-6 h-6" />,
   },
 ];
 
@@ -36,7 +36,7 @@ const ReviewCreatePage = () => {
       try {
         // TODO: 유저가 거래 참여자인지 서버에서 확인해주기
         const data = await getTradeInfoForReviewApi(tradeId);
-
+        console.log(data);
         setTradeInfo(data);
       } catch (error) {
         console.log(error);
