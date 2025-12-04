@@ -38,6 +38,6 @@ export async function getTradeDetailApi(tradeId) {
  * 로그인한 사용자 정보를 기반으로 상대 닉네임이 계산되어 내려옴
  */
 export async function getTradeInfoForReviewApi(tradeId) {
-  const { data } = await apiClient(`/api/trades//review${tradeId}`);
+  const { data } = await apiClient(`/api/trades/reviews/${tradeId}`);
   return data; // TradeReviewInfoDto
 }
