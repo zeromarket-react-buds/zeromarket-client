@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ProductPriceInput = ({ value, onChange }) => {
-  const [price, setPrice] = useState(value || "");
+  const [price, setPrice] = useState("");
 
   //화면 표시용 가격 포맷
   const formatNumber = (value) => {
-    const numericValue = value.replace(/[^\d]/g, "");
-    if (!numericValue) return "";
-    return parseInt(numericValue, 10).toLocaleString();
+    if (!value) return "";
+    const numeric = value.toString().replace(/[^\d]/g, "");
+    return numeric ? Number(numeric).toLocaleString() : "";
   };
+
+  useEffect(() => {
+    setPrice(formatNumber(value));
+  }, [value]);
 
   const handlePrice = (e) => {
     const input = e.target.value;

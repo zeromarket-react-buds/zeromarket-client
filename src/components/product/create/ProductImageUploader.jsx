@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const ProductImageUploader = ({ images, setImages }) => {
   const fileInputRef = useRef(null);
-  const [mainIndex, setMainIndex] = useState(null);
-
-  // const handleUploadClick = () => {
-  //   fileInputRef.current.click();
-  // };
+  // const [mainIndex, setMainIndex] = useState(null);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -26,6 +22,8 @@ const ProductImageUploader = ({ images, setImages }) => {
       validFiles.push({
         file,
         preview: URL.createObjectURL(file),
+        imageUrl: null, //아직없음
+        imageId: null, //신규
       });
     }
 
@@ -34,10 +32,13 @@ const ProductImageUploader = ({ images, setImages }) => {
     setImages((prev) => {
       const merged = [...prev, ...validFiles].slice(0, 5);
 
+      //기존 메인index찾기
+      const oldMainIndex = prev.findIndex((i) => i.isMain);
+
       return merged.map((img, idx) => ({
         ...img,
         sortOrder: idx,
-        isMain: idx === 0,
+        isMain: idx === oldMainIndex,
       }));
     });
 
@@ -46,6 +47,7 @@ const ProductImageUploader = ({ images, setImages }) => {
 
   //대표 사진 선택
   const setAsMain = (index) => {
+    console.log(`Selected main image index: ${index}`);
     setImages((prev) =>
       prev.map((img, i) => ({
         ...img,
@@ -54,15 +56,35 @@ const ProductImageUploader = ({ images, setImages }) => {
     );
   };
 
-  //첨부대기중 이미지 삭제
+  // 첨부대기중 이미지 삭제
   const removeImage = (index) => {
     setImages((prev) => {
+      const wasMain = prev[index].isMain; //삭제된게 대표였는지확인
       const filtered = prev.filter((_, i) => i !== index);
       //sortorder 재정렬
+
+      if (filtered.length === 0) return [];
+
+      // 삭제된 이미지가 대표 이미지였던 경우- 첫 번째 이미지를 새 대표로 지정하거나 isMain을 모두 false로 설정 (현재는 모두 false로)
+      if (wasMain) {
+        return filtered.map((img, idx) => ({
+          ...img,
+          sortOrder: idx,
+          isMain: false,
+        }));
+      }
+
+      // 삭제된게 대표가 아님 - 기존 대표 이미지를 유지
+      const oldMainIndex = prev.findIndex((i) => i.isMain);
+
+      //삭제 후 새로운 메인 이미지 인덱스를 계산
+      const newMainIndex =
+        oldMainIndex > index ? oldMainIndex - 1 : oldMainIndex;
+
       return filtered.map((img, idx) => ({
         ...img,
-        sortOrder: idx,
-        isMain: idx === 0, //삭제후 첫번째 이미지가 자동으로 대표
+        sortOrder: idx, // 삭제 이미지 인덱스 고려 재정렬
+        isMain: idx === newMainIndex, //계산된 새로운 인덱스 사용
       }));
     });
   };
@@ -99,16 +121,19 @@ const ProductImageUploader = ({ images, setImages }) => {
         />
 
         {/* 미리보기 상태 이미지들 */}
-        <div className="flex gap-1.5 items-center h-22">
+        <div className="flex gap-1.5 items-center h-25">
           {images.map((img, idx) => (
             <div
               key={idx}
-              className="relative w-20 h-20 cursor-pointer"
-              onClick={() => setAsMain(idx)}
+              className="relative w-20 h-20 cursor-pointer "
+              // onClick={() => setAsMain(idx)}
             >
-              <div className="relative w-full h-full overflow-hidden border rounded-xl ">
+              <div
+                className="relative w-full h-full overflow-hidden border rounded-xl"
+                onClick={() => setAsMain(idx)}
+              >
                 <img
-                  src={img.preview}
+                  src={img.preview || img.imageUrl}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -123,7 +148,7 @@ const ProductImageUploader = ({ images, setImages }) => {
                 type="button"
                 onClick={(e) => {
                   // e.stopPropagation();
-                  removeImage(idx);
+                  removeImage(idx, e);
                 }}
                 className="absolute -top-1 -right-1 bg-gray-200 rounded-full cursor-pointer"
               >

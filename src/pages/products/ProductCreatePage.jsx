@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
@@ -14,6 +15,7 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductCreatePage = () => {
   const [images, setImages] = useState([]);
+  const navigate = useNavigate();
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -84,6 +86,7 @@ const ProductCreatePage = () => {
       const response = await res.json();
       // const newProductId = await res.json();
       alert(`상품 등록 완료! 상품ID: ${response.productId}`);
+      navigate(`/products/${response.productId}`);
     } catch (error) {
       console.error(error);
       alert("네트워크 오류 발생");

@@ -240,8 +240,8 @@ const ActionButtonBar = ({
         <div className="p-3 ">
           <Button
             className="w-full bg-brand-green text-white py-7 pt-7 text-lg rounded-lg mb-3 mt-6"
-            onClick={() => handleButtonClick("수정완료")}
-            // onClick={onSubmit}
+            // onClick={() => handleButtonClick("수정완료")}
+            onClick={onSubmit}
           >
             수정 완료
           </Button>
