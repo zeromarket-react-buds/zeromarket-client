@@ -11,6 +11,7 @@ import {
 import { getTradeListApi } from "@/common/api/trade.api";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
+import TradeFilter from "./TradeFilter";
 
 const MySalesPage = () => {
   const navigate = useNavigate();
@@ -18,13 +19,15 @@ const MySalesPage = () => {
   const [tradeList, setTradeList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchTradeList = async () => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const fetchTradeList = async (overrideQuery) => {
     if (loading) return;
     setLoading(true);
 
     try {
       const query = {
-        keyword: keyword.trim(),
+        keyword: (overrideQuery?.keyword ?? keyword).trim(),
         role: "SALES",
       };
 
@@ -79,7 +82,7 @@ const MySalesPage = () => {
               className="absolute right-8 top-1/2 -translate-y-1/2 h-4 w-4"
               onClick={() => {
                 setKeyword("");
-                fetchTradeList();
+                fetchTradeList({ keyword: "" });
               }}
             >
               <XCircle />
@@ -93,9 +96,17 @@ const MySalesPage = () => {
           </Button>
         </form>
 
-        <span className="flex flex-row gap-2 py-3">
-          <Filter /> 전체
-        </span>
+        <button
+          type="button"
+          className="flex flex-row items-center gap-2 py-3"
+          onClick={() => setIsFilterOpen(true)}
+        >
+          <Filter />
+          <span>전체</span>
+        </button>
+
+        {/* 필터 모달 */}
+        {isFilterOpen && <TradeFilter onClose={() => setIsFilterOpen(false)} />}
 
         <div className="flex flex-col gap-4">
           {tradeList.map((trade) => {
