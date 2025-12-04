@@ -31,6 +31,17 @@ export async function getTradeDetailApi(tradeId) {
   return data; //
 }
 
+export async function updateTradeStatusApi({ tradeId, nextStatus }) {
+  const { data } = await apiClient(`/api/trades/${tradeId}/status`, {
+    method: "PATCH",
+    body: {
+      status: nextStatus,
+    },
+  });
+
+  return data;
+}
+
 /**
  * 특정 거래 상세 조회 (리뷰 작성 전 필요한 정보)
  * GET /api/trades/{tradeId}
