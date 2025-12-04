@@ -8,6 +8,7 @@ const TradeActionStatusButton = ({
   mode,
   showStatusBar = true,
   isHidden,
+  onComplete,
 }) => {
   const isPending = tradeStatusKey === "PENDING";
 
@@ -54,7 +55,10 @@ const TradeActionStatusButton = ({
               <Button
                 variant="ivory"
                 type="button"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onComplete && onComplete();
+                }}
                 className="flex-1 py-5"
               >
                 거래 완료로 변경

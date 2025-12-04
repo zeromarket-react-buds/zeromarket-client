@@ -14,13 +14,13 @@ export const tradeFlowLabels = (params = {}) => {
     return "INSTANT_DELIVERY";
   }
 
-  // 직거래: 바로구매 - 직거래(3단계)
+  // 직거래: 채팅 - 직거래(2단계)
   if (key === "직거래" || key === "DIRECT") {
-    return "INSTANT_DIRECT";
+    return "CHAT_DIRECT";
   }
 
-  // 그 외: 채팅 - 직거래(2단계)
-  return "CHAT_DIRECT";
+  // 그 외: 바로구매 - 직거래(3단계)
+  return "INSTANT_DIRECT";
 };
 
 export const tradeFlows = {

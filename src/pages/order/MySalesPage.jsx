@@ -8,7 +8,7 @@ import {
   tradeFlowLabels,
   getTradeStatusKey,
 } from "@/components/order/tradeFlow";
-import { getTradeListApi } from "@/common/api/trade.api";
+import { getTradeListApi, updateTradeStatusApi } from "@/common/api/trade.api";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import TradeFilter from "./TradeFilter";
@@ -61,6 +61,20 @@ const MySalesPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchTradeList();
+  };
+
+  const handleUpdateCompleteTrade = async (tradeId) => {
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        nextStatus: "COMPLETED",
+      });
+
+      // 상태 변경 성공 후 목록 다시 불러오기
+      await fetchTradeList();
+    } catch (err) {
+      console.error("거래 완료로 변경 실패:", err);
+    }
   };
 
   const goToTradeDetail = (tradeId) => {
@@ -173,6 +187,10 @@ const MySalesPage = () => {
                       flowType={flowType}
                       tradeStatusKey={tradeStatusKey}
                       mode="sales"
+                      onComplete={() => {
+                        handleUpdateCompleteTrade(tradeId);
+                        confirm("거래완료로 변경하시겠습니까?");
+                      }}
                     />
                   )}
 
