@@ -20,6 +20,29 @@ export async function getReviewByIdApi(reviewId) {
 }
 
 /**
+ * 특정 회원이 받은 리뷰 요약 (평점별 3개씩 + 총 개수)
+ */
+export async function getReceivedReviewSummaryApi(memberId) {
+  const { data } = await apiClient(`/api/reviews/received/summary/${memberId}`);
+  return data;
+}
+
+/**
+ * 특정 회원이 받은 리뷰 전체 목록 (특정 평점 기준, 페이징 포함)
+ */
+export async function getReceivedReviewsByRatingApi(
+  memberId,
+  rating,
+  page = 1,
+  size = 10
+) {
+  const { data } = await apiClient(`/api/reviews/received/${memberId}`, {
+    params: { rating, page, size },
+  });
+  return data;
+}
+
+/**
  * 모든 리뷰 조회 (GET /api/reviews)
  */
 export async function getAllReviewsApi() {

@@ -29,6 +29,8 @@ import ChatListPage from "./pages/chat/ChatListPage";
 import ChatRoomPage from "./pages/chat/ChatRoomPage";
 import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
+import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
+import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
 
 const router = createBrowserRouter([
   {
@@ -231,6 +233,14 @@ const router = createBrowserRouter([
                 },
               },
             },
+          },
+          {
+            path: "received/summary/:memberId",
+            element: <ReceivedReviewSummaryPage />,
+          },
+          {
+            path: "received/:memberId",
+            element: <ReceivedReviewListPage />,
           },
           // {
           //   index: true, // /users/:userId/reviews (후기 조회 페이지)
