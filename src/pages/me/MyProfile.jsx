@@ -5,7 +5,7 @@ import { useHeader } from "@/hooks/HeaderContext";
 
 export default function MyProfile() {
   const navigate = useNavigate();
-  const { setHeader, resetHeader } = useHeader();
+  const { setHeader } = useHeader();
 
   const [previewImg, setPreviewImg] = useState(null);
   const [profileFile, setProfileFile] = useState(null); // 실제 파일 저장
@@ -47,12 +47,7 @@ export default function MyProfile() {
         },
       ],
     });
-
-    // 페이지 빠질 때 헤더 초기화
-    return () => {
-      resetHeader();
-    };
-  }, [setHeader, resetHeader, handleSave]);
+  }, [handleSave]);
 
   // 프로필 이미지 업로드 처리
   const handleProfileChange = (e) => {

@@ -1,11 +1,26 @@
 // src/hooks/HeaderContext.jsx
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 const HeaderContext = createContext(null);
 
 // 헤더 전체 상태 기본값
-const defaultHeaderState = {
-  title: null,
+// const defaultHeaderState = {
+//   // title: null, // 라우터에서 내려준 정적 타이틀 안들어가는 문제 해결
+//   titleAlign: "center", // "left" | "center"
+//   showBack: true,
+//   hideRight: false,
+//   rightActions: [], // { key, label, icon, onClick, className }[]
+//   rightSlot: null,
+// };
+
+export const defaultHeaderState = {
+  title: "",
   titleAlign: "center", // "left" | "center"
   showBack: true,
   hideRight: false,
@@ -14,22 +29,27 @@ const defaultHeaderState = {
 };
 
 function HeaderProvider({ children }) {
-  const [headerState, setHeaderState] = useState(defaultHeaderState);
+  const [headerState, setHeaderState] = useState({});
 
-  const setHeader = (partial) => {
+  const setHeader = useCallback((partial) => {
     setHeaderState((prev) => ({
       ...prev,
       ...partial,
     }));
-  };
+  }, []);
 
-  const resetHeader = () => setHeaderState(defaultHeaderState);
+  const resetHeader = useCallback(() => {
+    setHeaderState({});
+  }, []);
 
-  const value = {
-    headerState,
-    setHeader,
-    resetHeader,
-  };
+  const value = useMemo(
+    () => ({
+      headerState,
+      setHeader,
+      resetHeader,
+    }),
+    [headerState, setHeader, resetHeader]
+  );
 
   return (
     <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>

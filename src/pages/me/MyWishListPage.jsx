@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
 const MyWishListPage = () => {
+  console.log("🔍 MyWishListPage 렌더됨");
   const tabs = [
     { key: "product", label: "상품" },
     { key: "seller", label: "셀러 샵" },
@@ -17,10 +18,34 @@ const MyWishListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ⭐ axios → fetch 버전
+  // ⭐ 찜 삭제(X 버튼)
+  const handleDelete = async (productId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/products/${productId}/wish`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!res.ok) throw new Error("삭제 실패");
+
+      // 🔥 삭제 후 프론트에서 즉시 제거
+      setWishItems((prev) =>
+        prev.filter((item) => item.productId !== productId)
+      );
+    } catch (err) {
+      console.error("찜 삭제 오류:", err);
+    }
+  };
+
+  // ⭐ 찜 목록 로딩
   useEffect(() => {
+    console.log("📡 찜 목록 요청 시작됨");
+
     const fetchWishList = async () => {
       try {
+        console.log("📡 fetchWishList 함수 실행됨");
         const response = await fetch(
           "http://localhost:8080/api/products/wishlist",
           {
@@ -70,17 +95,20 @@ const MyWishListPage = () => {
 
       {/* 날짜 기준 그룹 */}
       {wishItems
-        .filter((item) => item !== null) // ⭐ null 값 방지 추가
+        .filter((item) => item !== null)
         .map((item) => (
           <div key={item.productId} className="mt-6">
-            {/* ⭐ createdAt → YYYY.MM.DD */}
+            {/* ⭐ 찜한 날짜 YYYY.MM.DD */}
             <p className="text-sm text-gray-600 mb-2">
               {item.createdAt ? dayjs(item.createdAt).format("YYYY.MM.DD") : ""}
             </p>
 
             <div className="relative border rounded-xl p-3 flex gap-3 shadow-sm">
               {/* 삭제버튼 */}
-              <button className="absolute top-2 right-2">
+              <button
+                className="absolute top-2 right-2"
+                onClick={() => handleDelete(item.productId)}
+              >
                 <X size={20} className="text-gray-500" />
               </button>
 
@@ -103,20 +131,26 @@ const MyWishListPage = () => {
                   <p className="font-semibold text-sm line-clamp-1">
                     {item.productTitle}
                   </p>
+
                   <p className="font-bold mt-1">
                     {item.sellPrice?.toLocaleString()}원
                   </p>
 
-                  {/* ⭐ createdAt → "X일 전" */}
+                  {/* ⭐ 직거래 · 택배거래 표시 */}
+                  <p className="text-xs text-gray-700 mt-1">
+                    {item.tradeTypeDisplay}
+                  </p>
+
+                  {/* ⭐ 찜한 날짜 → "X일 전" */}
                   <p className="text-xs text-gray-500 mt-1">
                     {item.createdAt ? dayjs(item.createdAt).fromNow() : ""}
                   </p>
                 </div>
 
-                {/* 상태 뱃지 */}
+                {/* 판매 상태 뱃지 */}
                 <div className="flex justify-end mt-1">
                   <span className="px-2 py-1 bg-brand-green text-white text-xs rounded-full">
-                    {item.salesStatus}
+                    {item.salesStatusKr ?? item.salesStatus}
                   </span>
                 </div>
               </div>

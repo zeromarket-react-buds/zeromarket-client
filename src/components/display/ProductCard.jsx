@@ -14,12 +14,22 @@ const ProductCard = ({ products, onToggleLike }) => {
 
   const navigate = useNavigate();
 
-  // 찜 목록 추가/삭제 함수
-  const handleHeartClick = (productId, liked) => {
-    if (!liked) showLikeAddedToast();
-    else showLikeRemovedToast();
+  // // 찜 목록 추가/삭제 함수
+  // const handleHeartClick = (productId, liked) => {
+  //   if (!liked) showLikeAddedToast();
+  //   else showLikeRemovedToast();
 
-    onToggleLike(productId);
+  //   onToggleLike(productId);
+  // };
+
+  // ⭐ 찜 목록 추가/삭제 함수 (백엔드 연동 버전)
+  const handleHeartClick = async (productId, liked) => {
+    // ⭐ 백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
+    const newLiked = await onToggleLike(productId); // ← 수정됨!
+
+    // ⭐ 토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
+    if (newLiked) showLikeAddedToast();
+    else showLikeRemovedToast();
   };
 
   // 상품상세 페이지 이동

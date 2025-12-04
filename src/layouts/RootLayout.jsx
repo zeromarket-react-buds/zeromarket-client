@@ -1,9 +1,13 @@
-import { Outlet, useMatches } from "react-router-dom";
+import { Outlet, useMatches, useLocation } from "react-router-dom";
 import Container from "@/components/Container";
 import ScrollToTop from "@/components/ScrollToTop";
 import clsx from "clsx";
 import { useState, useEffect } from "react";
-import { HeaderProvider, useHeader } from "@/hooks/HeaderContext";
+import {
+  HeaderProvider,
+  useHeader,
+  defaultHeaderState,
+} from "@/hooks/HeaderContext";
 
 import DefaultHeader from "@/layouts/header/DefaultHeader";
 import TitleHeader from "@/layouts/header/TitleHeader";
@@ -90,6 +94,7 @@ const HeaderWrapper = ({ HeaderComponent, headerConfig }) => {
   const baseProps = headerConfig?.props || {};
 
   const headerProps = {
+    ...defaultHeaderState,
     ...baseProps,
     ...headerState,
   };
@@ -101,6 +106,7 @@ const HeaderWrapper = ({ HeaderComponent, headerConfig }) => {
 
 const RootLayout = function () {
   const matches = useMatches();
+  const location = useLocation();
 
   const layoutFromMatches =
     [...matches].reverse().find((m) => m.handle?.layout)?.handle.layout || null;
@@ -122,7 +128,7 @@ const RootLayout = function () {
     : null;
 
   return (
-    <HeaderProvider>
+    <HeaderProvider key={location.pathname}>
       <div className="flex flex-col w-full min-h-screen">
         {HeaderComponent && (
           <HeaderWrapper

@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
-import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
 import AiWriteSection from "@/components/product/create/AiWriteSection";
@@ -15,8 +15,9 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const ProductEditPage = () => {
   const [images, setImages] = useState([]);
-  const [description, setDescription] = useState("");
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -26,7 +27,6 @@ const ProductEditPage = () => {
     categoryDepth2: null,
     categoryDepth3: null,
     sellPrice: "",
-    // sellPrice: Number(form.sellPrice.toString().replace(/,/g, "")),
     productDescription: "",
     productStatus: "USED", //초기값
     direct: false,
@@ -34,8 +34,57 @@ const ProductEditPage = () => {
     sellingArea: "서울 관악구",
   });
 
+  //기존 정보 불러오기
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/products/${id}`);
+        if (!res.ok) throw new Error("상품 정보를 불러오지 못했습니다.");
+
+        const data = await res.json();
+        console.log("서버에서 받은 productStatus:", data.productStatus);
+
+        //백에서 가져온 초기데이터로 폼채우기
+        setForm({
+          sellerId: data.sellerId,
+          productTitle: data.productTitle,
+          categoryDepth1: data.level1Id,
+          categoryDepth2: data.level2Id,
+          categoryDepth3: data.level3Id,
+          sellPrice: data.sellPrice?.toString() ?? "",
+          productDescription: data.productDescription,
+          productStatus: data.productStatus.name,
+          direct: data.direct,
+          delivery: data.delivery,
+          sellingArea: data.sellingArea,
+          // imageUrls: uploadUrls,
+          // mainImageIndex: mainIndex,
+        });
+
+        setImages(
+          data.images.map((img) => ({
+            imageId: img.imageId, //기존 이미지의 디비PK
+            imageUrl: img.imageUrl,
+            preview: img.imageUrl,
+            file: null, //기존 이미지는 file없음
+            isMain: img.main,
+            // isMain: img.isMain ?? img.main ?? img.is_main,
+            sortOrder: img.sortOrder, //기존순서
+          }))
+        );
+
+        setLoading(false);
+      } catch (e) {
+        console.error(e);
+        alert("상품 정보를 불러오는데에 실패했습니다.");
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  //상품 수정 patch
   const handleSubmit = async () => {
-    console.log("상품 등록 요청 시작");
+    console.log("상품 수정 요청 시작");
 
     if (!form.productTitle.trim()) {
       alert("상품명을 입력해주세요.");
@@ -51,10 +100,30 @@ const ProductEditPage = () => {
       alert("카테고리를 선택해주세요.");
       return;
     }
-    const fd = new FormData();
 
-    const jsonData = {
-      sellerId: form.sellerId,
+    //새 이미지 파일만 supabase 업로드 처리
+    const finalImages = [];
+    let order = 1;
+
+    for (const img of images) {
+      let url = img.imageUrl;
+
+      //새로 업로드 필요 이미지
+      if (img.file) {
+        url = await uploadToSupabase(img.file);
+      }
+
+      finalImages.push({
+        imageId: img.imageId ?? null,
+        imageUrl: url,
+        sortOrder: order,
+        isMain: img.isMain,
+      });
+      order++;
+    }
+
+    //수정내용 서버로 보내는 patch전용 json 데이터
+    const body = {
       productTitle: form.productTitle,
       categoryDepth1: form.categoryDepth1,
       categoryDepth2: form.categoryDepth2,
@@ -65,40 +134,34 @@ const ProductEditPage = () => {
       direct: form.direct,
       delivery: form.delivery,
       sellingArea: form.sellingArea,
-      imageUrls: uploadUrls,
-      mainImageIndex: mainIndex,
+      images: finalImages,
     };
 
-    //JSON
-    fd.append(
-      "data",
-      new Blob([JSON.stringify(jsonData)], { type: "application/json" })
-    );
-    //이미지 파일
-    images.forEach((img) => {
-      fd.append("images", img.file);
-    });
-
     try {
-      const res = await fetch("http://localhost:8080/api/products", {
-        method: "POST",
-        body: fd,
+      const res = await fetch(`http://localhost:8080/api/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
+      console.log("PATCH 응답 상태:", res.status);
+      console.log("PATCH body images:", finalImages);
+
       if (!res.ok) {
         const errorText = await res.text();
-        console.log(jsonData);
         console.error("서버오류 내용:", errorText);
-        alert("상품 등록 실패 (서버오류)");
+        alert("상품 수정 실패");
         return;
       }
 
-      const newProductId = await res.json();
-      alert("상품 등록 완료! 상품ID: " + newProductId);
+      alert(`상품 수정 완료! 상품ID:${id}`);
+      navigate(`/products/${id}`);
     } catch (error) {
       console.error(error);
       alert("오류 발생");
     }
   };
+  if (loading) return <div>로딩중...</div>;
+
   return (
     <Container>
       <div>상품수정페이지 / 현재 수정중 상품 ID : {id}</div>
@@ -135,12 +198,6 @@ const ProductEditPage = () => {
                 depth3: form.categoryDepth3,
               }}
               onChange={(depth1, depth2, depth3) =>
-                // setForm({
-                //   ...form,
-                //   categoryDepth1: depth1,
-                //   categoryDepth2: depth2,
-                //   categoryDepth3: depth3,
-                // })
                 setForm((prev) => ({
                   ...prev,
                   categoryDepth1:
@@ -178,19 +235,13 @@ const ProductEditPage = () => {
             />
           </div>
 
-          {/* 거래 방법 
-          직거래 택배거래 둘다 가능하게 변경예정, radio에서 checkbox로 변경예정 
-          */}
+          {/* 거래 방법*/}
           <div>
             <TradeMethodSelector
-              value={form.direct ? "direct" : "delivery"}
-              onChange={(method) => {
-                if (method === "direct") {
-                  setForm({ ...form, direct: true, delivery: false });
-                } else {
-                  setForm({ ...form, direct: false, delivery: true });
-                }
-              }}
+              value={{ delivery: form.delivery, direct: form.direct }}
+              onChange={({ delivery, direct }) =>
+                setForm((prev) => ({ ...prev, delivery, direct }))
+              }
             />
           </div>
 
@@ -199,8 +250,9 @@ const ProductEditPage = () => {
             <EcoScoreSection />
           </div>
         </div>
+
         <div className="sticky bottom-0  bg-white border-t z-50 ">
-          <ActionButtonBar role="EDITOR" />
+          <ActionButtonBar role="EDITOR" onSubmit={handleSubmit} />
         </div>
       </div>
     </Container>
