@@ -5,7 +5,7 @@ const HeaderContext = createContext(null);
 
 // 헤더 전체 상태 기본값
 const defaultHeaderState = {
-  title: null,
+  // title: null, // 라우터에서 내려준 정적 타이틀 안들어가는 문제 해결
   titleAlign: "center", // "left" | "center"
   showBack: true,
   hideRight: false,
