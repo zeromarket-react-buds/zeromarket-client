@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 // ⭐ dayjs 추가
 import dayjs from "dayjs";
 
+// ⭐ 상세 페이지 이동용
+import { useNavigate, useLocation, Link } from "react-router-dom";
+
 const MyWishListPage = () => {
   console.log("🔍 MyWishListPage 렌더됨");
-  const tabs = [
-    { key: "product", label: "상품" },
-    { key: "seller", label: "셀러 샵" },
-  ];
+
+  const navigate = useNavigate();
+  const location = useLocation(); // ⭐ 페이지 이동 감지
 
   const active = "product";
 
@@ -40,64 +42,78 @@ const MyWishListPage = () => {
   };
 
   // ⭐ 찜 목록 로딩
-  useEffect(() => {
-    console.log("📡 찜 목록 요청 시작됨");
-
-    const fetchWishList = async () => {
-      try {
-        console.log("📡 fetchWishList 함수 실행됨");
-        const response = await fetch(
-          "http://localhost:8080/api/products/wishlist",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("서버 응답 오류: " + response.status);
+  const fetchWishList = async () => {
+    try {
+      console.log("📡 fetchWishList 함수 실행됨");
+      const response = await fetch(
+        "http://localhost:8080/api/products/wishlist",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
 
-        const data = await response.json();
-        console.log("🔥 찜 목록 응답:", data);
-        setWishItems(data);
-      } catch (err) {
-        console.error("찜 목록 불러오기 실패:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("서버 응답 오류: " + response.status);
       }
-    };
 
+      const data = await response.json();
+      console.log("🔥 찜 목록 응답:", data);
+      setWishItems(data);
+    } catch (err) {
+      console.error("찜 목록 불러오기 실패:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ⭐ 페이지에 들어올 때마다 찜 목록 새로고침
+  useEffect(() => {
+    console.log("📡 찜 목록 요청 시작됨 (탭 이동 또는 페이지 방문 시)");
     fetchWishList();
-  }, []);
+  }, [location.pathname]); // ← 여기가 핵심!
 
   if (loading) return <Container>불러오는 중...</Container>;
   if (error) return <Container>에러 발생: {error.message}</Container>;
 
   return (
     <Container>
-      {/* 탭 */}
+      {/* 탭 (상품 = 기존 버튼 유지, 셀러샵 = 링크 이동) */}
       <div className="flex border-b">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            className={`flex-1 text-center py-2 font-medium ${
-              active === t.key ? "" : "bg-white"
-            } hover:bg-gray-200 transition-colors`}
-          >
-            {t.label}
-          </button>
-        ))}
+        <button
+          className={`flex-1 text-center py-2 font-medium ${
+            location.pathname === "/me/wishlist" ? "" : "bg-white"
+          } hover:bg-gray-200 transition-colors`}
+        >
+          상품
+        </button>
+
+        {/* ⭐ 셀러샵 탭 → /sellershop 이동 */}
+        <Link
+          to="/sellershop"
+          className={`flex-1 text-center py-2 font-medium ${
+            location.pathname === "/sellershop"
+              ? "border-b-2 border-brand-green"
+              : "bg-white"
+          } hover:bg-gray-200 transition-colors`}
+        >
+          셀러 샵
+        </Link>
       </div>
 
       {/* 날짜 기준 그룹 */}
       {wishItems
         .filter((item) => item !== null)
         .map((item) => (
-          <div key={item.productId} className="mt-6">
+          <div
+            key={item.productId}
+            className="mt-6 cursor-pointer"
+            // ⭐ 클릭하면 상세페이지로 이동!
+            onClick={() => navigate(`/products/${item.productId}`)}
+          >
             {/* ⭐ 찜한 날짜 YYYY.MM.DD */}
             <p className="text-sm text-gray-600 mb-2">
               {item.createdAt ? dayjs(item.createdAt).format("YYYY.MM.DD") : ""}
@@ -107,7 +123,10 @@ const MyWishListPage = () => {
               {/* 삭제버튼 */}
               <button
                 className="absolute top-2 right-2"
-                onClick={() => handleDelete(item.productId)}
+                onClick={(e) => {
+                  e.stopPropagation(); // ⭐ 상세페이지로 이동 막기(이벤트 버블링 방지)
+                  handleDelete(item.productId);
+                }}
               >
                 <X size={20} className="text-gray-500" />
               </button>
