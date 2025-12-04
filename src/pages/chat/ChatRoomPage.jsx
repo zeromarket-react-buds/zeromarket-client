@@ -18,6 +18,7 @@ const ChatRoomPage = () => {
 
   const { user } = useAuth();
 
+  const { setHeader } = useHeader();
   const productProps = {
     ...(chatInfo ?? {}),
     thumbnailUrl: chatInfo?.productImage,
