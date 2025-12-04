@@ -45,7 +45,7 @@ const LongProductCard = ({
       </div>
       <div className="flex flex-col gap-1 flex-1">
         <div className="font-semibold">{productTitle}</div>
-        <div className="font-semibold">{sellPrice.toLocaleString()}원</div>
+        <div className="font-semibold">{sellPrice?.toLocaleString()}원</div>
         <div className="flex w-full flex-row items-center justify-between">
           <div className="text-brand-mediumgray">{tradeTypeLabel}</div>
           {isHidden ? (

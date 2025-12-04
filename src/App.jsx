@@ -137,7 +137,7 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { type: "detail", title: "채팅 목록" },
+                  props: { title: "채팅 목록" },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -152,10 +152,10 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { type: "detail", title: "채팅방" },
+                  props: { title: "채팅방" },
                 },
                 footer: {
-                  component: "DefaultFooter",
+                  component: null,
                 },
               },
             },
@@ -174,7 +174,7 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { type: "detail", title: "로그인" },
+              props: { title: "로그인" },
             },
             footer: {
               component: "DefaultFooter",
@@ -190,7 +190,7 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { type: "detail", title: "회원가입" },
+              props: { title: "회원가입" },
             },
             footer: {
               component: "DefaultFooter",
@@ -209,7 +209,7 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { type: "detail", title: "후기 작성" },
+                  props: { title: "후기 작성" },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -224,7 +224,7 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
-                  props: { type: "detail", title: "후기 보기" },
+                  props: { title: "후기 보기" },
                 },
                 footer: {
                   component: "DefaultFooter",
