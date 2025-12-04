@@ -18,7 +18,7 @@ const SectionItem = ({ title, data, memberId }) => {
 
   return (
     <div className="mb-6 w-full">
-      <div className="flex justify-between items-center text-gray-700 mb-1">
+      <div className="flex justify-between items-center text-gray-700 mb-3">
         <p className="text-sm">{title}</p>
         <span className="text-green-600 font-semibold">
           {data.totalCount} 건
@@ -26,10 +26,12 @@ const SectionItem = ({ title, data, memberId }) => {
       </div>
 
       <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-        <ul className="list-disc list-inside text-sm text-black space-y-1">
+        <ul className="list-disc list-inside text-black space-y-2">
           {data.totalCount > 0 ? (
             data.latestReviews.map((item) => (
-              <li key={item.reviewId}>{item.content}</li>
+              <li key={item.reviewId} className="line-clamp-1">
+                {item.content}
+              </li>
             ))
           ) : (
             <p className="text-gray-500">아직 받은 리뷰가 없어요!</p>
@@ -38,7 +40,7 @@ const SectionItem = ({ title, data, memberId }) => {
       </div>
 
       <button
-        className="w-full mt-2 text-center text-gray-600 text-sm underline"
+        className="w-full mt-3 text-center text-gray-600 text-sm underline cursor-pointer"
         onClick={() => handleMoreClick(data.rating)}
       >
         더 보기
@@ -87,32 +89,30 @@ export default function ReceivedReviewSummaryPage() {
 
   return (
     <Container>
-      <div className="min-h-screen bg-white p-5">
-        {/* Summary */}
-        <p className="text-sm text-gray-700 mb-4">
-          <span className="font-semibold text-gray-900">{nickname}님</span>은
-          현재 <span className="font-bold text-green-600">{totalCount}</span>
-          건의 후기를 받았어요
-        </p>
+      {/* Summary */}
+      <p className="text-gray-700 mb-12 text-center">
+        <span className="font-semibold text-brand-green">{nickname}</span>님은
+        현재 <span className="font-bold text-brand-green">{totalCount}</span>
+        건의 후기를 받았어요
+      </p>
 
-        {/* Rating 5 Section */}
-        <SectionItem
-          title="이런 점이 최고예요"
-          data={reviewSummary.rating5}
-          memberId={memberId}
-        />
+      {/* Rating 5 Section */}
+      <SectionItem
+        title="이런 점이 최고예요"
+        data={reviewSummary.rating5}
+        memberId={memberId}
+      />
 
-        {/* Rating 4 Section */}
-        <SectionItem
-          title="이런 점이 좋았어요"
-          data={reviewSummary.rating4}
-          memberId={memberId}
-        />
+      {/* Rating 4 Section */}
+      <SectionItem
+        title="이런 점이 좋았어요"
+        data={reviewSummary.rating4}
+        memberId={memberId}
+      />
 
-        <p className="text-gray-400 text-xs text-center mt-4">
-          후기는 최신순으로 3건만 보입니다
-        </p>
-      </div>
+      <p className="text-gray-400 text-sm text-center mt-4">
+        후기는 최신순으로 3건만 보입니다
+      </p>
     </Container>
   );
 }

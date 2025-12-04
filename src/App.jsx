@@ -237,10 +237,32 @@ const router = createBrowserRouter([
           {
             path: "received/summary/:memberId",
             element: <ReceivedReviewSummaryPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "내가 받은 후기" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           {
             path: "received/:memberId",
             element: <ReceivedReviewListPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "후기" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
           },
           // {
           //   index: true, // /users/:userId/reviews (후기 조회 페이지)

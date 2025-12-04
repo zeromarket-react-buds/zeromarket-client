@@ -1,8 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import Container from "@/components/Container";
 import { getReceivedReviewsByRatingApi } from "@/common/api/review.api";
+
+const ReviewCard = ({ info }) => {
+  return (
+    <div
+      key={info.reviewId}
+      className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm"
+    >
+      <p className="font-medium text-sm text-gray-400">
+        {info.writerNickname}님이 남겨주신 후기입니다
+      </p>
+      <p className="text-gray-700 mt-2 font-medium">{info.content}</p>
+      <p className="text-gray-500 text-sm mt-2">
+        {new Date(info.createdAt).toLocaleDateString()}
+      </p>
+    </div>
+  );
+};
 
 export default function ReceivedReviewListPage() {
   const navigate = useNavigate();
@@ -11,7 +27,7 @@ export default function ReceivedReviewListPage() {
 
   const rating = Number(params.get("rating"));
   const ratingLabel =
-    rating === 5 ? "이런 점이 최고예요" : "이런 점이 좋았어요";
+    rating === 5 ? "이런 점이 최고예요 ;)" : "이런 점이 좋았어요 :)";
 
   const [list, setList] = useState([]);
   const [pageInfo, setPageInfo] = useState({});
@@ -26,31 +42,18 @@ export default function ReceivedReviewListPage() {
           page,
           10
         );
-        console.log(data);
 
-        const {
-          content,
-          currentPage,
-          startPage,
-          endPage,
-          hasNext,
-          hasPrevious,
-          pageSize,
-          totalCount,
-          totalPages,
-        } = data;
-
-        setList(content);
+        setList(data.content);
         setPageInfo({
-          pageSize,
-          startPage,
-          endPage,
-          hasNext,
-          hasPrevious,
-          totalCount,
-          totalPages,
+          pageSize: data.pageSize,
+          startPage: data.startPage,
+          endPage: data.endPage,
+          hasNext: data.hasNext,
+          hasPrevious: data.hasPrevious,
+          totalCount: data.totalCount,
+          totalPages: data.totalPages,
         });
-        setPage(currentPage);
+        setPage(data.currentPage);
       } catch (err) {
         console.error(err);
       }
@@ -59,55 +62,54 @@ export default function ReceivedReviewListPage() {
   }, [memberId, rating, page]);
 
   return (
-    <div className="p-5">
+    <Container>
       {/* Header */}
-
-      <div className="flex justify-between items-center">
-        <p className="text-gray-700 mb-4">{rating}점 후기</p>
-        <p>{pageInfo.totalItems ?? 0}개</p>
-      </div>
-
-      <div className="space-y-3">
-        {list.map((item) => (
-          <div
-            key={item.reviewId}
-            className="bg-gray-100 p-4 rounded-lg cursor-pointer"
-          >
-            <p className="font-medium text-sm">
-              {item.writerNickname}님과의 거래
-            </p>
-            <p className="text-gray-700 text-sm mt-1 line-clamp-2">
-              {item.content}
-            </p>
-            <p className="text-gray-500 text-xs mt-1">
-              {new Date(item.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center gap-2 mt-6">
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-30"
-          disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
-        >
-          이전
-        </button>
-
-        <span className="text-sm">
-          {page} / {pageInfo.totalPages ?? 1}
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-gray-700">{ratingLabel}</p>
+        <span className="flex items-center gap-1">
+          <p className="text-brand-green font-bold text-lg">
+            {pageInfo.totalCount ?? 0}
+          </p>
+          <p>건</p>
         </span>
-
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-30"
-          disabled={page === pageInfo.totalPages}
-          onClick={() => setPage((p) => p + 1)}
-        >
-          다음
-        </button>
       </div>
-    </div>
+
+      {pageInfo.totalCount > 0 ? (
+        <div>
+          <div className="space-y-6">
+            {list.map((item) => (
+              <ReviewCard info={item} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+            <button
+              className="px-3 py-1 border rounded disabled:opacity-30"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              이전
+            </button>
+
+            <span className="text-sm">
+              {page} / {pageInfo.totalPages ?? 1}
+            </span>
+
+            <button
+              className="px-3 py-1 border rounded disabled:opacity-30"
+              disabled={page === pageInfo.totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className=" bg-gray-200 rounded-lg text-gray-400 p-6 text-sm">
+          아직 받은 후기가 없습니다!
+        </div>
+      )}
+    </Container>
   );
 }

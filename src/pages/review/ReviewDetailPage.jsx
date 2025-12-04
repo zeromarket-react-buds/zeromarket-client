@@ -6,20 +6,26 @@ import { ThumbsUp, ThumbsDown } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import Container from "@/components/Container";
+import { Angry, Annoyed, Meh, Smile, Laugh } from "lucide-react";
+
+// TODO: ratingOptions 외부로 뺴보기
+// TODO: 후기 상세 ui 개선 (거래 상대 이미지 또는 거래 물품 이미지 표시) -> preload는 제외하고
+// TODO: 리뷰 목록 -클릭-> 후기 상세 이동 (가능하도록 해보기)
+// TODO: 시간도 표시하기
 
 const ratingOptions = [
-  { rating: 5, label: "최고예요", icon: <ThumbsUp className="w-6 h-6" /> },
-  { rating: 4, label: "좋아요", icon: <ThumbsUp className="w-6 h-6" /> },
+  { rating: 5, label: "최고예요", icon: <Laugh className="w-6 h-6" /> },
+  { rating: 4, label: "좋아요", icon: <Smile className="w-6 h-6" /> },
   {
     rating: 3,
     label: "보통이에요",
-    icon: <ThumbsDown className="w-6 h-6" />,
+    icon: <Meh className="w-6 h-6" />,
   },
-  { rating: 2, label: "별로예요", icon: <ThumbsDown className="w-6 h-6" /> },
+  { rating: 2, label: "별로예요", icon: <Annoyed className="w-6 h-6" /> },
   {
     rating: 1,
     label: "정말 별로예요",
-    icon: <ThumbsDown className="w-6 h-6" />,
+    icon: <Angry className="w-6 h-6" />,
   },
 ];
 
