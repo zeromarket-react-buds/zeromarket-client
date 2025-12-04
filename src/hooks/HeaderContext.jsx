@@ -1,5 +1,11 @@
 // src/hooks/HeaderContext.jsx
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 const HeaderContext = createContext(null);
 
@@ -25,20 +31,25 @@ export const defaultHeaderState = {
 function HeaderProvider({ children }) {
   const [headerState, setHeaderState] = useState({});
 
-  const setHeader = (partial) => {
+  const setHeader = useCallback((partial) => {
     setHeaderState((prev) => ({
       ...prev,
       ...partial,
     }));
-  };
+  }, []);
 
-  const resetHeader = () => setHeaderState({});
+  const resetHeader = useCallback(() => {
+    setHeaderState({});
+  }, []);
 
-  const value = {
-    headerState,
-    setHeader,
-    resetHeader,
-  };
+  const value = useMemo(
+    () => ({
+      headerState,
+      setHeader,
+      resetHeader,
+    }),
+    [headerState, setHeader, resetHeader]
+  );
 
   return (
     <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>
