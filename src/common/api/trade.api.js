@@ -22,6 +22,15 @@ export async function getTradeListApi(query = {}) {
   return data; // List<TradeHistoryResponse>
 }
 
+// 거래 상세 조회 (거래내역 상세 화면용)
+export async function getTradeDetailApi(tradeId) {
+  const { data } = await apiClient(`/api/trades/${tradeId}`, {
+    method: "GET",
+  });
+
+  return data; //
+}
+
 /**
  * 특정 거래 상세 조회 (리뷰 작성 전 필요한 정보)
  * GET /api/trades/{tradeId}
@@ -29,6 +38,6 @@ export async function getTradeListApi(query = {}) {
  * 로그인한 사용자 정보를 기반으로 상대 닉네임이 계산되어 내려옴
  */
 export async function getTradeInfoForReviewApi(tradeId) {
-  const { data } = await apiClient(`/api/trades/${tradeId}`);
+  const { data } = await apiClient(`/api/trades//review${tradeId}`);
   return data; // TradeReviewInfoDto
 }
