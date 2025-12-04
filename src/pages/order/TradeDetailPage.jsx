@@ -22,6 +22,21 @@ const getHeaderDate = (trade) => {
   return formatDate(canceledAt ?? completedAt ?? updatedAt ?? createdAt);
 };
 
+function formatPhone(phone = "") {
+  // 숫자만 추출
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.length === 11) {
+    // 010-1234-5678
+    return digits.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+  }
+
+  if (digits.length === 10) {
+    // 010-123-4567
+    return digits.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+  }
+}
+
 const TradeDetailPage = () => {
   const navigate = useNavigate();
   const { tradeId } = useParams();
@@ -73,6 +88,7 @@ const TradeDetailPage = () => {
     name,
     phone,
     createdAt,
+    canceledBy,
   } = tradeProduct;
 
   // 이 거래에서의 내 역할 판별
@@ -116,21 +132,27 @@ const TradeDetailPage = () => {
               <div className="text-brand-green font-semibold">결제완료</div>
             ) : (
               <div className="text-brand-mediumgray font-semibold">
-                {tradeProduct.tradeStatus?.description}
+                {tradeStatus?.description}
               </div>
             )}
 
-            {isCanceled ? (
-              <div className="font-semibold">
-                판매자/구매자가 주문을 취소하였습니다
-              </div>
-            ) : isCompleted ? (
-              <div className="font-semibold">거래가 완료되었습니다</div>
-            ) : (
-              <div className="font-semibold">
-                판매자에게 주문 확인을 요청해주세요
-              </div>
-            )}
+            <div className="font-semibold">
+              {isCanceled
+                ? canceledBy === "SELLER"
+                  ? isSeller
+                    ? "거래를 취소했습니다."
+                    : "판매자가 거래를 취소했습니다."
+                  : canceledBy === "BUYER"
+                  ? isSeller
+                    ? "구매자가 거래를 취소했습니다."
+                    : "거래를 취소했습니다."
+                  : null
+                : isCompleted
+                ? "거래가 완료되었습니다."
+                : isSeller
+                ? "구매자의 주문을 확인하고 거래를 진행해주세요."
+                : "판매자에게 주문 확인을 요청해주세요."}
+            </div>
           </div>
           <div
             className="flex flex-row gap-10 pt-2 pb-5 items-center"
@@ -149,7 +171,7 @@ const TradeDetailPage = () => {
           </div>
           {isCompleted ? (
             <TradeReviewButton
-              tradeId={tradeProduct.tradeId}
+              tradeId={tradeId}
               reviewStatus={tradeProduct.reviewStatus}
             />
           ) : !hideActions ? (
@@ -168,7 +190,10 @@ const TradeDetailPage = () => {
             <div className="flex flex-col gap-2 py-4 text-lg font-semibold">
               <div className="flex flex-row justify-between items-center">
                 <span>판매자 정보</span>
-                <Button className="text-lg text-black px-0">
+                <Button
+                  className="text-lg text-black px-0"
+                  onClick={() => navigate(`/sellershop`)}
+                >
                   가게 보기 <ChevronRight className="-mr-3" />
                 </Button>
               </div>
@@ -188,7 +213,7 @@ const TradeDetailPage = () => {
                     <span>이름</span> <span>{name}</span>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <span>연락처</span> <span>{phone}</span>
+                    <span>연락처</span> <span>{formatPhone(phone)}</span>
                   </div>
                   <div className="flex flex-row justify-between">
                     <span>주소</span> <span>[우편번호] 주소</span>
@@ -236,25 +261,43 @@ const TradeDetailPage = () => {
           </span>
         </div>
 
-        <div className="flex flex-col border-t border-brand-mediumgray p-2">
-          <div className="text-lg font-semibold py-2">안내사항</div>
+        {!isCompleted ? (
+          <div className="flex flex-col border-t border-brand-mediumgray p-2">
+            <div className="text-lg font-semibold py-2">안내사항</div>
 
-          {isCanceled ? (
-            <div className="text-brand-mediumgray text-sm">
-              판매자/구매자가 거래를 취소하였습니다.
-              <br />
-              결제금이 환불되지 않았을 경우 문의 주세요
-            </div>
-          ) : (
-            <div className="text-brand-mediumgray text-sm">
-              판매자가 계속해서 주문 확인하지 않을 경우, 거래가 진행되지 않을
-              경우
-              <br />
-              거래가 진행되지 않습니다. 구매를 원하지 않으실 경우 [구매 취소]
-              해주세요.
-            </div>
-          )}
-        </div>
+            {isCanceled ? (
+              isSeller ? (
+                <div className="text-brand-mediumgray text-sm">
+                  거래가 취소되었습니다.
+                  <br />
+                  구매자에게 환불 등 필요 조치를 안내해주세요.
+                </div>
+              ) : (
+                <div className="text-brand-mediumgray text-sm">
+                  거래가 취소되었습니다.
+                  <br />
+                  결제금 환불이 처리되지 않았을 경우 문의해주세요.
+                </div>
+              )
+            ) : isSeller ? (
+              <div className="text-brand-mediumgray text-sm">
+                판매자가 주문을 확인하지 않을 경우 거래가 진행되지 않을 수
+                있습니다.
+                <br />
+                주문 확인 후 거래를 진행할 수 있습니다.
+              </div>
+            ) : (
+              <div className="text-brand-mediumgray text-sm">
+                판매자가 계속해서 주문 확인하지 않을 경우 거래가 진행되지
+                않습니다.
+                <br />
+                구매를 원하지 않으실 경우 [구매 취소] 해주세요.
+              </div>
+            )}
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );
