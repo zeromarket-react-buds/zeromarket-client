@@ -1,12 +1,40 @@
 import { Badge } from "@/components/ui/badge";
 
+// 거래 타입 표시용 문자열 생성
+const buildTradeTypeLabel = ({ tradeType, isDirect, isDelivery }) => {
+  // tradeType enum 객체가 있으면 description 우선 사용
+  if (tradeType && tradeType.description) {
+    return tradeType.description;
+  }
+
+  // tradeType enum이 없으면 isDirect / isDelivery로 판단 (거래상품x, 숨기기상품 같은 것)
+  const direct = isDirect === true;
+  const delivery = isDelivery === true;
+
+  if (direct && delivery) return "직거래 / 택배거래";
+  if (direct) return "직거래";
+  if (delivery) return "택배거래";
+
+  // 둘 다 없으면 표시 안 함 (방어용 코드)
+  return "";
+};
+
 const LongProductCard = ({
   productTitle,
   sellPrice,
-  tradeType,
-  tradeStatus,
+  tradeType, // enum 객체 그대로
+  isDirect, // tradeType 없을시 체크할 Boolean
+  isDelivery, // tradeType 없을시 체크할 Boolean
+  tradeStatus, // enum 객체 그대로
   thumbnailUrl,
+  isHidden,
 }) => {
+  const tradeTypeLabel = buildTradeTypeLabel({
+    tradeType,
+    isDirect,
+    isDelivery,
+  });
+
   return (
     <div className="flex flex-row gap-10 items-center">
       <div className="overflow-hidden">
@@ -19,12 +47,14 @@ const LongProductCard = ({
         <div className="font-semibold">{productTitle}</div>
         <div className="font-semibold">{sellPrice.toLocaleString()}원</div>
         <div className="flex w-full flex-row items-center justify-between">
-          <div className="text-brand-mediumgray">{tradeType}</div>
-          {tradeStatus === "취소" ? (
+          <div className="text-brand-mediumgray">{tradeTypeLabel}</div>
+          {isHidden ? (
+            <Badge>숨기기</Badge>
+          ) : tradeStatus === "취소" ? (
             <Badge variant="red">거래취소</Badge>
-          ) : (
+          ) : tradeStatus ? (
             <Badge>{tradeStatus}</Badge>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
