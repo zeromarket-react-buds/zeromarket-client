@@ -3,7 +3,11 @@ import Container from "@/components/Container";
 import ScrollToTop from "@/components/ScrollToTop";
 import clsx from "clsx";
 import { useState, useEffect } from "react";
-import { HeaderProvider, useHeader } from "@/hooks/HeaderContext";
+import {
+  HeaderProvider,
+  useHeader,
+  defaultHeaderState,
+} from "@/hooks/HeaderContext";
 
 import DefaultHeader from "@/layouts/header/DefaultHeader";
 import TitleHeader from "@/layouts/header/TitleHeader";
@@ -90,6 +94,7 @@ const HeaderWrapper = ({ HeaderComponent, headerConfig }) => {
   const baseProps = headerConfig?.props || {};
 
   const headerProps = {
+    ...defaultHeaderState,
     ...baseProps,
     ...headerState,
   };
