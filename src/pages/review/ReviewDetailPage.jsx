@@ -1,17 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail } from "lucide-react";
+import { CircleUserRound, Mail } from "lucide-react";
 import { getReviewByIdApi } from "@/common/api/review.api";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import Container from "@/components/Container";
 import { Angry, Annoyed, Meh, Smile, Laugh } from "lucide-react";
-
-// TODO: ratingOptions 외부로 뺴보기
-// TODO: 후기 상세 ui 개선 (거래 상대 이미지 또는 거래 물품 이미지 표시) -> preload는 제외하고
-// TODO: 리뷰 목록 -클릭-> 후기 상세 이동 (가능하도록 해보기)
-// TODO: 시간도 표시하기
 
 const ratingOptions = [
   { rating: 5, label: "최고예요", icon: <Laugh className="w-6 h-6" /> },
@@ -50,7 +45,7 @@ const ReviewDetailPage = () => {
       try {
         // console.log("getReviewById!!");
         const data = await getReviewByIdApi(reviewId);
-        // console.log(data);
+        console.log(data);
 
         setReview(data);
       } catch (error) {
@@ -69,20 +64,50 @@ const ReviewDetailPage = () => {
       <div className="flex flex-col items-center gap-6">
         {/* 상단 정보 */}
         <div className="flex flex-col items-center">
-          <Mail className="w-16 h-16 text-black mb-4" />
-          <p className="text-sm text-gray-700 mb-2">{review.productTitle}</p>
-          <p className="text-sm text-gray-700">{review.opponentNickname}님과</p>
-          <p className="text-sm text-gray-700 mb-1">거래한 후기 내용입니다</p>
+          {/* 프로필 & 상품 이미지 */}
+          <div className="relative w-20 h-20 mb-15">
+            <div className="w-full h-full rounded-full overflow-hidden">
+              {review.opponentProfileImage ? (
+                <img
+                  src={review.opponentProfileImage}
+                  alt="프로필 이미지"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <CircleUserRound className="w-full h-full text-gray-700" />
+              )}
+            </div>
+            <div className="absolute top-12 left-12 z-10 w-16 h-16 rounded-full overflow-hidden">
+              {review.productImage ? (
+                <img
+                  src={review.productImage}
+                  alt="상품 이미지"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Mail className="w-full h-full text-gray-700" />
+              )}
+            </div>
+          </div>
+
+          <p className="text-gray-700 mb-1 w-50 truncate text-center">
+            {review.productTitle}
+          </p>
+          <p className="text-gray-700 mb-1">
+            {review.opponentNickname}님과 거래한 후기 내용입니다
+          </p>
         </div>
 
         {/* 후기 */}
-        <div className="bg-gray-100 p-4 rounded-md w-full max-w-md">
-          <p className="font-semibold mb-2">
+        <div className="bg-brand-ivory p-4 rounded-md w-full max-w-md space-y-3">
+          <p className="font-semibold">
             {ratingOptions.find((r) => r.rating === review?.rating)?.label ??
               "후기 평점 정보 없음"}
           </p>
-          <hr className="border-gray-300 mb-2" />
           <p>{review.content}</p>
+          <p className="text-sm text-gray-600">
+            {dayjs(review.createdAt).format("YYYY년 MM월 DD일 A hh:mm")}
+          </p>
         </div>
       </div>
     </Container>

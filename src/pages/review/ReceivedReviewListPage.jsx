@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import Container from "@/components/Container";
 import { getReceivedReviewsByRatingApi } from "@/common/api/review.api";
 
-const ReviewCard = ({ info }) => {
+const ReviewCard = ({ info, onClick }) => {
   return (
     <div
       key={info.reviewId}
-      className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm"
+      className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm cursor-pointer"
+      onClick={onClick}
     >
       <p className="font-medium text-sm text-gray-400">
         {info.writerNickname}님이 남겨주신 후기입니다
@@ -61,6 +62,10 @@ export default function ReceivedReviewListPage() {
     fetchList();
   }, [memberId, rating, page]);
 
+  const onCardClick = (reviewId) => {
+    navigate(`/reviews/${reviewId}`);
+  };
+
   return (
     <Container>
       {/* Header */}
@@ -78,7 +83,11 @@ export default function ReceivedReviewListPage() {
         <div>
           <div className="space-y-6">
             {list.map((item) => (
-              <ReviewCard info={item} />
+              <ReviewCard
+                key={item.reviewId}
+                info={item}
+                onClick={() => onCardClick(item.reviewId)}
+              />
             ))}
           </div>
 
