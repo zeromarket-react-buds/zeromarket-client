@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import {
   getProductDetailApi,
@@ -19,6 +20,7 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import { products } from "@/data/product.js";
 
 const ProductDetailPage = () => {
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const { onToggleLike } = useLikeToggle([]);
@@ -49,40 +51,6 @@ const ProductDetailPage = () => {
       }
 
       setDetail(data);
-      // const res = await fetch(`http://localhost:8080/api/products/${id}`);
-
-      // //상태코드별 예외처리
-      // if (!res.ok) {
-      //   // let errorMessage = "상품 정보를 불러오지 못했습니다.";
-      //   // const text = await res.text();
-
-      //   if (res.status === 403) {
-      //     setError("HIDDEN");
-      //     alert("숨겨진 게시글이에요.");
-      //     // navigate(-1);
-      //     //로그인권한 구현 전 숨김화면에서 숨김해제 버튼표시용, 추후 삭제예정
-      //     setDetail({
-      //       productId: id,
-      //       images: [],
-      //       seller: {},
-      //       isHidden: true,
-      //     });
-
-      //     return;
-      //   }
-
-      //   if (res.status === 404 || res.status === 410) {
-      //     setError("상품이 삭제되었거나 존재하지 않습니다.");
-      //     return;
-      //   }
-
-      //   setError("상품 정보를 불러오지 못했습니다.");
-      //   return;
-      // }
-
-      // // const data = await res.json();
-      // // console.log("detail.images", data.images);
-      // // setDetail(data);
     } catch (err) {
       const status = err.status;
       if (status === 403) {
@@ -95,6 +63,7 @@ const ProductDetailPage = () => {
           images: [],
           seller: {},
           isHidden: true,
+          sellerId: user.memberId,
         });
         return;
       }
@@ -103,7 +72,6 @@ const ProductDetailPage = () => {
         return;
       }
       setError("상품 정보를 불러오는 중 오류가 발생했습니다.");
-      // setError("네트워크 오류가 발생했습니다.");
       console.error("상품 상세 페이지 불러오기 실패 : ", err);
     } finally {
       setLoading(false);
@@ -114,20 +82,10 @@ const ProductDetailPage = () => {
   const fetchSimilarProducts = async () => {
     try {
       const data = await getSimilarProductsApi(id);
-      // const res = await fetch(
-      //   `http://localhost:8080/api/products/${id}/similar`
-      // );
-
-      // if (!res.ok) return;
-
-      // const data = await res.json();
-
-      //서버응답이 배열형태인지 확인
       if (!Array.isArray(data)) {
         console.warn("비슷한 상품 API 응답이 배열이 아님:", data);
         return;
       }
-
       const formatted = data.map((p) => ({
         productId: p.productId,
         productTitle: p.productTitle,
@@ -199,6 +157,13 @@ const ProductDetailPage = () => {
       })
     : [];
 
+  const isProductOwner = user && user.memberId === detail.sellerId;
+  const isProductHidden =
+    detail.isHidden || detail.productStatus?.name === "HIDDEN";
+
+  const handleStatusUpdateSuccess = () => {
+    fetchProductDetail();
+  };
   return (
     <div>
       <Container>
@@ -247,23 +212,16 @@ const ProductDetailPage = () => {
             />
           </div>
 
-          <div className="sticky bottom-20 bg-white border-t z-50">
-            <ActionButtonBar
-              role="BUYER"
-              // role={userRole}
-              isWished={detail.isWished}
-              onToggleWish={toggleWish}
-              productId={detail.productId}
-            />
-          </div>
+          {/* 로그인 여부와 상품 작성자 여부 따라 버튼 다르게 렌더링 */}
           <div className="sticky bottom-0 bg-white border-t z-50">
             <ActionButtonBar
-              role="SELLER"
-              // role={userRole}
-              productId={detail.productId}
+              role={isAuthenticated && isProductOwner ? "SELLER" : "BUYER"}
               isWished={detail.isWished}
               onToggleWish={toggleWish}
-              isHidden={detail.isHidden}
+              productId={detail.productId}
+              isHidden={isProductHidden}
+              onHide={handleStatusUpdateSuccess} // 숨기기 성공 시 로컬 상태 업데이트 함수 전달
+              onUnhide={handleStatusUpdateSuccess} // 숨기기 해제 성공 시 로컬 상태 업데이트 함수 전달
             />
           </div>
         </div>

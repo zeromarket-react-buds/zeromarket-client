@@ -1,10 +1,27 @@
-import { ChevronLeft, Share2 } from "lucide-react";
+import { ChevronLeft, Share2, User, LogIn } from "lucide-react";
 import Container from "@/components/Container";
 import { useNavigate } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
+import { useAuth } from "@/hooks/AuthContext";
+
+const AuthStatusIcon = ({ isAuthenticated, navigate }) => (
+  <button
+    className="w-10 h-10 cursor-pointer flex items-center justify-center"
+    onClick={() => navigate(isAuthenticated ? "/mypage" : "/login")}
+    title={isAuthenticated ? "마이페이지" : "로그인"}
+  >
+    {/* 현재 로그인상태 확인용 임의 코드 - 추후 삭제예정 */}
+    {isAuthenticated ? (
+      <User className="text-brand-green" size={20} /> // 로그인 상태
+    ) : (
+      <LogIn className="text-gray-500" size={20} /> // 비로그인 상태
+    )}
+  </button>
+);
 
 const ProductHeader = ({ type }) => {
   const { headerState } = useHeader();
+  const { isAuthenticated } = useAuth();
   const detail = headerState?.detail;
   const navigate = useNavigate();
 
@@ -46,6 +63,10 @@ const ProductHeader = ({ type }) => {
           <button className="text-sm font-semibold text-gray-500 w-15 h-10  mr-4 cursor-pointer">
             임시 저장
           </button>
+          <AuthStatusIcon
+            isAuthenticated={isAuthenticated}
+            navigate={navigate}
+          />
         </header>
       )}
 
@@ -61,6 +82,10 @@ const ProductHeader = ({ type }) => {
           <button className="w-15 h-10 cursor-pointer" onClick={handleShare}>
             <Share2 className="m-2 mr-3 text-gray-800" />
           </button>
+          <AuthStatusIcon
+            isAuthenticated={isAuthenticated}
+            navigate={navigate}
+          />
         </header>
       )}
 
@@ -77,6 +102,10 @@ const ProductHeader = ({ type }) => {
           <button className="text-sm font-semibold text-gray-500 w-15 h-10  mr-4 cursor-pointer">
             임시 저장
           </button>
+          <AuthStatusIcon
+            isAuthenticated={isAuthenticated}
+            navigate={navigate}
+          />
         </header>
       )}
     </Container>
