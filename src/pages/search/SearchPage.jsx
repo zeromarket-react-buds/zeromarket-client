@@ -1,12 +1,13 @@
 import Container from "@/components/Container";
 import ProductCard from "@/components/display/ProductCard";
-import ProductFilter from "@/components/display/ProductFilter";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { Button } from "@/components/ui/button";
+import ProductFilterModal from "@/components/display/ProductFilterModal";
+import { getProductListApi } from "@/common/api/product.api";
 
 const SearchPage = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -55,37 +56,21 @@ const SearchPage = () => {
     setLoading(true);
 
     try {
-      const params = new URLSearchParams();
+      const query = {
+        offset: nextOffset,
+        sort,
+        keyword,
+        categoryId: selectedLevel3Id,
+        minPrice,
+        maxPrice,
+        area,
+      };
 
-      if (nextOffset !== null) params.set("offset", nextOffset);
-      if (sort) params.set("sort", sort);
-      if (keyword.trim()) params.set("keyword", keyword.trim());
+      const data = await getProductListApi(query);
+      console.log("상품 목록 응답:", data);
 
-      // 카테고리
-      if (selectedLevel3Id != null) params.set("categoryId", selectedLevel3Id);
-
-      // 가격
-      if (minPrice) params.set("minPrice", minPrice);
-      if (maxPrice) params.set("maxPrice", maxPrice);
-
-      // 지역
-      if (area.trim()) params.set("area", area.trim());
-
-      console.log("정렬:", sort, "쿼리스트링:", params.toString());
-
-      const res = await fetch(
-        `http://localhost:8080/api/products?${params.toString()}`
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.log("비정상 응답:", text);
-        return;
-      }
-
-      const data = await res.json();
       const fetched = data.content;
-      const offset = data.offset;
+      const nextOffsetValue = data.offset;
       const nextHas = data.hasNext;
 
       setProducts((prev) => {
@@ -102,7 +87,8 @@ const SearchPage = () => {
 
         return [...prev, ...duplicateRemove];
       });
-      setOffset(offset);
+
+      setOffset(nextOffsetValue);
       setHasNext(nextHas);
     } catch (e) {
       console.error("상품 목록 불러오기 실패:", e);
@@ -257,7 +243,7 @@ const SearchPage = () => {
         </div>
 
         {/* 필터 */}
-        <ProductFilter
+        <ProductFilterModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           keyword={keyword}

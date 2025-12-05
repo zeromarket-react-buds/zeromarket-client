@@ -11,7 +11,7 @@ import {
 import { getTradeListApi } from "@/common/api/trade.api";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
-import TradeFilter from "./TradeFilter";
+import TradeFilterModal from "@/components/order/TradeFilterModal";
 
 const MyPurchasesPage = () => {
   const navigate = useNavigate();
@@ -99,7 +99,9 @@ const MyPurchasesPage = () => {
         </Button>
 
         {/* 필터 모달 */}
-        {isFilterOpen && <TradeFilter onClose={() => setIsFilterOpen(false)} />}
+        {isFilterOpen && (
+          <TradeFilterModal onClose={() => setIsFilterOpen(false)} />
+        )}
 
         <div className="flex flex-col gap-4">
           {tradeList.map((trade) => {

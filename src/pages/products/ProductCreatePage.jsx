@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
@@ -12,14 +13,16 @@ import ProductConditionSelector from "@/components/product/create/ProductConditi
 import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
+import { createProductApi } from "@/common/api/product.api";
 
 const ProductCreatePage = () => {
+  const { user, isAuthenticated } = useAuth();
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
-    sellerId: 1, // 로그인 구현 전 임시 값
+    // sellerId: 1, // 로그인 구현 전 임시 값
     productTitle: "",
     categoryDepth1: null,
     categoryDepth2: null,
@@ -31,6 +34,17 @@ const ProductCreatePage = () => {
     delivery: false,
     sellingArea: "서울 관악구",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // 미로그인시 상품등록X
+  useEffect(() => {
+    if (!isAuthenticated) {
+      alert("로그인 후 상품을 등록할 수 있습니다.");
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async () => {
     if (!form.productTitle.trim()) {
@@ -48,6 +62,8 @@ const ProductCreatePage = () => {
       return;
     }
 
+    setLoading(true);
+    setError("");
     console.log("상품 등록 요청 시작");
 
     //supabase 이미지 업로드
@@ -68,28 +84,28 @@ const ProductCreatePage = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:8080/api/products", {
-        method: "POST",
-        headers: {
-          "content-Type": "application/json",
-        },
-        body: JSON.stringify(jsonData),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.log(jsonData);
-        console.error("서버오류 내용:", errorText);
-        alert("상품 등록 실패 (서버오류)");
-        return;
+      const response = await createProductApi(jsonData);
+      if (response && response.productId) {
+        console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
+        alert(`상품 등록 완료! 상품ID: ${response.productId}`);
+        navigate(`/products/${response.productId}`);
+      } else {
+        // 서버가 유효한 JSON 대신 null/비어있는 응답을 보냈을 때 처리
+        console.error(
+          "서버 응답 데이터 문제: 예상된 productId를 찾을 수 없거나 응답이 null입니다.",
+          response
+        );
+        setError(
+          "상품 등록은 완료되었을 수 있으나, 서버 응답 형식이 올바르지 않습니다."
+        );
+        // 임시로 상품 목록으로 이동
+        navigate("/products");
       }
-      const response = await res.json();
-      // const newProductId = await res.json();
-      alert(`상품 등록 완료! 상품ID: ${response.productId}`);
-      navigate(`/products/${response.productId}`);
     } catch (error) {
       console.error(error);
-      alert("네트워크 오류 발생");
+      setError("상품 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
     }
   };
   return (

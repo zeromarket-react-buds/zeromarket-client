@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import {
   getProductDetailApi,
@@ -19,6 +20,7 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import { products } from "@/data/product.js";
 
 const ProductDetailPage = () => {
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const { onToggleLike } = useLikeToggle([]);
@@ -59,6 +61,7 @@ const ProductDetailPage = () => {
           images: [],
           seller: {},
           isHidden: true,
+          sellerId: user.memberId,
         });
         return;
       }
@@ -103,26 +106,22 @@ const ProductDetailPage = () => {
     try {
       const method = detail.isWished ? "DELETE" : "POST";
 
-      // ⭐ 수정됨: fetch 응답을 변수로 받기. const res =
       const res = await fetch(`http://localhost:8080/api/products/${id}/wish`, {
         method,
       });
 
       if (!res.ok) throw new Error("찜 토글 실패");
 
-      // ⭐ 수정됨: 서버 응답(boolean) 읽기
-      const result = await res.json(); // true = 찜 / false = 취소됨
+      const result = await res.json();
       console.log("🔥 서버 응답:", result);
 
-      // ⭐ 수정됨: POST일 때 찜목록으로 이동
       if (method === "POST") {
-        navigate("/me/wishlist"); //이동 경로
+        navigate("/me/wishlist");
       }
 
-      // ⭐ 수정됨: 서버 응답 기반으로 상태 업데이트
       setDetail((prev) => ({
         ...prev,
-        isWished: result, // true = 찜됨, false = 삭제됨
+        isWished: result,
         wishCount: result ? prev.wishCount + 1 : prev.wishCount - 1,
       }));
     } catch (err) {
@@ -130,13 +129,11 @@ const ProductDetailPage = () => {
     }
   };
 
-  //초기 로딩 시 API 호출
   useEffect(() => {
     fetchProductDetail();
     fetchSimilarProducts();
   }, [id]);
 
-  // ⭐ 수정됨: 디버그용 useEffect를 return 위 최상단으로 이동 (Hooks 규칙)
   useEffect(() => {
     if (detail) {
       console.log("🔥 상세상품 detail:", detail);
@@ -170,12 +167,21 @@ const ProductDetailPage = () => {
     ? [...detail.images].sort((a, b) => {
         const aMain = Boolean(a.main);
         const bMain = Boolean(b.main);
-        //메인먼저
+
         if (aMain && !bMain) return -1;
         if (!aMain && bMain) return 1;
-        return a.sortOrder - b.sortOrder; // 둘다 메인 아니면 sort order순
+
+        return a.sortOrder - b.sortOrder;
       })
     : [];
+
+  const isProductOwner = user && user.memberId === detail.sellerId;
+  const isProductHidden =
+    detail.isHidden || detail.productStatus?.name === "HIDDEN";
+
+  const handleStatusUpdateSuccess = () => {
+    fetchProductDetail();
+  };
 
   return (
     <div>
@@ -225,21 +231,16 @@ const ProductDetailPage = () => {
             />
           </div>
 
-          <div className="sticky bottom-20 bg-white border-t z-50">
-            <ActionButtonBar
-              role="BUYER"
-              isWished={detail.isWished}
-              onToggleWish={toggleWish}
-              productId={detail.productId}
-            />
-          </div>
+          {/* 로그인 여부와 상품 작성자 여부 따라 버튼 다르게 렌더링 */}
           <div className="sticky bottom-0 bg-white border-t z-50">
             <ActionButtonBar
-              role="SELLER"
-              productId={detail.productId}
+              role={isAuthenticated && isProductOwner ? "SELLER" : "BUYER"}
               isWished={detail.isWished}
               onToggleWish={toggleWish}
-              isHidden={detail.isHidden}
+              productId={detail.productId}
+              isHidden={isProductHidden}
+              onHide={handleStatusUpdateSuccess}
+              onUnhide={handleStatusUpdateSuccess}
             />
           </div>
         </div>

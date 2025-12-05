@@ -5,7 +5,7 @@ import FilterSideBar from "./FilterSidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-const ProductFilter = ({
+const ProductFilterModal = ({
   isOpen,
   onClose,
   keyword,
@@ -199,4 +199,4 @@ const ProductFilter = ({
   );
 };
 
-export default ProductFilter;
+export default ProductFilterModal;
