@@ -1,8 +1,33 @@
 import { UserRound, Heart, Pen } from "lucide-react";
 import Container from "@/components/Container";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function MyPage() {
+  // ⭐ 찜 개수 상태 추가
+  const [wishCount, setWishCount] = useState(0);
+
+  // ⭐ 찜 개수 불러오기 API
+  const fetchWishCount = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:8080/api/products/wishlist/count"
+      );
+
+      if (!res.ok) throw new Error("찜 개수 조회 실패");
+
+      const count = await res.json();
+      setWishCount(count);
+    } catch (err) {
+      console.error("🔥 찜 개수 에러:", err);
+    }
+  };
+
+  // ⭐ 페이지 로드될 때 찜 개수 불러오기
+  useEffect(() => {
+    fetchWishCount();
+  }, []);
+
   return (
     <Container>
       {/* 프로필 */}
@@ -70,10 +95,14 @@ export default function MyPage() {
           />
           <div className="flex items-center gap-2">
             <span>찜 목록</span>
-            <span className="font-bold text-brand-green">1</span>
+
+            {/* ⭐ 여기 수정됨: 하드코딩된 1 → 동적 wishCount */}
+            <span className="font-bold text-brand-green">{wishCount}</span>
+
             <span className="text-black">건</span>
           </div>
         </Link>
+
         <div className="flex flex-col items-center">
           <Pen
             color="var(--color-brand-green)"
