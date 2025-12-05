@@ -9,14 +9,25 @@ const ProductHeader = ({ type }) => {
   const navigate = useNavigate();
 
   const handleShare = async () => {
-    try {
-      await navigator.share({
-        title: detail?.productTitle || "제로마켓 상품",
-        text: detail?.productDescription || "제로마켓 상품을 확인해보세요!",
-        url: window.location.href,
-      });
-    } catch (err) {
-      console.error("공유 실패:", err);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: detail?.productTitle || "제로마켓 상품",
+          text: detail?.productDescription || "제로마켓 상품을 확인해보세요!",
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error("공유 실패:", err);
+      }
+    } else {
+      // navigator.share 미지원시 > URL 클립보드 복사
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("URL이 클립보드에 복사되었습니다!");
+      } catch (err) {
+        console.error("클립보드 복사 실패함:", err);
+        alert("공유 기능을 사용할 수 없습니다.");
+      }
     }
   };
 
