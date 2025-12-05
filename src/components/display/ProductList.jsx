@@ -3,10 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import ProductFilter from "./ProductFilter";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { useNavigate } from "react-router-dom";
 import { getProductListApi } from "@/common/api/product.api";
+import ProductFilterModal from "@/components/display/ProductFilterModal";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -154,7 +154,7 @@ const ProductList = () => {
       </div>
 
       {/* 필터 */}
-      <ProductFilter
+      <ProductFilterModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         keyword={keyword}
