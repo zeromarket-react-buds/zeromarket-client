@@ -75,8 +75,12 @@ export default function MyPage() {
           <li>
             <Link to="/me/profile-edit">회원 정보 설정</Link>
           </li>
-          <li>판매 내역</li>
-          <li>구매 내역</li>
+          <li>
+            <Link to="/me/selling">판매 내역</Link>
+          </li>
+          <li>
+            <Link to="/me/purchases">구매 내역</Link>
+          </li>
           <li>채팅 목록</li>
           <li>차단 유저 목록</li>
         </ul>
