@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { useNavigate } from "react-router-dom";
+import { getProductListApi } from "@/common/api/product.api";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -35,36 +36,18 @@ const ProductList = () => {
     setLoading(true);
 
     try {
-      const params = new URLSearchParams();
+      const query = {
+        offset: nextOffset,
+        sort,
+        keyword,
+        categoryId: selectedLevel3Id,
+        minPrice,
+        maxPrice,
+        area,
+      };
 
-      if (nextOffset !== null) params.set("offset", nextOffset);
-      if (sort) params.set("sort", sort);
-      if (keyword.trim()) params.set("keyword", keyword.trim());
-
-      // 카테고리
-      if (selectedLevel3Id != null) params.set("categoryId", selectedLevel3Id);
-
-      // 가격
-      if (minPrice) params.set("minPrice", minPrice);
-      if (maxPrice) params.set("maxPrice", maxPrice);
-
-      // 지역
-      if (area.trim()) params.set("area", area.trim());
-
-      console.log("정렬:", sort, "쿼리스트링:", params.toString());
-
-      const res = await fetch(
-        `http://localhost:8080/api/products?${params.toString()}`
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.log("비정상 응답:", text);
-        return;
-      }
-
-      const data = await res.json();
-      console.log("서버 응답:", data);
+      const data = await getProductListApi(query);
+      console.log("상품 목록 응답:", data);
 
       const fetched = data.content;
       const offset = data.offset;
