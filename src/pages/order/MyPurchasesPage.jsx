@@ -89,14 +89,14 @@ const MyPurchasesPage = () => {
           </Button>
         </form>
 
-        <button
+        <Button
           type="button"
-          className="flex flex-row items-center gap-2 py-3"
+          className="flex flex-row items-center gap-2 py-3 text-black font-normal"
           onClick={() => setIsFilterOpen(true)}
         >
           <Filter />
           <span>전체</span>
-        </button>
+        </Button>
 
         {/* 필터 모달 */}
         {isFilterOpen && <TradeFilter onClose={() => setIsFilterOpen(false)} />}
