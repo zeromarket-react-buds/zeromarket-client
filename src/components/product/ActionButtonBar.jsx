@@ -6,7 +6,8 @@ import { chatRoomIdApi } from "@/common/api/chat.api";
 
 const ActionButtonBar = ({
   role,
-  onToggleLike,
+  //onToggleLike,
+  onToggleWish,
   isWished,
   onSubmit,
   productId,
@@ -55,8 +56,11 @@ const ActionButtonBar = ({
     if (!isWished) showLikeAddedToast();
     else showLikeRemovedToast();
 
-    if (onToggleLike) {
-      onToggleLike();
+    // if (onToggleLike) {
+    //   onToggleLike();
+    // }
+    if (onToggleWish) {
+      onToggleWish();
     }
   };
 
