@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
-import { useNavigate } from "react-router-dom";
 import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
+import { useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
@@ -97,6 +97,34 @@ const ProductList = () => {
     setSort(value);
   };
 
+  // 모달에서 검색 버튼 눌렀을 때 검색 페이지로 이동
+  const handleFilterApply = (payload) => {
+    const params = new URLSearchParams();
+    params.set("keyword", payload.keyword);
+    if (payload.sort) params.set("sort", payload.sort);
+    if (payload.level3Id != null) params.set("categoryId", payload.level3Id);
+    if (payload.minPrice !== "" && payload.minPrice != null) {
+      params.set("minPrice", payload.minPrice);
+    }
+    if (payload.maxPrice !== "" && payload.maxPrice != null) {
+      params.set("maxPrice", payload.maxPrice);
+    }
+    if (payload.area) {
+      params.set("area", payload.area);
+    }
+
+    navigate(`/search?${params.toString()}`, {
+      state: {
+        level1Id: payload.level1Id,
+        level2Id: payload.level2Id,
+        level3Id: payload.level3Id,
+        minPrice: payload.minPrice,
+        maxPrice: payload.maxPrice,
+        area: payload.area,
+      },
+    });
+  };
+
   // 글등록 페이지 이동
   const goProductCreatePage = () => {
     navigate(`/products`);
@@ -172,6 +200,7 @@ const ProductList = () => {
         setMaxPrice={setMaxPrice}
         area={area}
         setArea={setArea}
+        onApply={handleFilterApply}
       />
       <ProductCard products={products} onToggleLike={onToggleLike} />
 

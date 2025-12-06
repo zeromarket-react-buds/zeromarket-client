@@ -26,9 +26,6 @@ const SearchPage = () => {
   const maxPriceFromUrl = searchParams.get("maxPrice");
   const areaFromUrl = searchParams.get("area");
 
-  // navigate에서 넘긴 state (없을 수도 있어서 기본값 처리)
-  const navState = location.state || {};
-
   // 실제 서버 요청에 쓰이는 확정된 상태
   const [keyword, setKeyword] = useState(keywordFromUrl);
   const [sort, setSort] = useState(sortFromUrl);
@@ -97,6 +94,7 @@ const SearchPage = () => {
     }
   };
 
+  // ProductList에서 넘어올 때 state로 준 값 반영
   useEffect(() => {
     if (!location.state) return;
 
@@ -151,6 +149,34 @@ const SearchPage = () => {
     navigate({
       pathname: "/search",
       search: params.toString(),
+    });
+  };
+
+  // 모달에서 검색 버튼 눌렀을 때 URL 쿼리까지 모두 반영
+  const handleFilterApply = (payload) => {
+    const params = new URLSearchParams();
+    params.set("keyword", payload.keyword);
+    if (payload.sort) params.set("sort", payload.sort);
+    if (payload.level3Id != null) params.set("categoryId", payload.level3Id);
+    if (payload.minPrice !== "" && payload.minPrice != null) {
+      params.set("minPrice", payload.minPrice);
+    }
+    if (payload.maxPrice !== "" && payload.maxPrice != null) {
+      params.set("maxPrice", payload.maxPrice);
+    }
+    if (payload.area) {
+      params.set("area", payload.area);
+    }
+
+    navigate(`/search?${params.toString()}`, {
+      state: {
+        level1Id: payload.level1Id,
+        level2Id: payload.level2Id,
+        level3Id: payload.level3Id,
+        minPrice: payload.minPrice,
+        maxPrice: payload.maxPrice,
+        area: payload.area,
+      },
     });
   };
 
@@ -261,7 +287,9 @@ const SearchPage = () => {
           setMaxPrice={setMaxPrice}
           area={area}
           setArea={setArea}
+          onApply={handleFilterApply}
         />
+
         <div className="text-2xl font-semibold">"{keyword}" 검색 결과</div>
         <ProductCard products={products} onToggleLike={onToggleLike} />
       </div>

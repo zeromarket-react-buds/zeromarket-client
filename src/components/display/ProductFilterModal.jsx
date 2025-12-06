@@ -1,9 +1,11 @@
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Search, XCircle } from "lucide-react";
-import FilterSideBar from "./FilterSidebar";
-import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import KeywordFilterSection from "@/components/display/KeywordFilterSection";
+import CategoryFilterSection from "@/components/display/CategoryFilterSection";
+import PriceFilterSection from "@/components/display/PriceFilterSection";
+import AreaFilterSection from "@/components/display/AreaFilterSection";
+import SelectedFiltersSection from "@/components/display/SelectedFiltersSection";
 
 const ProductFilterModal = ({
   isOpen,
@@ -23,10 +25,11 @@ const ProductFilterModal = ({
   setMaxPrice,
   area,
   setArea,
+  onApply,
 }) => {
   const keywordRef = useRef(null);
   const categoryFocusRef = useRef(null);
-  const navigate = useNavigate();
+  const areaRef = useRef(null);
 
   // 필터 값들에 대한 임시 상태값
   const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
@@ -36,8 +39,9 @@ const ProductFilterModal = ({
   const [tempMinPrice, setTempMinPrice] = useState(minPrice);
   const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
   const [tempArea, setTempArea] = useState(area);
+  const [tempCategoryName, setTempCategoryName] = useState(null); // 카테고리 이름 임시 상태
 
-  //현재 부모 컴포넌트가 들고 있는 필터 상태값을 모달 내부의 임시 값으로 복사해서 초기값으로 세팅
+  // 모달이 열릴 때마다 부모 상태를 임시 상태로 복사
   useEffect(() => {
     if (isOpen) {
       setTempKeyword(keyword ?? "");
@@ -52,15 +56,40 @@ const ProductFilterModal = ({
     }
   }, [isOpen]);
 
-  const clearKeywordInput = () => {
+  const clearKeyword = () => {
     setTempKeyword("");
     setTimeout(() => keywordRef.current?.focus(), 0);
+  };
+
+  const clearCategory = () => {
+    setTempLevel1Id(null);
+    setTempLevel2Id(null);
+    setTempLevel3Id(null);
+    setTempCategoryName(null);
+  };
+
+  const clearPrice = () => {
+    setTempMinPrice("");
+    setTempMaxPrice("");
+  };
+
+  const clearArea = () => {
+    setTempArea("");
+  };
+
+  const handleClearAll = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    clearCategory();
+    clearPrice();
+    clearArea();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const trimmedKeyword = tempKeyword.trim(); // 모달창에서 임시 키워드 input값 넣은 부분
+    const trimmedKeyword = tempKeyword.trim();
     if (!trimmedKeyword) {
       alert("키워드는 필수입니다");
       return;
@@ -70,53 +99,40 @@ const ProductFilterModal = ({
     const hasMin = tempMinPrice !== null && tempMinPrice !== "";
     const hasMax = tempMaxPrice !== null && tempMaxPrice !== "";
 
-    // 둘 다 값이 있을 때만 검사
     if (hasMin && hasMax && tempMaxPrice <= tempMinPrice) {
       alert("최소 금액은 최대 금액보다 작아야 합니다.");
       return;
     }
 
-    // 지역 문자열 정리
-    const trimmedArea = tempArea?.trim() ?? "";
+    const trimmedArea = tempArea ? tempArea.trim() : "";
 
-    //쿼리스트링 생성 및 키워드/sort 세팅
-    const params = new URLSearchParams();
-    params.set("keyword", trimmedKeyword);
-    if (sort) params.set("sort", sort);
+    // 부모에게 넘겨줄 최종 필터 값
+    const payload = {
+      keyword: trimmedKeyword,
+      sort,
+      level1Id: tempLevel1Id,
+      level2Id: tempLevel2Id,
+      level3Id: tempLevel3Id,
+      minPrice: hasMin ? tempMinPrice : "",
+      maxPrice: hasMax ? tempMaxPrice : "",
+      area: trimmedArea,
+    };
 
-    // 카테고리
-    if (tempLevel3Id != null) {
-      params.set("categoryId", tempLevel3Id);
-    }
-
-    // 가격
-    if (hasMin) params.set("minPrice", tempMinPrice);
-    if (hasMax) params.set("maxPrice", tempMaxPrice);
-
-    // 지역
-    if (trimmedArea) params.set("area", trimmedArea);
-
+    // 부모 상태 업데이트
     setKeyword(trimmedKeyword); // 검증된 최종 키워드를 임시 입력값이 아닌 실제 검색 키워드로 확정
-
-    // 임시 값을 부모컴포넌트의 필터값으로 실제 반영
     setSelectedLevel1Id(tempLevel1Id);
     setSelectedLevel2Id(tempLevel2Id);
     setSelectedLevel3Id(tempLevel3Id);
-    setMinPrice(tempMinPrice);
-    setMaxPrice(tempMaxPrice);
+    setMinPrice(payload.minPrice);
+    setMaxPrice(payload.maxPrice);
     setArea(trimmedArea);
 
-    navigate(`/search?${params.toString()}`, {
-      state: {
-        level1Id: tempLevel1Id,
-        level2Id: tempLevel2Id,
-        level3Id: tempLevel3Id,
-        minPrice: tempMinPrice,
-        maxPrice: tempMaxPrice,
-        area: trimmedArea,
-      },
-    });
+    // 실제 "검색 실행"은 부모 onApply에 위임
+    if (onApply) {
+      onApply(payload);
+    }
 
+    // 모달 닫기
     onClose();
   };
 
@@ -135,42 +151,23 @@ const ProductFilterModal = ({
           >
             <div className="flex gap-3 items-center border-b border-brand-mediumgray py-0.5">
               <div className="w-full text-base font-semibold">검색필터</div>
-              <Button
-                type="button"
-                onClick={onClose}
-                className="text-base pr-2"
-              >
+              <Button type="button" onClick={onClose} className="-mr-2">
                 <XCircle />
               </Button>
             </div>
+
             <form onSubmit={handleSubmit}>
-              <div className="relative w-full pt-2 pb-2 my-2">
-                <Input
-                  placeholder="어떤 상품을 찾으시나요?"
-                  className="font-normal"
-                  value={tempKeyword}
-                  onChange={(e) => setTempKeyword(e.target.value)}
-                  ref={keywordRef}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      keywordRef.current?.focus();
-                      categoryFocusRef.current?.focus();
-                    }
-                  }}
-                />
-                {tempKeyword && (
-                  <Button
-                    type="button"
-                    onClick={clearKeywordInput}
-                    className="absolute right-8 top-1/2 -translate-y-1/2 h-4 w-4"
-                  >
-                    <XCircle />
-                  </Button>
-                )}
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-mediumgray" />
-              </div>
-              <FilterSideBar
+              {/* 키워드 */}
+              <KeywordFilterSection
+                tempKeyword={tempKeyword}
+                setTempKeyword={setTempKeyword}
+                keywordRef={keywordRef}
+                clearKeyword={clearKeyword}
+                categoryFocusRef={categoryFocusRef}
+              />
+
+              {/* 카테고리 */}
+              <CategoryFilterSection
                 categoryFocusRef={categoryFocusRef}
                 selectedLevel1Id={tempLevel1Id}
                 selectedLevel2Id={tempLevel2Id}
@@ -178,14 +175,40 @@ const ProductFilterModal = ({
                 setSelectedLevel1Id={setTempLevel1Id}
                 setSelectedLevel2Id={setTempLevel2Id}
                 setSelectedLevel3Id={setTempLevel3Id}
+                setTempCategoryName={setTempCategoryName}
+              />
+
+              {/* 가격 */}
+              <PriceFilterSection
                 minPrice={tempMinPrice}
                 maxPrice={tempMaxPrice}
                 setMinPrice={setTempMinPrice}
                 setMaxPrice={setTempMaxPrice}
+                onEnterToArea={() => {
+                  areaRef.current?.focus();
+                }}
+              />
+
+              {/* 지역 */}
+              <AreaFilterSection
                 area={tempArea}
                 setArea={setTempArea}
+                areaRef={areaRef}
               />
-              {/* 하단 버튼 */}
+
+              {/* 선택한 필터 */}
+              <SelectedFiltersSection
+                categoryName={tempCategoryName}
+                minPrice={tempMinPrice}
+                maxPrice={tempMaxPrice}
+                area={tempArea}
+                clearCategory={clearCategory}
+                clearPrice={clearPrice}
+                clearArea={clearArea}
+                handleClearAll={handleClearAll}
+              />
+
+              {/* 검색 버튼 */}
               <div className="border-t pb-2 pt-4">
                 <Button type="submit" variant="green" className="w-full">
                   검색
