@@ -12,6 +12,11 @@ import { getTradeListApi, updateTradeStatusApi } from "@/common/api/trade.api";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import TradeFilterModal from "@/components/order/TradeFilterModal";
+import {
+  getStatusLabel,
+  getPeriodLabel,
+} from "@/components/order/filterOptions";
+import { Badge } from "@/components/ui/badge";
 
 const MySalesPage = () => {
   const navigate = useNavigate();
@@ -24,6 +29,11 @@ const MySalesPage = () => {
   const [filterStatus, setFilterStatus] = useState([]);
   const [filterFromDate, setFilterFromDate] = useState(null);
   const [filterToDate, setFilterToDate] = useState(null);
+
+  // 필터 상태 계산
+  const hasStatusFilter = filterStatus && filterStatus.length > 0;
+  const hasPeriodFilter = !!(filterFromDate || filterToDate);
+  const hasAnyFilter = hasStatusFilter || hasPeriodFilter;
 
   const fetchTradeList = async (overrideQuery) => {
     if (loading) return;
@@ -134,24 +144,43 @@ const MySalesPage = () => {
             <Search className="h-4 w-4" />
           </Button>
         </form>
-
         <Button
           type="button"
-          className="flex flex-row items-center gap-2 py-3 text-black font-normal"
+          className="flex flex-row items-center gap-2 py-6 text-black font-normal"
           onClick={() => setIsFilterOpen(true)}
         >
           <Filter />
-          <span>전체</span>
-        </Button>
+          {hasAnyFilter ? (
+            <div className="flex flex-wrap gap-1">
+              {/* 상태 뱃지 */}
+              {hasStatusFilter &&
+                filterStatus.map((value) => (
+                  <Badge key={value} variant="line">
+                    {getStatusLabel(value)}
+                  </Badge>
+                ))}
 
+              {/* 기간 뱃지 */}
+              {hasPeriodFilter && (
+                <Badge variant="line">
+                  {getPeriodLabel(filterFromDate, filterToDate)}
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <span>전체</span>
+          )}
+        </Button>
         {/* 필터 모달 */}
         {isFilterOpen && (
           <TradeFilterModal
             onClose={() => setIsFilterOpen(false)}
             onApply={handleFilterApply}
+            initialStatuses={filterStatus}
+            initialFromDate={filterFromDate}
+            initialToDate={filterToDate}
           />
         )}
-
         <div className="flex flex-col gap-4">
           {tradeList.map((trade) => {
             const {
