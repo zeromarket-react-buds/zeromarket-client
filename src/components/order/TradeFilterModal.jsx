@@ -12,10 +12,16 @@ const statusOptions = [
   { label: "숨기기", value: "isHidden" },
 ];
 
-const TradeFilterModal = ({ onClose, onApply }) => {
-  const [selectedStatuses, setSelectedStatuses] = useState([]);
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+const TradeFilterModal = ({
+  onClose,
+  onApply,
+  initialStatuses = [],
+  initialFromDate = null,
+  initialToDate = null,
+}) => {
+  const [selectedStatuses, setSelectedStatuses] = useState(initialStatuses);
+  const [fromDate, setFromDate] = useState(initialFromDate);
+  const [toDate, setToDate] = useState(initialToDate);
   const [openPicker, setOpenPicker] = useState(null);
 
   const fromPickerRef = useRef(null);
