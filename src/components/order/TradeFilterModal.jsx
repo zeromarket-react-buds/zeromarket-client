@@ -12,7 +12,7 @@ const statusOptions = [
   { label: "숨기기", value: "isHidden" },
 ];
 
-const TradeFilterModal = ({ onClose }) => {
+const TradeFilterModal = ({ onClose, onApply }) => {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -34,7 +34,7 @@ const TradeFilterModal = ({ onClose }) => {
   };
 
   const handleFromChange = (date) => {
-    // 날짜를 선택 취소할 때의 방어 로직
+    // 날짜를 선택 취소할 때의 방어 코드
     if (!date) {
       setFromDate(null);
       return;
@@ -125,6 +125,12 @@ const TradeFilterModal = ({ onClose }) => {
     };
   }, [openPicker]);
 
+  // 적용 버튼 클릭시 선택된 필터값 전달 후 모달 닫기
+  const handleApply = () => {
+    onApply(selectedStatuses, fromDate, toDate);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 배경 */}
@@ -138,7 +144,7 @@ const TradeFilterModal = ({ onClose }) => {
         {/* 헤더 */}
         <div className="flex gap-3 justify-between items-center border-b border-brand-mediumgray mb-5 pt-0.5 pb-2">
           <div className="w-full text-base font-semibold">검색필터</div>
-          <Button type="button" onClick={onClose} className="text-base -mr-2">
+          <Button type="button" onClick={onClose} className="-mr-2">
             <XCircle />
           </Button>
         </div>
@@ -191,6 +197,7 @@ const TradeFilterModal = ({ onClose }) => {
             type="submit"
             variant="green"
             className="px-3 py-2 mt-5 w-full"
+            onClick={handleApply}
           >
             적용
           </Button>

@@ -21,6 +21,10 @@ const MySalesPage = () => {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const [filterStatus, setFilterStatus] = useState([]);
+  const [filterFromDate, setFilterFromDate] = useState(null);
+  const [filterToDate, setFilterToDate] = useState(null);
+
   const fetchTradeList = async (overrideQuery) => {
     if (loading) return;
     setLoading(true);
@@ -29,6 +33,9 @@ const MySalesPage = () => {
       const query = {
         keyword: (overrideQuery?.keyword ?? keyword).trim(),
         role: "SALES",
+        status: overrideQuery?.status ?? filterStatus,
+        fromDate: overrideQuery?.fromDate ?? filterFromDate,
+        toDate: overrideQuery?.toDate ?? filterToDate,
       };
 
       const data = await getTradeListApi(query);
@@ -77,6 +84,24 @@ const MySalesPage = () => {
     }
   };
 
+  // 모달에서 받은 필터 값으로 상태를 갱신한 뒤 API 재요청
+  const handleFilterApply = (selectedStatus, fromDate, toDate) => {
+    // 로컬 상태에 저장
+    setFilterStatus(selectedStatus);
+    setFilterFromDate(fromDate);
+    setFilterToDate(toDate);
+
+    // 필터를 적용해서 목록 재조회
+    fetchTradeList({
+      status: selectedStatus,
+      fromDate,
+      toDate,
+    });
+
+    // 모달 닫기
+    setIsFilterOpen(false);
+  };
+
   const goToTradeDetail = (tradeId) => {
     navigate(`/trades/${tradeId}`);
   };
@@ -121,7 +146,10 @@ const MySalesPage = () => {
 
         {/* 필터 모달 */}
         {isFilterOpen && (
-          <TradeFilterModal onClose={() => setIsFilterOpen(false)} />
+          <TradeFilterModal
+            onClose={() => setIsFilterOpen(false)}
+            onApply={handleFilterApply}
+          />
         )}
 
         <div className="flex flex-col gap-4">
