@@ -81,7 +81,11 @@ const ActionButtonBar = ({
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = () => {
-    if (!handleNotLoggedIn()) return;
+    //if (!handleNotLoggedIn()) return; //로그인 여부 검사해서 미로그인시 리턴(실행중지)
+    if (!isAuthenticated) {
+      goLogin(); // 로그인 유도 함수
+      return;
+    }
     if (!isWished) showLikeAddedToast();
     else showLikeRemovedToast();
 
