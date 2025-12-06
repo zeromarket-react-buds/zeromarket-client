@@ -41,9 +41,10 @@ const ProductDetailPage = () => {
   //   liked: false,
   // }));
 
-  const fetchProductDetail = async () => {
+  /** ⭐ 수정됨: memberId를 인자로 받아 상세조회 */
+  const fetchProductDetail = async (memberId) => {
     try {
-      const data = await getProductDetailApi(id);
+      const data = await getProductDetailApi(id, memberId); //user?.memberId 전달
 
       if (!data || typeof data !== "object") {
         setError("상품 정보를 불러오지 못했습니다.");
@@ -106,7 +107,11 @@ const ProductDetailPage = () => {
 
   const toggleWish = async () => {
     try {
+      console.log("*** 현재 detail.isWished:", detail?.isWished);
+
       const method = detail.isWished ? "DELETE" : "POST";
+      console.log("*** 실행될 HTTP method:", method);
+      console.log("*** 현재 wishCount:", detail?.wishCount);
 
       const res = await fetch(`http://localhost:8080/api/products/${id}/wish`, {
         method,
@@ -114,27 +119,44 @@ const ProductDetailPage = () => {
 
       if (!res.ok) throw new Error("찜 토글 실패");
 
-      const result = await res.json();
-      console.log("🔥 서버 응답:", result);
+      // const result = await res.json();
+      // console.log("🔥 서버 응답:", result);
 
-      if (method === "POST") {
-        navigate("/me/wishlist");
-      }
+      //경로 이동시엔 상품목록에서 찜해제 못함. 그리고 찜목록페이지에서도 찜한후 한번 더 눌러야하는 문제 해결 못함
+      // // ⭐ 수정됨: POST일 때 찜목록으로 이동
+      // if (method === "POST") {
+      //   navigate("/me/wishlist"); //이동 경로
+      // }
 
+      const isAdded = method === "POST";
+
+      // ⭐ 화면 상태는 HTTP method 기준으로 확실하게 변경
       setDetail((prev) => ({
         ...prev,
-        isWished: result,
-        wishCount: result ? prev.wishCount + 1 : prev.wishCount - 1,
+        isWished: method === "POST",
+        wishCount:
+          method === "POST"
+            ? prev.wishCount + 1
+            : Math.max((prev.wishCount || 1) - 1, 0),
       }));
+
+      return isAdded; // ⭐⭐ 여기 중요!!
     } catch (err) {
       console.error("찜 토글 실패 : ", err);
     }
   };
 
   useEffect(() => {
-    fetchProductDetail();
+    // 1) AuthContext 로딩 중이면 실행 금지
+    if (user === undefined) return;
+
+    // 2) 로그인 여부가 결정될 때까지 기다림 (user === null이면 요청 금지)
+    if (user === null) return;
+
+    // 3) 로그인 된 경우 → 정상적으로 memberId 넣어서 조회
+    fetchProductDetail(user.memberId);
     fetchSimilarProducts();
-  }, [id]);
+  }, [id, user]);
 
   useEffect(() => {
     if (detail) {
@@ -182,7 +204,8 @@ const ProductDetailPage = () => {
     detail.isHidden || detail.productStatus?.name === "HIDDEN";
 
   const handleStatusUpdateSuccess = () => {
-    fetchProductDetail();
+    const memberId = user ? user.memberId : null;
+    fetchProductDetail(memberId); // ⭐ 숨김/해제 후 상세 재조회
   };
 
   return (
