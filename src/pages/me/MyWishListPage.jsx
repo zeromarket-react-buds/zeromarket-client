@@ -114,9 +114,11 @@ const MyWishListPage = () => {
             // ⭐ 클릭하면 상세페이지로 이동!
             onClick={() => navigate(`/products/${item.productId}`)}
           >
-            {/* ⭐ 찜한 날짜 YYYY.MM.DD */}
+            {/* ⭐ 찜한 날짜 YYYY.MM.DD (박스 밖) */}
             <p className="text-sm text-gray-600 mb-2">
-              {item.createdAt ? dayjs(item.createdAt).format("YYYY.MM.DD") : ""}
+              {item.wishCreatedAt
+                ? dayjs(item.wishCreatedAt).format("YYYY.MM.DD")
+                : ""}
             </p>
 
             <div className="relative border rounded-xl p-3 flex gap-3 shadow-sm">
@@ -155,14 +157,12 @@ const MyWishListPage = () => {
                     {item.sellPrice?.toLocaleString()}원
                   </p>
 
-                  {/* ⭐ 직거래 · 택배거래 표시 */}
+                  {/* ⭐ 거래정보 + 상품등록일 한 줄로 표시 (수정됨) */}
                   <p className="text-xs text-gray-700 mt-1">
                     {item.tradeTypeDisplay}
-                  </p>
-
-                  {/* ⭐ 찜한 날짜 → "X일 전" */}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {item.createdAt ? dayjs(item.createdAt).fromNow() : ""}
+                    {item.productCreatedAt && (
+                      <> · {dayjs(item.productCreatedAt).fromNow()}</>
+                    )}
                   </p>
                 </div>
 
