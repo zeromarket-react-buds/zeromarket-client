@@ -60,7 +60,7 @@ const MyWishListPage = () => {
       }
 
       const data = await response.json();
-      console.log("🔥 찜 목록 응답:", data);
+      console.log("✅ 찜 목록 응답:", data);
       setWishItems(data);
     } catch (err) {
       console.error("찜 목록 불러오기 실패:", err);
