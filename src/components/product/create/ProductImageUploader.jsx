@@ -98,7 +98,8 @@ const ProductImageUploader = ({ images, setImages }) => {
         {/* 이미지 업로드 버튼 */}
         <button
           type="button"
-          className="shrink-0 relative w-20 h-20 border rounded-xl flex items-center justify-center bg-gray-200 text-brand-darkgray text-sm"
+          className="shrink-0 relative w-20 h-20 border rounded-xl flex items-center justify-center bg-gray-200 text-brand-darkgray text-sm 
+          cursor-pointer hover:shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] transition-all duration-200 "
           onClick={() => fileInputRef.current.click()}
           // onClick={handleUploadClick}
         >
@@ -121,21 +122,21 @@ const ProductImageUploader = ({ images, setImages }) => {
         />
 
         {/* 미리보기 상태 이미지들 */}
-        <div className="flex gap-1.5 items-center h-25">
+        <div className="flex gap-1.5 items-center h-25 ">
           {images.map((img, idx) => (
             <div
               key={idx}
-              className="relative w-20 h-20 cursor-pointer "
+              className="relative w-20 h-20 cursor-pointer  "
               // onClick={() => setAsMain(idx)}
             >
               <div
-                className="relative w-full h-full overflow-hidden border rounded-xl"
+                className="relative w-full h-full overflow-hidden border rounded-xl "
                 onClick={() => setAsMain(idx)}
               >
                 <img
                   src={img.preview || img.imageUrl}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover "
                 />
                 {img.isMain && (
                   <div className="absolute bottom-0 left-0 w-full bg-black opacity-80 text-white text-xs text-center py-0.5">

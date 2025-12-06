@@ -27,7 +27,6 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
-
   const [similarProducts, setSimilarProducts] = useState([]);
 
   //목데이터
@@ -217,7 +216,7 @@ const ProductDetailPage = () => {
             <ProductImageCarousel images={sortedImages} />
           </div>
           <div className="px-6">
-            {/* 판매자 정보 확인*/}
+            {/* 판매자 정보*/}
             <ProductSellerInfo detail={detail} />
 
             {/* 상품명 & 가격 & 판매상태*/}
@@ -241,12 +240,12 @@ const ProductDetailPage = () => {
             {/* 환경점수 - 2,3차 */}
             <DetailEcoScoreSection detail={detail} />
 
-            {/* 거래 정보 */}
+            {/* 거래 정보 + 맵 */}
             <ProductTradeInfoSection detail={detail} />
 
             {/* 신고하기 버튼 */}
             <div className="mb-6">
-              <button>신고하기</button>
+              <button className="cursor-pointer">신고하기</button>
             </div>
 
             {/* 비슷한 상품 */}

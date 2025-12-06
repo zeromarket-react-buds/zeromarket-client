@@ -76,11 +76,16 @@ const ProductHeader = ({ type }) => {
           <button
             className="w-15 h-10 cursor-pointer"
             onClick={() => navigate(-1)}
+            title="뒤로가기"
           >
             <ChevronLeft className="p-0.3 ml-4 stroke-3" />
           </button>
           <div className="flex">
-            <button className="w-15 h-10 cursor-pointer" onClick={handleShare}>
+            <button
+              className="w-15 h-10 cursor-pointer"
+              onClick={handleShare}
+              title="공유하기"
+            >
               <Share2 className="m-2 mr-3 text-gray-800" />
             </button>
             <AuthStatusIcon

@@ -1,10 +1,12 @@
 import dayjs from "@/utils/time";
+import { useNavigate } from "react-router-dom";
 
 const ProductCategoryTimeSection = ({ detail }) => {
+  const navigate = useNavigate();
   return (
     <div className="flex justify-between items-center my-3">
       <span
-        className=" text-gray-600 text-base hover:underline flex items-center"
+        className=" text-gray-600 text-base hover:underline flex items-center cursor-pointer"
         onClick={() =>
           navigate(
             `/search?keyword=&sort=popularity` +
