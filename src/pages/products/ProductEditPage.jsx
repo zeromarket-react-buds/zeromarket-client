@@ -168,7 +168,6 @@ const ProductEditPage = () => {
 
   return (
     <Container>
-      <div>상품수정페이지 / 현재 수정중 상품 ID : {id}</div>
       <div className="max-w-full mx-auto bg-gray-0 -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
