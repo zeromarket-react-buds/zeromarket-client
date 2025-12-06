@@ -42,7 +42,7 @@ const ProductCreatePage = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       alert("로그인 후 상품을 등록할 수 있습니다.");
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

@@ -7,12 +7,12 @@ import { useAuth } from "@/hooks/AuthContext";
 const AuthStatusIcon = ({ isAuthenticated, navigate }) => (
   <button
     className="w-10 h-10 cursor-pointer flex items-center justify-center"
-    onClick={() => navigate(isAuthenticated ? "/mypage" : "/login")}
-    title={isAuthenticated ? "마이페이지" : "로그인"}
+    disabled
+    title={isAuthenticated ? "로그인중" : "미로그인"}
   >
     {/* 현재 로그인상태 확인용 임의 코드 - 추후 삭제예정 */}
     {isAuthenticated ? (
-      <User className="text-brand-green" size={20} /> // 로그인 상태
+      <User className="text-brand-green" size={20}></User> // 로그인 상태
     ) : (
       <LogIn className="text-gray-500" size={20} /> // 비로그인 상태
     )}
@@ -79,13 +79,15 @@ const ProductHeader = ({ type }) => {
           >
             <ChevronLeft className="p-0.3 ml-4 stroke-3" />
           </button>
-          <button className="w-15 h-10 cursor-pointer" onClick={handleShare}>
-            <Share2 className="m-2 mr-3 text-gray-800" />
-          </button>
-          <AuthStatusIcon
-            isAuthenticated={isAuthenticated}
-            navigate={navigate}
-          />
+          <div className="flex">
+            <button className="w-15 h-10 cursor-pointer" onClick={handleShare}>
+              <Share2 className="m-2 mr-3 text-gray-800" />
+            </button>
+            <AuthStatusIcon
+              isAuthenticated={isAuthenticated}
+              navigate={navigate}
+            />
+          </div>
         </header>
       )}
 

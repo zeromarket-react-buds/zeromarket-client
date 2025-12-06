@@ -56,6 +56,8 @@ const ProductDetailPage = () => {
       if (status === 403) {
         setError("HIDDEN");
         alert("숨겨진 게시글입니다.");
+        // navigate(-1);
+        //로그인권한 구현 전 숨김화면에서 숨김해제 버튼표시용, 추후 삭제예정
         setDetail({
           productId: id,
           images: [],
