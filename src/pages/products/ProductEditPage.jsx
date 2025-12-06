@@ -155,9 +155,10 @@ const ProductEditPage = () => {
       const response = await updateProductApi(id, body);
       if (response && response.ok) {
         alert(`상품 수정 완료! 상품ID: ${id}`);
-        navigate(`/products/${id}`);
+        navigate(`/products/${id}`, { replace: true });
       } else {
         alert("상품 수정 실패");
+        console.error("서버 응답 문제:", response);
       }
     } catch (error) {
       console.error(error);

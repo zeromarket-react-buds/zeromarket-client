@@ -66,9 +66,20 @@ const ProductCreatePage = () => {
     setError("");
     console.log("상품 등록 요청 시작");
 
+    //대표이미지 자동설정 로직
+    const hasMain = images.some((img) => img.isMain);
+    let finalImages = images;
+
+    if (!hasMain && images.length > 0) {
+      finalImages = images.map((img, idx) => ({
+        ...img,
+        isMain: idx === 0,
+      }));
+    }
+
     //supabase 이미지 업로드
     const uploadedImages = [];
-    for (const img of images) {
+    for (const img of finalImages) {
       const imageUrl = await uploadToSupabase(img.file);
 
       uploadedImages.push({
@@ -88,18 +99,18 @@ const ProductCreatePage = () => {
       if (response && response.productId) {
         console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
         alert(`상품 등록 완료! 상품ID: ${response.productId}`);
-        navigate(`/products/${response.productId}`);
+        navigate(`/products/${response.productId}`, { replace: true });
       } else {
         // 서버가 유효한 JSON 대신 null/비어있는 응답을 보냈을 때 처리
         console.error(
-          "서버 응답 데이터 문제: 예상된 productId를 찾을 수 없거나 응답이 null입니다.",
+          "서버 응답 문제(예상된 productId를 찾을 수 없거나 응답이 null):",
           response
         );
         setError(
           "상품 등록은 완료되었을 수 있으나, 서버 응답 형식이 올바르지 않습니다."
         );
-        // 임시로 상품 목록으로 이동
-        navigate("/products");
+        // navigate("/products");
+        return; // 에러시 화면이동X
       }
     } catch (error) {
       console.error(error);
