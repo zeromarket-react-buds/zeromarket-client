@@ -24,7 +24,7 @@ const ChatListPage = () => {
               className="border border-brand-green rounded-2xl p-2"
               key={chat.chatRoomId}
             >
-              <Link to={`/chat/${chat.chatRoomId}`}>
+              <Link to={`/chats/${chat.chatRoomId}`}>
                 <ChatRecentMessage {...chat}></ChatRecentMessage>
               </Link>
             </div>
