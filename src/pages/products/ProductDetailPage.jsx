@@ -45,6 +45,14 @@ const ProductDetailPage = () => {
     try {
       const data = await getProductDetailApi(id, memberId); //user?.memberId 전달
 
+      console.log("🟢 서버에서 받은 상세 응답:", data);
+      console.log(
+        "🟢 서버 isWished:",
+        data.isWished,
+        "wishCount:",
+        data.wishCount
+      );
+
       if (!data || typeof data !== "object") {
         setError("상품 정보를 불러오지 못했습니다.");
         return;
@@ -121,25 +129,32 @@ const ProductDetailPage = () => {
       // const result = await res.json();
       // console.log("🔥 서버 응답:", result);
 
-      //경로 이동시엔 상품목록에서 찜해제 못함. 그리고 찜목록페이지에서도 찜한후 한번 더 눌러야하는 문제 해결 못함
-      // // ⭐ 수정됨: POST일 때 찜목록으로 이동
-      // if (method === "POST") {
-      //   navigate("/me/wishlist"); //이동 경로
-      // }
-
       const isAdded = method === "POST";
 
-      // ⭐ 화면 상태는 HTTP method 기준으로 확실하게 변경
-      setDetail((prev) => ({
-        ...prev,
-        isWished: method === "POST",
-        wishCount:
-          method === "POST"
-            ? prev.wishCount + 1
-            : Math.max((prev.wishCount || 1) - 1, 0),
-      }));
+      // // ⭐ 화면 상태는 HTTP method 기준으로 확실하게 변경
+      // setDetail((prev) => ({
+      //   ...prev,
+      //   isWished: method === "POST",
+      //   wishCount:
+      //     method === "POST"
+      //       ? prev.wishCount + 1
+      //       : Math.max((prev.wishCount || 1) - 1, 0),
+      // }));
+      // ⭐ 업데이트된 detail을 계산
+      const updated = {
+        ...detail,
+        isWished: isAdded,
+        wishCount: isAdded
+          ? detail.wishCount + 1
+          : Math.max((detail.wishCount || 1) - 1, 0),
+      };
 
-      return isAdded; // ⭐⭐ 여기 중요!!
+      // ⭐ 상태 반영
+      setDetail(updated);
+      console.log("🟡 토글 이후 detail 업데이트됨:", updated);
+      
+
+      return isAdded; // ActionButtonBar에서 메시지 구분용
     } catch (err) {
       console.error("찜 토글 실패 : ", err);
     }
@@ -147,13 +162,13 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     // 1) AuthContext 로딩 중이면 실행 금지
-    if (user === undefined) return;
+    if (user === undefined) return; // Context 초기 상태일 때는 아무것도 안 함
 
     // 2) 로그인 여부가 결정될 때까지 기다림 (user === null이면 요청 금지)
-    if (user === null) return;
+    // if (user === null) return;
+    const memberId = user ? user.memberId : null; // 로그인 여부 상관없이 처리
 
-    // 3) 로그인 된 경우 → 정상적으로 memberId 넣어서 조회
-    fetchProductDetail(user.memberId);
+    fetchProductDetail(memberId);
     fetchSimilarProducts();
   }, [id, user]);
 

@@ -73,10 +73,20 @@ const updateProductApi = async (id, productData) => {
 };
 
 //상품상세
-const getProductDetailApi = async (id) => {
-  const { data } = await apiClient(`/api/products/${id}`, {
+// const getProductDetailApi = async (id) => {
+//   const { data } = await apiClient(`/api/products/${id}`, {
+//     method: "GET",
+//   });
+//   return data;
+// };
+const getProductDetailApi = async (id, memberId) => {
+  const query = memberId ? `?memberId=${memberId}` : "";
+
+  //실제 API 호출 URL /api/products/${id}${query}
+  const { data } = await apiClient(`/api/products/${id}${query}`, {
     method: "GET",
   });
+
   return data;
 };
 
