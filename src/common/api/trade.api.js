@@ -57,11 +57,24 @@ export async function getTradeDetailApi(tradeId) {
   return data; //
 }
 
+// 거래 상태 변경 (판매내역/구매내역용)
 const updateTradeStatusApi = async ({ tradeId, nextStatus }) => {
   const { data } = await apiClient(`/api/trades/${tradeId}/status`, {
     method: "PATCH",
     body: {
       status: nextStatus,
+    },
+  });
+
+  return data;
+};
+
+// 거래 목록에서 소프트 딜리트 (판매내역/구매내역용)
+const softDeleteTradeApi = async ({ tradeId, deletedBy }) => {
+  const { data } = await apiClient(`/api/trades/${tradeId}/delete`, {
+    method: "PATCH",
+    body: {
+      deletedBy, // SELLER / BUYER
     },
   });
 
@@ -78,4 +91,9 @@ const getTradeInfoForReviewApi = async (tradeId) => {
   const { data } = await apiClient(`/api/trades/reviews/${tradeId}`);
   return data; // TradeReviewInfoDto
 };
-export { getTradeListApi, updateTradeStatusApi, getTradeInfoForReviewApi };
+export {
+  getTradeListApi,
+  updateTradeStatusApi,
+  softDeleteTradeApi,
+  getTradeInfoForReviewApi,
+};
