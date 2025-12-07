@@ -22,10 +22,10 @@ const buildTradeTypeLabel = ({ tradeType, isDirect, isDelivery }) => {
 const LongProductCard = ({
   productTitle,
   sellPrice,
-  tradeType, // enum 객체 그대로
+  tradeType, // enum 객체({ name, description }) 또는 라벨 문자열. 없을 수도 있음
   isDirect, // tradeType 없을시 체크할 Boolean
   isDelivery, // tradeType 없을시 체크할 Boolean
-  tradeStatus, // enum 객체 그대로
+  tradeStatus, // enum 형태는 아니고 enum의 .description 부분 그대로
   thumbnailUrl,
   isHidden,
 }) => {
