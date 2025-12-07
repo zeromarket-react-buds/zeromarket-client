@@ -1,6 +1,8 @@
 // src/layouts/header/TitleHeader.jsx
-import { ChevronLeft, Bell } from "lucide-react";
+import React from "react";
+import { ChevronLeft, Bell, Home } from "lucide-react";
 import Container from "@/components/Container";
+import { useNavigate } from "react-router-dom";
 
 const TitleHeader = ({
   title,
@@ -9,11 +11,13 @@ const TitleHeader = ({
   hideLeft = false,
   hideRight = false,
   showBack = true,
+  showHome = true,
   rightButtonText, // 기존 단일 버튼 유지
   rightButtonEvent, // 기존 단일 버튼 유지
 
   rightActions, // ⭐ HeaderContext에서 내려오는 멀티 버튼
 }) => {
+  const navigate = useNavigate();
   // 멀티 액션이 존재하는지
   const hasRightActions =
     !hideRight && Array.isArray(rightActions) && rightActions.length > 0;
@@ -26,19 +30,43 @@ const TitleHeader = ({
     if (hasRightActions) {
       return (
         <div className="flex items-center gap-2">
-          {rightActions.map((action, i) => (
-            <button
-              key={action.key ?? i}
-              onClick={action.onClick}
-              className={
-                action.className ??
-                "text-brand-green font-semibold inline-flex items-center gap-1"
-              }
-            >
-              {action.icon}
-              {action.label}
-            </button>
-          ))}
+          {rightActions.map((action, i) => {
+            // 1) 이미 만들어진 React 컴포넌트인 경우
+            if (React.isValidElement(action)) {
+              return (
+                <div key={action.key ?? i} className="inline-flex items-center">
+                  {action}
+                </div>
+              );
+            }
+
+            // 2) 기존처럼 설정 객체인 경우
+            const { key, label, icon, onClick, className } = action || {};
+            return (
+              <button
+                key={key ?? i}
+                onClick={onClick}
+                className={
+                  className ??
+                  "text-brand-green font-semibold inline-flex items-center gap-1"
+                }
+              >
+                {icon}
+                {label}
+              </button>
+            );
+            // <button
+            //   key={action.key ?? i}
+            //   onClick={action.onClick}
+            //   className={
+            //     action.className ??
+            //     "text-brand-green font-semibold inline-flex items-center gap-1"
+            //   }
+            // >
+            //   {action.icon}
+            //   {action.label}
+            // </button>
+          })}
         </div>
       );
     }
@@ -70,9 +98,16 @@ const TitleHeader = ({
         {hideLeft ? (
           <div className="w-6" />
         ) : showBack ? (
-          <button onClick={() => window.history.back()}>
-            <ChevronLeft size={24} />
-          </button>
+          <div className="flex items-center gap-1 min-w-12">
+            <button onClick={() => window.history.back()}>
+              <ChevronLeft size={24} />
+            </button>
+            {showHome && (
+              <button className="ml-3" onClick={() => navigate("/")}>
+                <Home size={22} />
+              </button>
+            )}
+          </div>
         ) : (
           <div className="w-6" />
         )}
@@ -87,7 +122,7 @@ const TitleHeader = ({
         </h1>
 
         {/* 오른쪽 영역 */}
-        {renderRight()}
+        <div className="min-w-[48px] flex justify-end">{renderRight()}</div>
       </header>
     </Container>
   );
