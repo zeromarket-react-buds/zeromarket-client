@@ -240,6 +240,7 @@ const MyPurchasesPage = () => {
                   }
                 >
                   <LongProductCard
+                    productId={productId}
                     productTitle={productTitle}
                     sellPrice={sellPrice}
                     tradeType={tradeType}
