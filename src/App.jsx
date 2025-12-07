@@ -155,44 +155,24 @@ const router = createBrowserRouter([
       },
 
       // chats(채팅)
+
       {
-        path: "chats",
-        children: [
-          {
-            index: true,
-            element: <ChatListPage />,
-            // API: GET /api/chats
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "채팅 목록" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
+        path: "chat/:chatRoomId",
+        element: <ChatRoomPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "채팅방" },
+            },
+            footer: {
+              component: null,
             },
           },
-          {
-            path: ":chatRoomId",
-            element: <ChatRoomPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "채팅방" },
-                },
-                footer: {
-                  component: null,
-                },
-              },
-            },
-            // API: GET /api/chats/:roomId
-            //      GET /api/chats/:roomId/messages
-            //      POST /api/chats/:roomId/messages
-          },
-        ],
+        },
+        // API: GET /api/chats/:roomId
+        //      GET /api/chats/:roomId/messages
+        //      POST /api/chats/:roomId/messages
       },
 
       // 로그인
@@ -430,6 +410,24 @@ const router = createBrowserRouter([
                   },
                 },
                 footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+
+          {
+            path: "chats",
+            index: true,
+            element: <ChatListPage />,
+            // API: GET /api/chats
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "채팅 목록" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
               },
             },
           },

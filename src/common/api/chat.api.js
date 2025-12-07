@@ -1,5 +1,13 @@
 import { apiClient } from "@/common/client";
 
+const chatRoomsApi = async (productId) => {
+  const { data } = await apiClient("/api/chats", {
+    method: "GET",
+  });
+
+  return data;
+};
+
 const chatRoomIdApi = async (productId) => {
   const { data } = await apiClient("/api/chats/room", {
     method: "GET",
@@ -78,6 +86,7 @@ const processTradeCompleteApi = async (productId, buyerId, callback) => {
 };
 
 export {
+  chatRoomsApi,
   chatRoomIdApi,
   chatMessagesApi,
   processTradePendingApi,
