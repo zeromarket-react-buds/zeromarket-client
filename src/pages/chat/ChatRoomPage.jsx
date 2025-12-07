@@ -69,22 +69,24 @@ const ChatRoomPage = () => {
     }, {});
   };
 
+  const fetchChatMessages = async () => {
+    const data = await chatMessagesApi(chatRoomId);
+    setChatInfo(data);
+    setHeader({
+      title: data.sellerNickname,
+      // 옵션
+      titleAlign: "left",
+      // showBack: true,
+      // hideRight: false,
+      // rightActions: [...]
+    });
+    setChatMessages(data.chatMessages);
+    settingChatParticipantInfo(data);
+  };
+
   useEffect(() => {
     console.log("chatRoomId", chatRoomId);
-    const fetchChatMessages = async () => {
-      const data = await chatMessagesApi(chatRoomId);
-      setChatInfo(data);
-      setHeader({
-        title: data.sellerNickname,
-        // 옵션
-        titleAlign: "left",
-        // showBack: true,
-        // hideRight: false,
-        // rightActions: [...]
-      });
-      setChatMessages(data.chatMessages);
-      settingChatParticipantInfo(data);
-    };
+
     if (user) {
       fetchChatMessages();
     }
@@ -95,7 +97,10 @@ const ChatRoomPage = () => {
   return (
     <Container className="flex flex-col flex-1 min-h-screen">
       <div className="sticky top-0 bg-white z-50 ">
-        <ChatProductInfoBar {...productProps} />
+        <ChatProductInfoBar
+          {...productProps}
+          onStatusChanged={fetchChatMessages}
+        />
       </div>
       <div className="p-4 flex flex-col space-y-4">
         {/* <div className="text-sm text-gray-500 text-center">날짜</div>
