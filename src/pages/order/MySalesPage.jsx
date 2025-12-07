@@ -8,7 +8,11 @@ import {
   tradeFlowLabels,
   getTradeStatusKey,
 } from "@/components/order/tradeFlow";
-import { getTradeListApi, updateTradeStatusApi } from "@/common/api/trade.api";
+import {
+  getTradeListApi,
+  updateTradeStatusApi,
+  softDeleteTradeApi,
+} from "@/common/api/trade.api";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import TradeFilterModal from "@/components/order/TradeFilterModal";
@@ -17,9 +21,15 @@ import {
   getPeriodLabel,
 } from "@/components/order/filterOptions";
 import { Badge } from "@/components/ui/badge";
+import { useTradeToast } from "@/components/GlobalToast";
 
 const MySalesPage = () => {
   const navigate = useNavigate();
+  const {
+    showCompletedUpdatedToast,
+    showCanceledUpdatedToast,
+    showSoftDeletedToast,
+  } = useTradeToast();
   const [keyword, setKeyword] = useState("");
   const [tradeList, setTradeList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -89,6 +99,7 @@ const MySalesPage = () => {
 
       // 상태 변경 성공 후 목록 다시 불러오기
       await fetchTradeList();
+      showCompletedUpdatedToast();
     } catch (err) {
       console.error("거래 완료로 변경 실패:", err);
     }
@@ -103,8 +114,25 @@ const MySalesPage = () => {
 
       // 거래 취소 성공 후 목록 다시 불러오기
       await fetchTradeList();
+      showCanceledUpdatedToast();
     } catch (err) {
       console.error("거래 취소로 변경 실패:", err);
+    }
+  };
+
+  const handleSoftDeleteTrade = async (tradeId) => {
+    if (!window.confirm("거래 내역을 삭제하겠습니까?")) return;
+
+    try {
+      await softDeleteTradeApi({
+        tradeId,
+        deletedBy: "SELLER",
+      });
+
+      await fetchTradeList();
+      showSoftDeletedToast();
+    } catch (err) {
+      console.error("거래 내역 삭제 실패:", err);
     }
   };
 
@@ -233,7 +261,12 @@ const MySalesPage = () => {
               <div key={tradeId ?? productId}>
                 <div className="flex flex-row justify-between p-2 items-center">
                   <span>{createdAt?.split("T")[0]?.replaceAll("-", ".")}</span>
-                  <XCircle className="w-4.5 h-4.5" />
+                  <Button
+                    onClick={() => handleSoftDeleteTrade(tradeId)}
+                    className="-mr-3"
+                  >
+                    <XCircle className="w-4.5 h-4.5" />
+                  </Button>
                 </div>
 
                 <div
