@@ -49,13 +49,13 @@ const getTradeListApi = async (query = {}) => {
 };
 
 // 거래 상세 조회 (거래내역 상세 화면용)
-export async function getTradeDetailApi(tradeId) {
+export const getTradeDetailApi = async (tradeId) => {
   const { data } = await apiClient(`/api/trades/${tradeId}`, {
     method: "GET",
   });
 
   return data; //
-}
+};
 
 const updateTradeStatusApi = async ({ tradeId, nextStatus }) => {
   const { data } = await apiClient(`/api/trades/${tradeId}/status`, {
