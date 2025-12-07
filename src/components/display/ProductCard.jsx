@@ -70,7 +70,7 @@ const ProductCard = ({ products, onToggleLike }) => {
               </div>
 
               {/* 상품에 관한 상세정보 부분 */}
-              <CardTitle>{p.productTitle}</CardTitle>
+              <CardTitle className="line-clamp-1">{p.productTitle}</CardTitle>
               <CardTitle>{p.sellPrice?.toLocaleString()}원</CardTitle>
               <CardDescription>{dayjs(p.createdAt).fromNow()}</CardDescription>
             </CardHeader>
