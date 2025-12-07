@@ -14,7 +14,8 @@ const ProductSellerInfo = ({ detail }) => {
   const viewCount = formatCount(detail.viewCount);
   const wishCount = formatCount(detail.wishCount);
 
-  const trustScore = detail.seller?.trustScore ?? 0;
+  const rawScore = detail.seller?.trustScore;
+  const trustScore = !rawScore || rawScore === 0 ? "0" : rawScore.toFixed(1);
 
   return (
     <div className="max-w-lg mx-auto py-5 bg-white">
