@@ -87,6 +87,20 @@ const MyPurchasesPage = () => {
     }
   };
 
+  const handleUpdateCancelTrade = async (tradeId) => {
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        nextStatus: "CANCELED",
+      });
+
+      // 거래 취소 성공 후 목록 다시 불러오기
+      await fetchTradeList();
+    } catch (err) {
+      console.error("거래 취소로 변경 실패:", err);
+    }
+  };
+
   // 모달에서 받은 필터 값으로 상태를 갱신한 뒤 API 재요청
   const handleFilterApply = (selectedStatus, fromDate, toDate) => {
     // 로컬 상태에 저장
@@ -243,8 +257,14 @@ const MyPurchasesPage = () => {
                       tradeStatusKey={tradeStatusKey}
                       mode="purchases"
                       onComplete={() => {
-                        handleUpdateCompleteTrade(tradeId);
-                        confirm("거래완료로 변경하시겠습니까?");
+                        if (window.confirm("거래완료로 변경하시겠습니까?")) {
+                          handleUpdateCompleteTrade(tradeId);
+                        }
+                      }}
+                      onCancel={() => {
+                        if (window.confirm("거래를 취소하시겠습니까?")) {
+                          handleUpdateCancelTrade(tradeId);
+                        }
                       }}
                     />
                   )}

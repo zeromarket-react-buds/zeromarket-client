@@ -31,6 +31,7 @@ import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
+import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const router = createBrowserRouter([
   {
@@ -85,8 +86,20 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "register" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "상품 등록",
+                    rightActions: [
+                      {
+                        key: "save",
+                        label: "임시 저장",
+                        // onClick: handleSave,
+                        className:
+                          "text-gray-500 font-semibold text-sm cursor-pointer",
+                      },
+                      <AuthStatusIcon />,
+                    ],
+                  },
                 },
                 footer: {
                   component: null,
@@ -100,8 +113,10 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "detail" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "",
+                  },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -115,8 +130,20 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "edit" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "상품 수정",
+                    rightActions: [
+                      {
+                        key: "save",
+                        label: "임시 저장",
+                        // onClick: handleSave,
+                        className:
+                          "text-gray-500 font-semibold text-sm cursor-pointer",
+                      },
+                      <AuthStatusIcon />,
+                    ],
+                  },
                 },
                 footer: {
                   component: null,

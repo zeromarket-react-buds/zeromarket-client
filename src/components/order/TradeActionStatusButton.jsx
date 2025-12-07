@@ -8,6 +8,7 @@ const TradeActionStatusButton = ({
   showStatusBar = true,
   isHidden,
   onComplete,
+  onCancel,
 }) => {
   const isPending = tradeStatusKey === "PENDING";
 
@@ -41,7 +42,10 @@ const TradeActionStatusButton = ({
               <Button
                 variant="green"
                 type="button"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel && onCancel();
+                }}
                 className="flex-1 py-5"
               >
                 거래 취소
@@ -65,7 +69,10 @@ const TradeActionStatusButton = ({
               <Button
                 variant="green"
                 type="button"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel && onCancel();
+                }}
                 className="flex-1 py-5"
               >
                 거래 취소
@@ -80,7 +87,10 @@ const TradeActionStatusButton = ({
           <Button
             variant="green"
             type="button"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancel && onCancel();
+            }}
             className="flex-1 py-5"
           >
             주문 취소 요청

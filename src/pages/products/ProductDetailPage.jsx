@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import {
@@ -18,6 +18,8 @@ import DetailEcoScoreSection from "@/components/product/detail/DetailEcoScoreSec
 import SimilarProductsSection from "@/components/product/detail/SimilarProductsSection";
 import ProductImageCarousel from "@/components/product/detail/ProductImageCarousel";
 import { products } from "@/data/product.js";
+import { useHeader } from "@/hooks/HeaderContext";
+import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -28,6 +30,7 @@ const ProductDetailPage = () => {
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
+  const { setHeader } = useHeader();
 
   //목데이터
   // const formattedProducts = products.map((p) => ({
@@ -180,6 +183,49 @@ const ProductDetailPage = () => {
       console.log("🔥 wishCount:", detail.wishCount);
     }
   }, [detail]);
+
+  const handleShare = useCallback(async () => {
+    // const { headerState } = useHeader();
+    // const detail = headerState?.detail;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: detail?.productTitle || "제로마켓 상품",
+          text: detail?.productDescription || "제로마켓 상품을 확인해보세요!",
+          // title: "제로마켓 상품",
+          // text: "제로마켓 상품을 확인해보세요!",
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error("공유 실패:", err);
+      }
+    } else {
+      // navigator.share 미지원시 > URL 클립보드 복사
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("URL이 클립보드에 복사되었습니다!");
+      } catch (err) {
+        console.error("클립보드 복사 실패함:", err);
+        alert("공유 기능을 사용할 수 없습니다.");
+      }
+    }
+  }, [detail]);
+
+  useEffect(() => {
+    setHeader({
+      title: "",
+      showBack: true,
+      rightActions: [
+        {
+          key: "share",
+          label: "공유하기",
+          onClick: handleShare,
+          className: "font-semibold text-sm cursor-pointer",
+        },
+        <AuthStatusIcon />,
+      ],
+    });
+  }, [handleShare]);
 
   if (loading)
     return (
