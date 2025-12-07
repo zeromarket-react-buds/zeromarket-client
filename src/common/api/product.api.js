@@ -1,6 +1,6 @@
 import { apiClient } from "@/common/client";
 
-const getProductListApi = async (query = {}) => {
+const getProductListApi = async (query = {}, memberId = 0) => {
   const params = new URLSearchParams();
 
   if (query.offset != null) {
@@ -24,9 +24,13 @@ const getProductListApi = async (query = {}) => {
   if (query.area && query.area.trim()) {
     params.set("area", query.area.trim());
   }
+  //새로고침해도 찜유지하기위해 추가
+  params.set("memberId", memberId);
 
   const qs = params.toString();
   const url = qs ? `/api/products?${qs}` : "/api/products";
+  //찜유지 안돼서 콘솔확인
+  console.log("📌 [getProductListApi] 최종 요청 URL =", url);
 
   const { data } = await apiClient(url, {
     method: "GET",
