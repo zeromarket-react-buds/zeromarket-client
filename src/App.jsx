@@ -31,6 +31,7 @@ import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
+import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const router = createBrowserRouter([
   {
@@ -85,8 +86,20 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "register" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "상품 등록",
+                    rightActions: [
+                      {
+                        key: "save",
+                        label: "임시 저장",
+                        // onClick: handleSave,
+                        className:
+                          "text-gray-500 font-semibold text-sm cursor-pointer",
+                      },
+                      <AuthStatusIcon />,
+                    ],
+                  },
                 },
                 footer: {
                   component: null,
@@ -100,8 +113,10 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "detail" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "",
+                  },
                 },
                 footer: {
                   component: "DefaultFooter",
@@ -115,8 +130,20 @@ const router = createBrowserRouter([
             handle: {
               layout: {
                 header: {
-                  component: "ProductHeader",
-                  props: { type: "edit" },
+                  component: "TitleHeader",
+                  props: {
+                    title: "상품 수정",
+                    rightActions: [
+                      {
+                        key: "save",
+                        label: "임시 저장",
+                        // onClick: handleSave,
+                        className:
+                          "text-gray-500 font-semibold text-sm cursor-pointer",
+                      },
+                      <AuthStatusIcon />,
+                    ],
+                  },
                 },
                 footer: {
                   component: null,
@@ -128,44 +155,24 @@ const router = createBrowserRouter([
       },
 
       // chats(채팅)
+
       {
-        path: "chats",
-        children: [
-          {
-            index: true,
-            element: <ChatListPage />,
-            // API: GET /api/chats
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "채팅 목록" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
+        path: "chat/:chatRoomId",
+        element: <ChatRoomPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "채팅방" },
+            },
+            footer: {
+              component: null,
             },
           },
-          {
-            path: ":chatRoomId",
-            element: <ChatRoomPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "채팅방" },
-                },
-                footer: {
-                  component: null,
-                },
-              },
-            },
-            // API: GET /api/chats/:roomId
-            //      GET /api/chats/:roomId/messages
-            //      POST /api/chats/:roomId/messages
-          },
-        ],
+        },
+        // API: GET /api/chats/:roomId
+        //      GET /api/chats/:roomId/messages
+        //      POST /api/chats/:roomId/messages
       },
 
       // 로그인
@@ -403,6 +410,24 @@ const router = createBrowserRouter([
                   },
                 },
                 footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+
+          {
+            path: "chats",
+            index: true,
+            element: <ChatListPage />,
+            // API: GET /api/chats
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "채팅 목록" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
               },
             },
           },

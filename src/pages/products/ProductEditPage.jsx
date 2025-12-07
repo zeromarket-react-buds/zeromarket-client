@@ -2,6 +2,11 @@ import Container from "@/components/Container";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
+import {
+  updateProductApi,
+  getProductDetailApi,
+} from "@/common/api/product.api";
+
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
 import AiWriteSection from "@/components/product/create/AiWriteSection";
@@ -13,7 +18,6 @@ import ProductConditionSelector from "@/components/product/create/ProductConditi
 import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
-import { updateProductApi } from "@/common/api/product.api";
 
 const ProductEditPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -42,14 +46,11 @@ const ProductEditPage = () => {
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/products/${id}`);
-        if (!res.ok) throw new Error("상품 정보를 불러오지 못했습니다.");
-
-        const data = await res.json();
+        const data = await getProductDetailApi(id);
 
         // console.log("서버에서 받은 productStatus:", data.productStatus);
         if (!data) {
-          setError("상품 정보를 불러오지 못했습니다");
+          setError("상품 정보를 불러오지 못했습니다.");
           return;
         }
 
@@ -79,7 +80,6 @@ const ProductEditPage = () => {
             preview: img.imageUrl,
             file: null, //기존 이미지는 file없음
             isMain: img.main,
-            // isMain: img.isMain ?? img.main ?? img.is_main,
             sortOrder: img.sortOrder, //기존순서
           }))
         );

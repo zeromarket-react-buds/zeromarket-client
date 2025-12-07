@@ -81,7 +81,9 @@ export default function MyPage() {
           <li>
             <Link to="/me/purchases">구매 내역</Link>
           </li>
-          <li>채팅 목록</li>
+          <li>
+            <Link to="/me/chats">채팅 목록</Link>
+          </li>
           <li>차단 유저 목록</li>
         </ul>
       </section>

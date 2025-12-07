@@ -18,23 +18,20 @@ const DefaultHeader = () => {
             마이페이지
           </Link>
         </div>
-        <div className="flex space-x-16 items-center h-[60px]">
+        <div className="flex space-x-16 justify-between h-[60px]">
           <Link to="/" className="h-[50px] shrink-0">
             <img src={logo} className="h-full" alt="logo" />
           </Link>
-          <div className="flex-grow"></div>
-          <div className="flex space-x-3 items-center mr-4">
-            <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864]">
-              <Link
-                to="/boards"
-                className="flex space-x-1 items-center px-3 py-2"
-              >
+          {/* <div className="flex-grow"></div> */}
+          <div className="flex space-x-2 items-center mr-2">
+            <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864] ">
+              <Link to="/boards" className="flex items-center gap-1 px-3 py-2 ">
                 <img
                   src={iconLogin}
-                  alt="cart"
-                  className="text-white w-5 h-5"
+                  alt="board"
+                  className="text-white w-5 h-5 block"
                 />
-                <span>게시판</span>
+                <span className="w-10">게시판</span>
               </Link>
             </div>
             <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864]">
@@ -47,8 +44,13 @@ const DefaultHeader = () => {
                   alt="cart"
                   className="text-white w-5 h-5"
                 />
-                <span>로그인</span>
+                <span className="w-10">로그인</span>
               </Link>
+
+              {/* <button className="flex space-x-1 items-center px-3 py-2">
+                <img src={iconLogin} className="w-5 h-5" />
+                <span className="w-13">로그아웃</span>
+              </button> */}
             </div>
 
             <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864]">
@@ -57,18 +59,18 @@ const DefaultHeader = () => {
                 className="flex space-x-1 items-center px-3 py-2"
               >
                 <img src={iconJoin} alt="cart" className="text-white w-5 h-5" />
-                <span>회원가입</span>
+                <span className="w-13">회원가입</span>
               </Link>
             </div>
-            <Link to="/shopping/cart" className="relative cursor-pointer">
+            <Link to="/shopping/cart" className="relative cursor-pointer w-5 ">
               <img src={iconCart} alt="cart" className="w-5 h-5" />
               <div className="absolute -top-1.5 -right-2 h-4 w-4 rounded-full bg-[#0063ba] flex items-center justify-center">
                 <div className="text-white text-[8pt] font-bold">0</div>
               </div>
             </Link>
-            <div className="cursor-pointer">
+            {/* <div className="cursor-pointer">
               <img src={iconSearch} alt="search" className="w-5 h-5" />
-            </div>
+            </div> */}
           </div>
         </div>
       </header>
