@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import TradeStatusBar from "@/components/order/TradeStatusBar";
 
 const TradeActionStatusButton = ({
-  trade,
   flowType,
   tradeStatusKey,
   mode,
