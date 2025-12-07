@@ -5,14 +5,23 @@ const StatusFilterSection = ({
   statusOptions,
   selectedStatuses,
   toggleStatus,
+  mode,
 }) => {
+  // 구매내역에서는 숨기기 옵션은 안 보이게 처리
+  const visibleStatusOptions =
+    mode === "purchases"
+      ? statusOptions.filter((option) => option.value !== "isHidden")
+      : statusOptions;
+
   return (
     <div className="flex flex-col gap-3 py-3">
-      <div className="text-base font-semibold px-3">거래 · 상품상태</div>
+      <div className="text-base font-semibold px-3">
+        {mode === "purchases" ? <>거래상태</> : <>거래 · 상품상태</>}
+      </div>
 
       <div>
         <div className="flex gap-4">
-          {statusOptions.map((option) => (
+          {visibleStatusOptions.map((option) => (
             <Button
               key={option.value}
               type="button"

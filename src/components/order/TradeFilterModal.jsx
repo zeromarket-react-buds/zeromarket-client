@@ -15,6 +15,7 @@ const statusOptions = [
 const TradeFilterModal = ({
   onClose,
   onApply,
+  mode,
   initialStatuses = [],
   initialFromDate = null,
   initialToDate = null,
@@ -161,6 +162,7 @@ const TradeFilterModal = ({
             {/* 거래/상품 필터 */}
             <StatusFilterSection
               statusOptions={statusOptions}
+              mode={mode}
               selectedStatuses={selectedStatuses}
               toggleStatus={toggleStatus}
             />

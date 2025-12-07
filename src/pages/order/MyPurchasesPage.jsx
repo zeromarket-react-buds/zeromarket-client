@@ -171,6 +171,7 @@ const MyPurchasesPage = () => {
           <TradeFilterModal
             onClose={() => setIsFilterOpen(false)}
             onApply={handleFilterApply}
+            mode="purchases"
             initialStatuses={filterStatus}
             initialFromDate={filterFromDate}
             initialToDate={filterToDate}
