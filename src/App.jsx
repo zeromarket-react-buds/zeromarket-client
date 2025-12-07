@@ -157,7 +157,7 @@ const router = createBrowserRouter([
       // chats(채팅)
 
       {
-        path: "chat/:chatRoomId",
+        path: "chats/:chatRoomId",
         element: <ChatRoomPage />,
         handle: {
           layout: {

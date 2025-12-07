@@ -5,9 +5,8 @@ import {
 } from "@/common/api/chat.api";
 import { useAuth } from "@/hooks/AuthContext";
 
-const ChangeStatusButtons = (productProps, onStatusChanged) => {
+const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
   const { productId, sellerId, buyerId, tradeStatus } = productProps;
-  console.log(productProps);
   const { user } = useAuth();
   const isMyProduct = user?.memberId === sellerId;
 
