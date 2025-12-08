@@ -188,24 +188,26 @@ const router = createBrowserRouter([
         },
       },
       // 리뷰
+      // /trades/:tradeId/review (후기 작성 페이지)
+      {
+        path: "trades/:tradeId/review", // /trades/:tradeId/review (후기 작성 페이지)
+        element: <ReviewCreatePage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "후기 작성" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
       {
         path: "reviews",
         children: [
-          {
-            path: "create/:tradeId", // /trades/:tradeId/review (후기 작성 페이지)
-            element: <ReviewCreatePage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "후기 작성" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
+          // /reviews/:reviewId (후기 상세 페이지)
           {
             path: ":reviewId",
             element: <ReviewDetailPage />,
@@ -221,6 +223,7 @@ const router = createBrowserRouter([
               },
             },
           },
+          // /reviews/received/summary/:memberId (후기 요약 페이지, 3건씩)
           {
             path: "received/summary/:memberId",
             element: <ReceivedReviewSummaryPage />,
@@ -236,6 +239,7 @@ const router = createBrowserRouter([
               },
             },
           },
+          // /reviews/received/:memberId (후기 목록 조회, 점수별)
           {
             path: "received/:memberId",
             element: <ReceivedReviewListPage />,
@@ -251,10 +255,6 @@ const router = createBrowserRouter([
               },
             },
           },
-          // {
-          //   index: true, // /users/:userId/reviews (후기 조회 페이지)
-          //   delement: <ReviewListPage />
-          // }
         ],
       },
 
