@@ -70,14 +70,15 @@ const ProductImageUploader = ({ images, setImages }) => {
         return filtered.map((img, idx) => ({
           ...img,
           sortOrder: idx,
-          isMain: false,
+          isMain: idx === 0, //삭제시 첫번째를 자동으로 대표이미지로
+          // isMain:false,
         }));
       }
 
-      // 삭제된게 대표가 아님 - 기존 대표 이미지를 유지
+      // 삭제된게 대표가 아님 - 1. 기존 대표 이미지를 유지
       const oldMainIndex = prev.findIndex((i) => i.isMain);
 
-      //삭제 후 새로운 메인 이미지 인덱스를 계산
+      //2. 삭제 후 새로운 메인 이미지 인덱스를 계산
       const newMainIndex =
         oldMainIndex > index ? oldMainIndex - 1 : oldMainIndex;
 

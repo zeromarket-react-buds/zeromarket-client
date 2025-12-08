@@ -19,6 +19,7 @@ import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { useHeader } from "@/hooks/HeaderContext";
+import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductEditPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -134,11 +135,28 @@ const ProductEditPage = () => {
       return;
     }
 
-    //새 이미지 파일만 supabase 업로드 처리
+    if (!form.delivery && !form.direct) {
+      alert("거래 방법을 1개 이상 선택해주세요.");
+      return;
+    }
+
+    //대표이미지 자동설정 로직
+    let adjustedImages = [...images];
+
+    const hasMain = adjustedImages.some((img) => img.isMain);
+
+    if (!hasMain && adjustedImages.length > 0) {
+      adjustedImages = adjustedImages.map((img, idx) => ({
+        ...img,
+        isMain: idx === 0,
+      }));
+    }
+
+    //새 이미지 파일만 supabase 업로드 + 정렬 + 메인지정
     const finalImages = [];
     let order = 1;
 
-    for (const img of images) {
+    for (const img of adjustedImages) {
       let url = img.imageUrl;
 
       //새로 업로드 필요 이미지

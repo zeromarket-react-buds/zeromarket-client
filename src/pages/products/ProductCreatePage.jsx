@@ -15,6 +15,7 @@ import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { createProductApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
+import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductCreatePage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -80,16 +81,21 @@ const ProductCreatePage = () => {
       return;
     }
 
+    if (!form.delivery && !form.direct) {
+      alert("거래 방법을 1개 이상 선택해주세요.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     console.log("상품 등록 요청 시작");
 
     //대표이미지 자동설정 로직
-    const hasMain = images.some((img) => img.isMain);
-    let finalImages = images;
+    let adjustedImages = [...images];
+    const hasMain = adjustedImages.some((img) => img.isMain);
 
-    if (!hasMain && images.length > 0) {
-      finalImages = images.map((img, idx) => ({
+    if (!hasMain && adjustedImages.length > 0) {
+      adjustedImages = adjustedImages.map((img, idx) => ({
         ...img,
         isMain: idx === 0,
       }));
@@ -97,14 +103,18 @@ const ProductCreatePage = () => {
 
     //supabase 이미지 업로드
     const uploadedImages = [];
-    for (const img of finalImages) {
+    let order = 1;
+
+    for (const img of adjustedImages) {
       const imageUrl = await uploadToSupabase(img.file);
 
       uploadedImages.push({
         imageUrl,
-        sortOrder: img.sortOrder,
+        // sortOrder: img.sortOrder,
+        sortOrder: order,
         isMain: img.isMain,
       });
+      order++;
     }
 
     const jsonData = {
