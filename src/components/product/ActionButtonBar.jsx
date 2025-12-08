@@ -40,8 +40,11 @@ const ActionButtonBar = ({
     }
     try {
       await ProductHiddenApi(productId, true);
+
       alert("상품이 숨김 처리 되었습니다.");
-      if (onHide) onHide();
+      navigate("/");
+
+      // if (onHide) onHide();
     } catch (error) {
       console.error("숨김 처리 오류", error);
       alert("숨김 처리 중 오류가 발생했습니다.");
