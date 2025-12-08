@@ -28,7 +28,7 @@ const ProductList = () => {
 
   // 검색/sort 관련
   const [keyword, setKeyword] = useState("");
-  const [sort, setSort] = useState("popularity");
+  const [sort, setSort] = useState("popularity"); //popularity인기순/ latest인기순 정렬을 사용자 명시 선택시에만
 
   // 필터 관련
   const [selectedLevel1Id, setSelectedLevel1Id] = useState(null);
