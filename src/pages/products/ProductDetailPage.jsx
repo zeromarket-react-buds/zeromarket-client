@@ -17,6 +17,7 @@ import ProductCategoryTimeSection from "@/components/product/detail/ProductCateg
 import DetailEcoScoreSection from "@/components/product/detail/DetailEcoScoreSection";
 import SimilarProductsSection from "@/components/product/detail/SimilarProductsSection";
 import ProductImageCarousel from "@/components/product/detail/ProductImageCarousel";
+import ReportModal from "@/components/report/ReportModal";
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
@@ -32,6 +33,7 @@ const ProductDetailPage = () => {
   const [detail, setDetail] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
   const { setHeader } = useHeader();
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   //목데이터
   // const formattedProducts = products.map((p) => ({
@@ -266,6 +268,24 @@ const ProductDetailPage = () => {
     fetchProductDetail(memberId); // ⭐ 숨김/해제 후 상세 재조회
   };
 
+  //신고하기
+  const handleOpenReportModal = () => {
+    if (!isAuthenticated) {
+      const goLogin = window.confirm(
+        "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?"
+      );
+      if (goLogin) {
+        navigate("/login");
+      }
+      return;
+    }
+    setIsReportModalOpen(true);
+    console.log("모달오픈");
+  };
+  const handleCloseReportModal = () => {
+    setIsReportModalOpen(false);
+  };
+
   return (
     <div>
       <Container>
@@ -302,7 +322,7 @@ const ProductDetailPage = () => {
             {/* 설명 */}
             <div className="mb-4">
               <div className=" font-semibold mb-2">설명</div>
-              <p className="">{detail.productDescription}</p>
+              <p className="whitespace-pre-line">{detail.productDescription}</p>
             </div>
 
             {/* 환경점수 - 2,3차 */}
@@ -313,8 +333,19 @@ const ProductDetailPage = () => {
 
             {/* 신고하기 버튼 */}
             <div className="mb-6">
-              <button className="cursor-pointer">신고하기</button>
+              <button
+                className="cursor-pointer"
+                onClick={handleOpenReportModal}
+              >
+                신고하기
+              </button>
             </div>
+
+            {/* 신고하기 모달 */}
+            <ReportModal
+              isOpen={isReportModalOpen}
+              onclose={handleCloseReportModal}
+            />
 
             {/* 비슷한 상품 */}
             <SimilarProductsSection
@@ -324,7 +355,7 @@ const ProductDetailPage = () => {
           </div>
 
           {/* 로그인 여부와 상품 작성자 여부 따라 버튼 다르게 렌더링 */}
-          <div className="sticky bottom-0 bg-white border-t z-50">
+          <div className="sticky bottom-0 bg-white border-t z-20">
             <ActionButtonBar
               role={isAuthenticated && isProductOwner ? "SELLER" : "BUYER"}
               isWished={detail.isWished}
