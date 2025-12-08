@@ -20,7 +20,6 @@ import MyPurchasesPage from "@/pages/order/MyPurchasesPage";
 import SellerShopPage from "./pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창 //확인필요
 import MyPageLayout from "@/layouts/MyPageLayout";
-import MyProfile from "./pages/me/MyProfile";
 import TradeDetailPage from "@/pages/order/TradeDetailPage";
 import MyProfileEditPage from "./pages/me/MyProfileEditPage";
 import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
@@ -32,6 +31,7 @@ import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
+import MyProfilePage from "@/pages/me/MyProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -318,7 +318,7 @@ const router = createBrowserRouter([
           },
           {
             path: "profile",
-            element: <MyProfile />,
+            element: <MyProfilePage />,
             handle: {
               layout: {
                 header: {

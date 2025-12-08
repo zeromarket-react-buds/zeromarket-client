@@ -2,24 +2,49 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Camera, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
+import { getProfileApi } from "@/common/api/user.api";
 
-export default function MyProfile() {
+const MyProfilePage = () => {
   const navigate = useNavigate();
   const { setHeader } = useHeader();
 
-  const [previewImg, setPreviewImg] = useState(null);
   const [profileFile, setProfileFile] = useState(null); // 실제 파일 저장
-  const [nickname, setNickname] = useState("현재 닉네임");
-  const [intro, setIntro] = useState("현재 한줄 소개");
+  const [nickname, setNickname] = useState("");
+  const [profileImg, setProfileImg] = useState("");
+  const [intro, setIntro] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  const fetchMyProfileSetting = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const data = await getProfileApi();
+      console.log("프로필 응답:", data);
+
+      setProfileImg(data.profileImage);
+      setNickname(data.nickname);
+      setIntro(data.introduction);
+    } catch (err) {
+      console.error("프로필 불러오기 실패:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 처음 들어왔을 때 한번 호출
+  useEffect(() => {
+    fetchMyProfileSetting();
+  }, []);
 
   // 저장 처리
   const handleSave = useCallback(async () => {
     const formData = new FormData();
     if (profileFile) formData.append("profileImage", profileFile);
     formData.append("nickname", nickname);
-    formData.append("intro", intro);
+    formData.append("introduction", intro);
 
     // 실제 저장 API 연동 코드 자리
     // await apiClient("/api/me/profile", {
@@ -55,7 +80,7 @@ export default function MyProfile() {
     if (!file) return;
 
     const imageUrl = URL.createObjectURL(file);
-    setPreviewImg(imageUrl);
+    setProfileImg(imageUrl);
     setProfileFile(file);
   };
 
@@ -70,11 +95,11 @@ export default function MyProfile() {
             className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center overflow-hidden"
             onClick={() => fileInputRef.current?.click()}
           >
-            {!previewImg ? (
+            {!profileImg ? (
               <UserRound className="text-brand-ivory size-25" />
             ) : (
               <img
-                src={previewImg}
+                src={profileImg}
                 alt="profile"
                 className="w-full h-full object-cover"
               />
@@ -101,24 +126,26 @@ export default function MyProfile() {
 
       {/* 닉네임 입력 */}
       <div className="mb-6">
-        <label className="block mb-2 text-sm">닉네임</label>
+        <label className="block mb-3 pl-1 text-base">닉네임</label>
         <input
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
-          className="w-full border border-brand-green rounded-md py-2 px-3 text-sm"
+          className="w-full border border-brand-green rounded-xl py-2 px-5 text-base"
         />
       </div>
 
       {/* 한줄 소개 입력 */}
       <div>
-        <label className="block mb-2 text-sm">한줄 소개</label>
+        <label className="block mb-3 pl-1 text-base">한줄 소개</label>
         <textarea
-          value={intro}
+          value={intro ?? ""}
           onChange={(e) => setIntro(e.target.value)}
           rows={3}
-          className="w-full border border-brand-green rounded-md py-2 px-3 text-sm resize-none"
+          className="w-full border border-brand-green rounded-xl py-2 px-5 text-base resize-none"
         />
       </div>
     </div>
   );
-}
+};
+
+export default MyProfilePage;
