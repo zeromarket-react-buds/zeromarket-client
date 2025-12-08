@@ -1,4 +1,7 @@
-import { getTradeDetailApi } from "@/common/api/trade.api";
+import {
+  getTradeDetailApi,
+  updateTradeStatusApi,
+} from "@/common/api/trade.api";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import {
@@ -9,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTradeToast } from "@/components/GlobalToast";
 
 // 공통 날짜 포맷 함수
 const formatDate = (isoString) => {
@@ -39,6 +43,8 @@ function formatPhone(phone = "") {
 
 const TradeDetailPage = () => {
   const navigate = useNavigate();
+  const { showCompletedUpdatedToast, showCanceledUpdatedToast } =
+    useTradeToast();
   const { tradeId } = useParams();
   const [tradeProduct, setTradeProduct] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -114,6 +120,36 @@ const TradeDetailPage = () => {
   const headerDate = getHeaderDate(tradeProduct);
   const paidDate = formatDate(createdAt);
 
+  const handleUpdateCompleteTrade = async (tradeId) => {
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        nextStatus: "COMPLETED",
+      });
+
+      // 상태 변경 성공 후 목록 다시 불러오기
+      await fetchTradeProduct();
+      showCompletedUpdatedToast();
+    } catch (err) {
+      console.error("거래 완료로 변경 실패:", err);
+    }
+  };
+
+  const handleUpdateCancelTrade = async (tradeId) => {
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        nextStatus: "CANCELED",
+      });
+
+      // 거래 취소 성공 후 목록 다시 불러오기
+      await fetchTradeProduct();
+      showCanceledUpdatedToast();
+    } catch (err) {
+      console.error("거래 취소로 변경 실패:", err);
+    }
+  };
+
   return (
     <div className="flex flex-col -mt-8">
       <div className="flex bg-black text-white justify-between p-4">
@@ -180,6 +216,16 @@ const TradeDetailPage = () => {
               flowType={flowType}
               tradeStatusKey={tradeStatusKey}
               mode={mode}
+              onComplete={() => {
+                if (window.confirm("거래완료로 변경하시겠습니까?")) {
+                  handleUpdateCompleteTrade(tradeId);
+                }
+              }}
+              onCancel={() => {
+                if (window.confirm("거래를 취소하시겠습니까?")) {
+                  handleUpdateCancelTrade(tradeId);
+                }
+              }}
               showStatusBar={false}
             />
           ) : null}
