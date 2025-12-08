@@ -60,7 +60,7 @@ const ProductCard = ({ products, onToggleLike }) => {
                     className="size-6 mx-1 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleHeartClick(p.productId);
+                      handleHeartClick(p.productId, p.isWished);
                     }}
                     fill={p.isWished ? "red" : "none"}
                     stroke={p.isWished ? "red" : "currentColor"}
