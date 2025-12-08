@@ -9,6 +9,7 @@ import { useLikeToast } from "@/components/GlobalToast";
 import dayjs from "@/utils/time";
 import { Badge } from "../ui/badge";
 import { useNavigate } from "react-router-dom";
+
 const ProductCard = ({ products, onToggleLike }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
 
@@ -23,19 +24,17 @@ const ProductCard = ({ products, onToggleLike }) => {
   // };
 
   // ⭐ 찜 목록 추가/삭제 함수 (백엔드 연동 버전)
-  const handleHeartClick = async (productId, liked) => {
+  const handleHeartClick = async (productId, isWished) => {
     // ⭐ 백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
-    const newLiked = await onToggleLike(productId); // ← 수정됨!
+    const newState = await onToggleLike(productId); // true / false
 
     // ⭐ 토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
-    if (newLiked) showLikeAddedToast();
+    if (newState) showLikeAddedToast();
     else showLikeRemovedToast();
   };
 
-  // 상품상세 페이지 이동
-  const goDetail = (productId) => {
-    navigate(`/products/${productId}`);
-  };
+  // 상세 이동
+  const goDetail = (id) => navigate(`/products/${id}`);
 
   return (
     <div className="grid grid-cols-2 gap-6">
@@ -61,10 +60,10 @@ const ProductCard = ({ products, onToggleLike }) => {
                     className="size-6 mx-1 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleHeartClick(p.productId, p.liked);
+                      handleHeartClick(p.productId);
                     }}
-                    fill={p.liked ? "red" : "none"}
-                    stroke={p.liked ? "red" : "currentColor"}
+                    fill={p.isWished ? "red" : "none"}
+                    stroke={p.isWished ? "red" : "currentColor"}
                   />
                 </div>
               </div>

@@ -20,6 +20,7 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
+import { Heart } from "lucide-react";//찜 데이터 콘솔 확인용
 
 const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -115,6 +116,7 @@ const ProductDetailPage = () => {
     }
   };
 
+  //찜 추가/삭제
   const toggleWish = async () => {
     try {
       console.log("*** 현재 detail.isWished:", detail?.isWished);
@@ -129,20 +131,11 @@ const ProductDetailPage = () => {
 
       if (!res.ok) throw new Error("찜 토글 실패");
 
-      // const result = await res.json();
-      // console.log("🔥 서버 응답:", result);
+      const result = await res.json(); //서버응답 콘솔확인용
+      console.log("🔥 서버 응답:", result);
 
       const isAdded = method === "POST";
 
-      // // ⭐ 화면 상태는 HTTP method 기준으로 확실하게 변경
-      // setDetail((prev) => ({
-      //   ...prev,
-      //   isWished: method === "POST",
-      //   wishCount:
-      //     method === "POST"
-      //       ? prev.wishCount + 1
-      //       : Math.max((prev.wishCount || 1) - 1, 0),
-      // }));
       // ⭐ 업데이트된 detail을 계산
       const updated = {
         ...detail,
@@ -155,7 +148,6 @@ const ProductDetailPage = () => {
       // ⭐ 상태 반영
       setDetail(updated);
       console.log("🟡 토글 이후 detail 업데이트됨:", updated);
-      
 
       return isAdded; // ActionButtonBar에서 메시지 구분용
     } catch (err) {
@@ -181,6 +173,9 @@ const ProductDetailPage = () => {
       console.log("🔥 salesStatus:", detail.salesStatus);
       console.log("🔥 isWished:", detail.isWished);
       console.log("🔥 wishCount:", detail.wishCount);
+
+      console.log("💛 현재 detail.isWished 값:", detail.isWished);
+      console.log("💛 현재 wishCount 값:", detail.wishCount);
     }
   }, [detail]);
 
@@ -271,10 +266,19 @@ const ProductDetailPage = () => {
   return (
     <div>
       <Container>
-        <div className="max-w-full mx-auto bg-gray-0 ">
+        <div className="relative ">
           <div>
             {/* 상품 이미지 */}
             <ProductImageCarousel images={sortedImages} />
+            {/*detail.isWished, wishCount값 들어오는지 ui,콘솔 확인용*/}
+            {/* {detail && (
+              <Heart
+                className="absolute top-4 right-4 size-8 cursor-pointer z-20"
+                onClick={toggleWish}
+                fill={detail.isWished ? "red" : "none"}
+                stroke={detail.isWished ? "red" : "currentColor"}
+              />
+            )} */}
           </div>
           <div className="px-6">
             {/* 판매자 정보*/}

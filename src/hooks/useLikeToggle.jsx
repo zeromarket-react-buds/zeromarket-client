@@ -32,17 +32,21 @@ export const useLikeToggle = () => {
 
       if (!res.ok) throw new Error("찜 토글 실패");
 
-      // 백엔드 응답: 찜됨(true) / 삭제됨(false)
-      const liked = await res.json();
+      // 서버는 true(찜됨) / false(찜해제) 반환
+      const newState = await res.json();
 
       // 프론트 UI 반영
+      // ⭐ 상태 업데이트: liked를 isWished로 변경
       setProducts((prev) =>
-        prev.map((p) => (p.productId === productId ? { ...p, liked } : p))
+        prev.map((p) =>
+          p.productId === productId ? { ...p, isWished: newState } : p
+        )
       );
 
-      return liked;
-    } catch (err) {
-      console.error("찜 API 오류:", err);
+      return newState;
+    } catch (error) {
+      console.error(error);
+      return false;
     }
   };
 

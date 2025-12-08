@@ -1,7 +1,8 @@
 import LongProductCard from "@/components/order/LongProductCard";
 import ChangeStatusButtons from "@/components/chat/ChangeStatusButtons";
 
-const ChatProductInfoBar = (productProps, onStatusChanged) => {
+const ChatProductInfoBar = ({ ...props }) => {
+  const { onStatusChanged, ...productProps } = props;
   return (
     <div className="p-4">
       <LongProductCard

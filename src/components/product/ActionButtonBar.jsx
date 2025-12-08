@@ -86,15 +86,6 @@ const ActionButtonBar = ({
       goLogin(); // 로그인 유도 함수
       return;
     }
-    // if (!isWished) showLikeAddedToast();
-    // else showLikeRemovedToast();
-
-    // // if (onToggleLike) {
-    // //   onToggleLike();
-    // // }
-    // if (onToggleWish) {
-    //   onToggleWish();
-    // }
     if (onToggleWish) {
       const isAdded = await onToggleWish(); // ⭐ 토글 결과값 받아오기
 
@@ -162,6 +153,8 @@ const ActionButtonBar = ({
               <Heart
                 className="size-7 cursor-pointer"
                 onClick={handleHeartClick}
+                fill={isWished ? "red" : "white"} //
+                stroke={isWished ? "red" : "currentColor"} //
               />
             </div>
 

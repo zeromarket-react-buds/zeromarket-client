@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 // 거래 타입 표시용 문자열 생성
 const buildTradeTypeLabel = ({ tradeType, isDirect, isDelivery }) => {
@@ -20,12 +21,13 @@ const buildTradeTypeLabel = ({ tradeType, isDirect, isDelivery }) => {
 };
 
 const LongProductCard = ({
+  productId,
   productTitle,
   sellPrice,
-  tradeType, // enum 객체 그대로
+  tradeType, // enum 객체({ name, description }) 또는 라벨 문자열. 없을 수도 있음
   isDirect, // tradeType 없을시 체크할 Boolean
   isDelivery, // tradeType 없을시 체크할 Boolean
-  tradeStatus, // enum 객체 그대로
+  tradeStatus, // enum 형태는 아니고 enum의 .description 부분 그대로
   thumbnailUrl,
   isHidden,
 }) => {
@@ -38,10 +40,12 @@ const LongProductCard = ({
   return (
     <div className="flex flex-row gap-10 items-center">
       <div className="overflow-hidden">
-        <img
-          src={thumbnailUrl}
-          className="w-[140px] h-[100px] object-cover rounded-2xl"
-        />
+        <Link to={`/products/${productId}`}>
+          <img
+            src={thumbnailUrl}
+            className="w-[140px] h-[100px] object-cover rounded-2xl"
+          />
+        </Link>
       </div>
       <div className="flex flex-col gap-1 flex-1">
         <div className="font-semibold line-clamp-1">{productTitle}</div>

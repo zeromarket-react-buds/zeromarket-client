@@ -8,11 +8,23 @@ import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "@/hooks/AuthContext";
+
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+
+  // ⭐ 로그인 사용자 정보
+  const { user, isAuthenticated } = useAuth();
+  // 로그인 안된 상태에서도 테스트용 memberId=1 사용
+  const memberId = isAuthenticated ? user.memberId : 1;
+
+  //찜하트 유지 안돼서 콘솔확인
+  useEffect(() => {
+    console.log("📌 [ProductList] 현재 로그인한 memberId =", memberId);
+  }, [memberId]);
 
   // 검색/sort 관련
   const [keyword, setKeyword] = useState("");
@@ -30,12 +42,33 @@ const ProductList = () => {
   const [offset, setOffset] = useState(null);
   const [hasNext, setHasNext] = useState(true);
 
+  // ⭐ 찜 토글 후 UI 즉시 반영 함수
+  const handleToggleWish = async (productId) => {
+    console.log("❤️ handleToggleWish 호출됨", productId);
+
+    // 백엔드 토글 API 수행 (true/false 반환)
+    const newState = await onToggleLike(productId);
+
+    // UI 즉시 업데이트 — 여기가 핵심!
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, isWished: newState } : item
+      )
+    );
+
+    return newState;
+  };
+
   // 검색 fetch 요청 함수
+  //상품 목록 API 요청
   const fetchHomeProducts = async (nextOffset = null) => {
     if (loading) return;
     setLoading(true);
 
     try {
+      //찜유지위해 memberId추가 콘솔확인
+      console.log("📌 [fetchHomeProducts] memberId 보내는 값 =", memberId);
+
       const query = {
         offset: nextOffset,
         sort,
@@ -45,9 +78,12 @@ const ProductList = () => {
         maxPrice,
         area,
       };
+      // 찜색유지 안돼는 문제콘솔 호출 직전 URL 모양 확인
+      console.log("📌 [fetchHomeProducts] query =", query);
 
-      const data = await getProductListApi(query);
-      console.log("상품 목록 응답:", data);
+      //찜색유지 안돼는 문제콘솔. memberId전달
+      const data = await getProductListApi(query, memberId);
+      console.log("📌 [fetchHomeProducts] API 응답 =", data);
 
       const fetched = data.content;
       const offset = data.offset;
@@ -56,17 +92,18 @@ const ProductList = () => {
       setProducts((prev) => {
         // 화면 처음 그려질 때(nextOffset 없을 경우)는 그냥 fetch 요청한거 그대로
         if (nextOffset === null) {
+          // 첫 로딩 → 그대로 적용
           return fetched;
         }
 
         // 불려와진 후
+        //추가 로딩 시 중복 제거
         const existingIds = new Set(prev.map((p) => p.productId));
-        const duplicateRemove = fetched.filter(
-          (p) => !existingIds.has(p.productId)
-        );
+        const newItems = fetched.filter((p) => !existingIds.has(p.productId));
 
-        return [...prev, ...duplicateRemove];
+        return [...prev, ...newItems];
       });
+
       setOffset(offset);
       setHasNext(hasNext);
     } catch (err) {
@@ -75,8 +112,13 @@ const ProductList = () => {
       setLoading(false);
     }
   };
-
+  // sort/filter 변경 시 목록 재호출
   useEffect(() => {
+    //찜 유지 안돼는 문제를 위한콘솔
+    console.log(
+      "⭐ memberId 변경 감지 → 상품 목록을 다시 불러옵니다:",
+      memberId
+    );
     setProducts([]);
     setOffset(null);
     fetchHomeProducts(null);
@@ -90,6 +132,14 @@ const ProductList = () => {
     maxPrice,
     area,
   ]);
+
+  // ⭐ 로그인 복구(memberId 변화) 시 → 강제 재조회
+  useEffect(() => {
+    console.log("🔄 memberId 변경 감지 → 전체 리스트 다시 조회:", memberId);
+    setProducts([]);
+    setOffset(null);
+    fetchHomeProducts(null);
+  }, [memberId]); // 🔥 이게 핵심!
 
   // sort 관련 함수
   const handleSort = (value) => {
@@ -181,7 +231,7 @@ const ProductList = () => {
         </span>
       </div>
 
-      {/* 필터 */}
+      {/*  필터 모달 */}
       <ProductFilterModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -202,6 +252,8 @@ const ProductList = () => {
         setArea={setArea}
         onApply={handleFilterApply}
       />
+
+      {/* 상품 카드 목록 */}
       <ProductCard products={products} onToggleLike={onToggleLike} />
 
       {/* 더보기 */}
