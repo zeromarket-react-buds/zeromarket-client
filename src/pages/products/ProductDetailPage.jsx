@@ -6,6 +6,7 @@ import {
   getProductDetailApi,
   getSimilarProductsApi,
 } from "@/common/api/product.api";
+import { createReportApi } from "@/common/api/report.api";
 
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
@@ -70,15 +71,15 @@ const ProductDetailPage = () => {
       if (status === 403) {
         setError("HIDDEN");
         alert("숨겨진 게시글입니다.");
-        // navigate(-1);
+        navigate(-1);
         //로그인권한 구현 전 숨김화면에서 숨김해제 버튼표시용, 추후 삭제예정
-        setDetail({
-          productId: id,
-          images: [],
-          seller: {},
-          isHidden: true,
-          sellerId: user.memberId,
-        });
+        // setDetail({
+        //   productId: id,
+        //   images: [],
+        //   seller: {},
+        //   isHidden: true,
+        //   sellerId: user.memberId,
+        // });
         return;
       }
       if (status === 404 || status === 410) {
@@ -286,6 +287,28 @@ const ProductDetailPage = () => {
     setIsReportModalOpen(false);
   };
 
+  //신고제출
+  const handleSubmitReport = async ({ reasonId, reasonText }) => {
+    if (!detail) return;
+
+    const payload = {
+      reasonId,
+      targetType: "PRODUCT",
+      targetId: detail.productId,
+      reasonText: reasonText || null,
+    };
+
+    try {
+      const result = await createReportApi(payload);
+      alert(result?.message || "신고가 접수되었습니다.");
+
+      setIsReportModalOpen(false);
+    } catch (error) {
+      console.error("신고 제출 실패", error);
+      alert("신고 처리 중 문제가 발생했습니다.");
+    }
+  };
+
   return (
     <div>
       <Container>
@@ -345,6 +368,7 @@ const ProductDetailPage = () => {
             <ReportModal
               isOpen={isReportModalOpen}
               onclose={handleCloseReportModal}
+              onSubmit={handleSubmitReport}
             />
 
             {/* 비슷한 상품 */}

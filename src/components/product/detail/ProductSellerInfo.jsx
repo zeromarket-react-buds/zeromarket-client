@@ -1,4 +1,5 @@
 import { UserRound, Heart, Eye, Smile } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ProductSellerInfo = ({ detail }) => {
   const profileImage = detail.seller?.profileImage;
@@ -21,20 +22,26 @@ const ProductSellerInfo = ({ detail }) => {
     <div className="max-w-lg mx-auto py-5 bg-white">
       {/* 판매자 정보 */}
       <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-3 ">
-          {/* 프사+닉네임 */}
-          <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center overflow-hidden ">
-            {profileImage ? (
-              <img src={profileImage} className="w-full h-full object-cover" />
-            ) : (
-              <UserRound className="size-15 text-brand-ivory " />
-            )}
+        <Link to={"/sellershop"}>
+          {/* 추후 판매자id별 이동 구현 필요 */}
+          <div className="flex items-center gap-3 ">
+            {/* 프사+닉네임 */}
+            <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center overflow-hidden ">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <UserRound className="size-15 text-brand-ivory " />
+              )}
+            </div>
+            <span className="font-semibold text-brand-green text-2xl truncate max-w-[200px] block">
+              {/* 가나다라마바사아자차카타파하 */}
+              {detail.seller?.sellerNickName}
+            </span>
           </div>
-          <span className="font-semibold text-brand-green text-2xl truncate max-w-[200px] block">
-            {/* 가나다라마바사아자차카타파하 */}
-            {detail.seller?.sellerNickName}
-          </span>
-        </div>
+        </Link>
 
         {/* 상호작용*/}
         <div className="flex items-center gap-3 px-1">

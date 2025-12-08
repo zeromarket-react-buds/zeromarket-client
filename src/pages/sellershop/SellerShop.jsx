@@ -1,9 +1,17 @@
 import Container from "@/components/Container";
+import { useNavigate } from "react-router-dom";
 import { UserRound, Heart } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
 import { useEffect, useState } from "react";
+import { createReportApi } from "@/common/api/report.api";
+import ReportModal from "@/components/report/ReportModal";
 
 const SellerShopPage = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
+  const navigate = useNavigate();
+
   // UI 전용 더미 데이터 — 나중에 fetch로 교체 가능
   const [detail] = useState({
     sellerNickName: "판매자 닉네임",
@@ -49,6 +57,43 @@ const SellerShopPage = () => {
     return () => window.removeEventListener("seller-menu-open", handler);
   }, []);
 
+  const handleOpenReportModal = () => {
+    if (!isAuthenticated) {
+      const goLogin = window.confirm(
+        "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?"
+      );
+      if (goLogin) {
+        navigate("/login");
+      }
+      return;
+    }
+    setIsReportModalOpen(true);
+    console.log("모달오픈");
+  };
+  const handleCloseReportModal = () => {
+    setIsReportModalOpen(false);
+  };
+
+  //신고제출
+  const handleSubmitReport = async ({ reasonId, reasonText }) => {
+    if (!detail) return;
+
+    const payload = {
+      reasonId,
+      targetType: "MEMBER",
+      targetId: memberId,
+      reasonText: reasonText || null,
+    };
+
+    try {
+      const result = await createReportApi(payload);
+      alert(result?.message || "신고가 접수되었습니다.");
+      setIsReportModalOpen(false);
+    } catch (error) {
+      console.error("신고 제출 실패", error);
+      alert("신고 처리 중 문제가 발생했습니다.");
+    }
+  };
   return (
     <>
       <Container>
@@ -170,10 +215,12 @@ const SellerShopPage = () => {
           <div className="fixed top-20 right-4 bg-white rounded-xl shadow-xl border w-36 p-2">
             <button
               className="w-full text-left p-2 hover:bg-gray-100"
-              onClick={() => {
-                setMenuOpen(false);
-                setReportModal(true);
-              }}
+              // onClick={() => {
+              //   setMenuOpen(false);
+              //   // setReportModal(true);
+
+              // }}
+              onClick={handleOpenReportModal}
             >
               신고하기
             </button>
@@ -192,7 +239,7 @@ const SellerShopPage = () => {
       )}
 
       {/* ====== 신고 모달 ===== */}
-      {reportModal && (
+      {/* {reportModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white w-72 p-6 rounded-lg shadow-xl text-center">
             <h2 className="font-semibold mb-4">신고하시겠습니까?</h2>
@@ -210,7 +257,14 @@ const SellerShopPage = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
+
+      {/* 신고하기 모달 */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onclose={handleCloseReportModal}
+        onSubmit={handleSubmitReport}
+      />
 
       {/* ==== 차단 모달 ==== */}
       {blockModal && (
