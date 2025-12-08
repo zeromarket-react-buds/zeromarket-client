@@ -2,10 +2,13 @@ import { UserRound, Heart, Pen } from "lucide-react";
 import Container from "@/components/Container";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
+  const navigate = useNavigate();
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -27,6 +30,16 @@ export default function MyPage() {
   useEffect(() => {
     fetchWishCount();
   }, []);
+
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    if (!window.confirm("로그아웃 하시겠습니까?")) {
+      return;
+    }
+    logout();
+    alert("로그아웃되었습니다. 홈으로 이동합니다.");
+    navigate("/");
+  };
 
   return (
     <Container>
@@ -126,7 +139,9 @@ export default function MyPage() {
       {/*  로그아웃 / 탈퇴 */}
       <section className="border rounded-2xl p-4 mt-6">
         <ul className="space-y-4 text-gray-800">
-          <li className="cursor-pointer">로그아웃</li>
+          <li className="cursor-pointer" onClick={handleLogout}>
+            로그아웃
+          </li>
           <li className="cursor-pointer">탈퇴</li>
         </ul>
       </section>

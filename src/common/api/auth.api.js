@@ -44,6 +44,6 @@ export const checkDuplicateIdApi = async (id) => {
 
 // 로그아웃
 export const logoutApi = async () => {
-  const { data } = await apiClient(`/api/auth/logout`);
+  const { data } = await apiClient(`/api/auth/logout`, { method: "POST" });
   return data;
 };

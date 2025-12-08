@@ -14,11 +14,13 @@ import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { createProductApi } from "@/common/api/product.api";
+import { useHeader } from "@/hooks/HeaderContext";
 
 const ProductCreatePage = () => {
   const { user, isAuthenticated } = useAuth();
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
+  const { setHeader } = useHeader();
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -44,6 +46,22 @@ const ProductCreatePage = () => {
       alert("로그인 후 상품을 등록할 수 있습니다.");
       navigate("/login", { replace: true });
     }
+    setHeader({
+      title: "상품 등록",
+      showBack: true,
+      rightActions: [
+        {
+          key: "save",
+          label: "임시 저장",
+          // onClick: handleSave,
+          className: "text-gray-500 font-semibold text-sm cursor-pointer",
+        },
+        <AuthStatusIcon
+          isAuthenticated={isAuthenticated}
+          navigate={navigate}
+        />,
+      ],
+    });
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async () => {

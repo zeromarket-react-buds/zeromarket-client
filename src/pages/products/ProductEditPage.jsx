@@ -18,6 +18,7 @@ import ProductConditionSelector from "@/components/product/create/ProductConditi
 import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
+import { useHeader } from "@/hooks/HeaderContext";
 
 const ProductEditPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -26,6 +27,7 @@ const ProductEditPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setHeader } = useHeader();
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -92,7 +94,24 @@ const ProductEditPage = () => {
     };
     fetchDetail();
   }, [id, user?.memberId]);
-
+  useEffect(() => {
+    setHeader({
+      title: "상품 수정",
+      showBack: true,
+      rightActions: [
+        {
+          key: "save",
+          label: "임시 저장",
+          // onClick: handleSave,
+          className: "text-gray-500 font-semibold text-sm cursor-pointer",
+        },
+        <AuthStatusIcon
+          isAuthenticated={isAuthenticated}
+          navigate={navigate}
+        />,
+      ],
+    });
+  }, [isAuthenticated, navigate]);
   if (loading) return <div>로딩중...</div>;
   if (error) return <div>{error}</div>;
 

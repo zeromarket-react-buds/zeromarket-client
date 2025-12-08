@@ -20,7 +20,7 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
-import { Heart } from "lucide-react";//찜 데이터 콘솔 확인용
+import { Heart } from "lucide-react"; //찜 데이터 콘솔 확인용
 
 const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -217,7 +217,10 @@ const ProductDetailPage = () => {
           onClick: handleShare,
           className: "font-semibold text-sm cursor-pointer",
         },
-        <AuthStatusIcon />,
+        <AuthStatusIcon
+          isAuthenticated={isAuthenticated}
+          navigate={navigate}
+        />,
       ],
     });
   }, [handleShare]);
