@@ -45,7 +45,7 @@ const ReviewDetailPage = () => {
       try {
         // console.log("getReviewById!!");
         const data = await getReviewByIdApi(reviewId);
-        console.log(data);
+        // console.log(data);
 
         setReview(data);
       } catch (error) {

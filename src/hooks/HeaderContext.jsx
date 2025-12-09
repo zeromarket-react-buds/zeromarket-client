@@ -26,6 +26,7 @@ export const defaultHeaderState = {
   hideRight: false,
   rightActions: [], // { key, label, icon, onClick, className }[]
   rightSlot: null,
+  onBack: null,
 };
 
 function HeaderProvider({ children }) {

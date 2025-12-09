@@ -153,6 +153,36 @@ const MyProfilePage = () => {
     setIntro(next);
   };
 
+  // 나가기 전 변경 사항 체크
+  const hasChanges = useCallback(() => {
+    return (
+      nickname !== initialNickname ||
+      profileImg !== initialProfileImg ||
+      intro !== initialIntro
+    );
+  }, [
+    nickname,
+    profileImg,
+    intro,
+    initialNickname,
+    initialProfileImg,
+    initialIntro,
+  ]);
+
+  const handleBack = useCallback(() => {
+    if (!hasChanges()) {
+      navigate(-1);
+      return;
+    }
+
+    const ok = window.confirm(
+      "변경사항이 있습니다. 저장하지 않고 나가시겠습니까?"
+    );
+    if (ok) {
+      navigate(-1);
+    }
+  }, [hasChanges]);
+
   // 저장 처리: 글자수/중복만 검증 후 patch
   const handleSave = useCallback(async () => {
     const trimmed = nickname.trim();
@@ -183,6 +213,12 @@ const MyProfilePage = () => {
       return;
     }
 
+    // 완료 버튼 누르고 뜨는 컨펌창
+    const ok = window.confirm("이대로 저장하시겠습니까?");
+    if (!ok) {
+      return; // 취소시 저장 안됨, 페이지 이동 없음
+    }
+
     try {
       setIsSaving(true);
       await updateProfileApi({
@@ -204,15 +240,16 @@ const MyProfilePage = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [nickname, dupError, intro, profileImg, navigate]);
+  }, [nickname, dupError, intro, profileImg]);
 
   // 페이지 진입 시 헤더 설정
   useEffect(() => {
     setHeader({
       title: "프로필 설정",
-      titleAlign: "left", // 필요에 따라 left/center
+      titleAlign: "left",
       showBack: true,
       hideRight: false,
+      onBack: handleBack,
       rightActions: [
         {
           key: "save",
@@ -258,6 +295,7 @@ const MyProfilePage = () => {
         profileImg={profileImg}
         fileInputRef={fileInputRef}
         onChange={handleProfileChange}
+        setProfileImg={setProfileImg}
       />
 
       {/* 닉네임 입력 */}

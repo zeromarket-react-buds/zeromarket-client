@@ -4,11 +4,18 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {
+  getAverageRatingApi,
+  getCountReceivedReviewsOnMyPage,
+} from "@/common/api/review.api";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
+  const [trustScore, setTrustScore] = useState(0.0);
+  const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -26,12 +33,32 @@ export default function MyPage() {
     }
   };
 
+  const fetchTrustScore = async () => {
+    if (loading) {
+      return;
+    }
+    const score = await getAverageRatingApi(user.memberId);
+    setTrustScore(score);
+  };
+
+  const fetchReceivedReviewCount = async () => {
+    if (loading) {
+      return;
+    }
+    const count = await getCountReceivedReviewsOnMyPage(user.memberId);
+    setReceivedReviewCount(count);
+  };
+
   // ⭐ 페이지 로드될 때 찜 개수 불러오기
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     fetchWishCount();
-  }, []);
+    fetchTrustScore();
+    fetchReceivedReviewCount();
+  }, [loading]);
 
-  const { logout } = useAuth();
   const handleLogout = () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
       return;
@@ -48,7 +75,7 @@ export default function MyPage() {
         <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
           <UserRound className="text-brand-ivory size-10" />
         </div>
-        <div className="text-lg font-semibold">닉네임 표시란</div>
+        <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>
 
       {/* 점수 카드 */}
@@ -56,7 +83,7 @@ export default function MyPage() {
         <div className="flex justify-between mb-2 text-[16px]">
           <span>신뢰점수</span>
           <span className="text-brand-green font-bold text-lg text-[20px]">
-            4.5
+            {trustScore.toFixed(1)}
           </span>
         </div>
         <div className="flex justify-between text-[16px]">
@@ -73,9 +100,9 @@ export default function MyPage() {
 
       {/* 한줄 소개 */}
       <section className="mb-6">
-        <h2 className="font-semibold mb-2">한줄 소개</h2>
+        <h2 className="font-semibold mb-2">한 줄 소개</h2>
         <div className="border rounded-2xl p-3 text-gray-700">
-          빠른 확인 가능합니다
+          {user?.introduction || "한 줄 소개가 비어있어요."}
         </div>
       </section>
 
@@ -121,21 +148,21 @@ export default function MyPage() {
             <span className="text-black">건</span>
           </div>
         </Link>
-
-        <div
-          className="flex flex-col items-center"
-          onClick={() => navigate("/me/reviews/summary")}
-        >
-          <Pen
-            color="var(--color-brand-green)"
-            size={32}
-            className="mx-auto mb-2.5"
-          />
-          <div className="flex items-center gap-2">
-            <span>받은 후기</span>
-            <span className="font-bold text-brand-green">3</span>
-            <span className="text-black">건</span>
-          </div>
+        <div className="flex flex-col items-center">
+          <Link to={"me/reviews/summary"}>
+            <Pen
+              color="var(--color-brand-green)"
+              size={32}
+              className="mx-auto mb-2.5"
+            />
+            <div className="flex items-center gap-2">
+              <span>받은 후기</span>
+              <span className="font-bold text-brand-green">
+                {receivedReviewCount}
+              </span>
+              <span className="text-black">건</span>
+            </div>
+          </Link>
         </div>
       </section>
 
