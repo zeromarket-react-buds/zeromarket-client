@@ -24,7 +24,7 @@ const ProductCard = ({ products, onToggleLike }) => {
   // };
 
   // ⭐ 찜 목록 추가/삭제 함수 (백엔드 연동 버전)
-  const handleHeartClick = async (productId, isWished) => {
+  const handleHeartClick = async (productId) => {
     // ⭐ 백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
     const newState = await onToggleLike(productId); // true / false
 
@@ -60,7 +60,7 @@ const ProductCard = ({ products, onToggleLike }) => {
                     className="size-6 mx-1 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleHeartClick(p.productId, p.isWished);
+                      handleHeartClick(p.productId);
                     }}
                     fill={p.isWished ? "red" : "none"}
                     stroke={p.isWished ? "red" : "currentColor"}

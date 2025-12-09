@@ -254,7 +254,9 @@ const ProductList = () => {
       />
 
       {/* 상품 카드 목록 */}
-      <ProductCard products={products} onToggleLike={onToggleLike} />
+      {/* 서버로 찜 토글 + UI 즉시반영 */}
+      {/*onToggleLike는 UI 내부 상태만 바꾸던 오래된 함수라 서버값 반영이 안 됨*/}
+      <ProductCard products={products} onToggleLike={handleToggleWish} />
 
       {/* 더보기 */}
       {hasNext && (

@@ -83,12 +83,15 @@ const updateProductApi = async (id, productData) => {
 //   });
 //   return data;
 // };
-const getProductDetailApi = async (id, memberId) => {
-  const query = memberId ? `?memberId=${memberId}` : "";
+const getProductDetailApi = async (id, memberId = 0) => {
+  //const query = memberId ? `?memberId=${memberId}` : "";
+  // ⭕ apiClient는 params로 보내야 정상 동작함
+  const params = { memberId }; // ⭐ 수정됨: 서버가 로그인 사용자 기준으로 isWished 계산 가능
 
   //실제 API 호출 URL /api/products/${id}${query}
-  const { data } = await apiClient(`/api/products/${id}${query}`, {
+  const { data } = await apiClient(`/api/products/${id}`, {
     method: "GET",
+    params, // ⭐ 수정됨: apiClient가 자동으로 ?memberId=xxx 붙여줌
   });
 
   return data;
