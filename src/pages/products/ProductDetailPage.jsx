@@ -167,7 +167,7 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     // 1) AuthContext 로딩 중이면 실행 금지
-    if (user === undefined) return; // Context 초기 상태일 때는 아무것도 안 함
+    if (!user) return; // Context 초기 상태일 때는 아무것도 안 함
 
     // 2) 로그인 여부가 결정될 때까지 기다림 (user === null이면 요청 금지)
     // if (user === null) return;
@@ -268,8 +268,7 @@ const ProductDetailPage = () => {
     : [];
 
   const isProductOwner = user && user.memberId === detail.sellerId;
-  const isProductHidden =
-    detail.isHidden || detail.productStatus?.name === "HIDDEN";
+  const isProductHidden = detail.hidden;
 
   const handleStatusUpdateSuccess = () => {
     const memberId = user ? user.memberId : null;
