@@ -204,58 +204,21 @@ const router = createBrowserRouter([
           },
         },
       },
+      // /reviews/:reviewId (후기 상세 페이지)
       {
-        path: "reviews",
-        children: [
-          // /reviews/:reviewId (후기 상세 페이지)
-          {
-            path: ":reviewId",
-            element: <ReviewDetailPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "후기 보기" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
+        path: "reviews/:reviewId",
+        element: <ReviewDetailPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "후기 보기" },
+            },
+            footer: {
+              component: "DefaultFooter",
             },
           },
-          // /reviews/received/summary/:memberId (후기 요약 페이지, 3건씩)
-          {
-            path: "received/summary/:memberId",
-            element: <ReceivedReviewSummaryPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "내가 받은 후기" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
-          // /reviews/received/:memberId (후기 목록 조회, 점수별)
-          {
-            path: "received/:memberId",
-            element: <ReceivedReviewListPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "후기" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
-        ],
+        },
       },
 
       // 마이페이지 라우트
@@ -404,6 +367,38 @@ const router = createBrowserRouter([
                 header: {
                   component: "TitleHeader",
                   props: { title: "채팅 목록" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+          // /me/reviews/summary (후기 요약 페이지, 3건씩)
+          {
+            path: "reviews/summary",
+            element: <ReceivedReviewSummaryPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "내가 받은 후기" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+          // /me/reviews (후기 목록 조회, 점수별)
+          {
+            path: "reviews",
+            element: <ReceivedReviewListPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "후기" },
                 },
                 footer: {
                   component: "DefaultFooter",

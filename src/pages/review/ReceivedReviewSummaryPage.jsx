@@ -9,11 +9,11 @@ const ratingLabels = {
   4: "이런 점이 최고예요",
 };
 
-const SectionItem = ({ title, data, memberId }) => {
+const SectionItem = ({ title, data }) => {
   const navigate = useNavigate();
 
   const handleMoreClick = (rating) => {
-    navigate(`/reviews/received/${memberId}?rating=${rating}`);
+    navigate(`/me/reviews?rating=${rating}`);
   };
 
   return (
@@ -51,7 +51,7 @@ const SectionItem = ({ title, data, memberId }) => {
 
 export default function ReceivedReviewSummaryPage() {
   const navigate = useNavigate();
-  const { memberId } = useParams();
+  // const { memberId } = useParams();
 
   const [nickname, setNickname] = useState("");
   const [totalCount, setTotalCount] = useState(null);
@@ -73,7 +73,7 @@ export default function ReceivedReviewSummaryPage() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const data = await getReceivedReviewSummaryApi(memberId);
+        const data = await getReceivedReviewSummaryApi();
         console.log(data);
 
         const { nickname, rating5, rating4 } = data;
@@ -85,7 +85,7 @@ export default function ReceivedReviewSummaryPage() {
       }
     };
     fetchReviews();
-  }, [memberId]);
+  }, []);
 
   return (
     <Container>
@@ -100,14 +100,14 @@ export default function ReceivedReviewSummaryPage() {
       <SectionItem
         title="이런 점이 최고예요"
         data={reviewSummary.rating5}
-        memberId={memberId}
+        // memberId={memberId}
       />
 
       {/* Rating 4 Section */}
       <SectionItem
         title="이런 점이 좋았어요"
         data={reviewSummary.rating4}
-        memberId={memberId}
+        // memberId={memberId}
       />
 
       <p className="text-gray-400 text-sm text-center mt-4">

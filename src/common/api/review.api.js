@@ -22,22 +22,27 @@ export const getReviewByIdApi = async (reviewId) => {
 /**
  * 특정 회원이 받은 리뷰 요약 (평점별 3개씩 + 총 개수)
  */
-export const getReceivedReviewSummaryApi = async (memberId) => {
-  const { data } = await apiClient(`/api/reviews/received/summary/${memberId}`);
+export const getReceivedReviewSummaryApi = async () => {
+  const { data } = await apiClient(`/api/reviews/received/summary`);
   return data;
 };
 
 /**
  * 특정 회원이 받은 리뷰 전체 목록 (특정 평점 기준, 페이징 포함)
  */
-export const getReceivedReviewsByRatingApi = async (
-  memberId,
+export const getReceivedReviewsByRatingApi = async ({
   rating,
-  page = 1,
-  size = 10
-) => {
-  const { data } = await apiClient(`/api/reviews/received/${memberId}`, {
-    params: { rating, page, size },
+  cursorReviewId = null,
+  cursorCreatedAt = null,
+  size = 10,
+} = {}) => {
+  const { data } = await apiClient(`/api/reviews/received`, {
+    params: {
+      rating,
+      size,
+      ...(cursorReviewId && { cursorReviewId }),
+      ...(cursorCreatedAt && { cursorCreatedAt }),
+    },
   });
   return data;
 };

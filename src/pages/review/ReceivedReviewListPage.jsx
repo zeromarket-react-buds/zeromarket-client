@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import Container from "@/components/Container";
 import { getReceivedReviewsByRatingApi } from "@/common/api/review.api";
@@ -23,7 +23,6 @@ const ReviewCard = ({ info, onClick }) => {
 
 export default function ReceivedReviewListPage() {
   const navigate = useNavigate();
-  const { memberId } = useParams();
   const [params] = useSearchParams();
 
   const rating = Number(params.get("rating"));
@@ -31,36 +30,84 @@ export default function ReceivedReviewListPage() {
     rating === 5 ? "이런 점이 최고예요 ;)" : "이런 점이 좋았어요 :)";
 
   const [list, setList] = useState([]);
-  const [pageInfo, setPageInfo] = useState({});
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState({
+    cursorProductId: null,
+    cursorCreatedAt: null,
+  });
+  const [hasNext, setHasNext] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const loadMoreRef = useRef(null);
+
+  const fetchList = async () => {
+    if (!hasNext || loading) return;
+    setLoading(true);
+
+    try {
+      const data = await getReceivedReviewsByRatingApi({
+        rating,
+        cursorCreatedAt: cursor.cursorCreatedAt,
+        cursorReviewId: cursor.cursorReviewId,
+      });
+
+      setList(data.reviewList);
+      setHasNext(data.hasNext);
+      setCursor({
+        cursorReviewId: data.cursorReviewId,
+        cursorCreatedAt: data.cursorCreatedAt,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchList = async () => {
-      try {
-        const data = await getReceivedReviewsByRatingApi(
-          memberId,
-          rating,
-          page,
-          10
-        );
+    // 새로고침 & 화면 이동 시 reset
+    setList([]);
+    setCursor({ cursorReviewId: null, cursorCreatedAt: null });
+    setHasNext(true);
 
-        setList(data.content);
-        setPageInfo({
-          pageSize: data.pageSize,
-          startPage: data.startPage,
-          endPage: data.endPage,
-          hasNext: data.hasNext,
-          hasPrevious: data.hasPrevious,
-          totalCount: data.totalCount,
-          totalPages: data.totalPages,
-        });
-        setPage(data.currentPage);
-      } catch (err) {
-        console.error(err);
-      }
-    };
     fetchList();
-  }, [memberId, rating, page]);
+  }, [rating]);
+
+  // 판매상품 목록 조회 - 페이지네이션(커서 기반)
+  useEffect(() => {
+    // 1. loadMoreRef가 없으면 실해 안 함
+    if (!loadMoreRef.current) return;
+
+    // 2. IntersectionObserver 생성 (특정 요소가 화면(viewport)에 보이는지 감지하는 브라우저 API)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // entries[0]: 관찰 중인 요소의 정보
+
+        if (
+          entries[0].isIntersecting && // 요소가 화면에 보이고
+          hasNext && // 다음 페이지가 있고
+          !loading // 로딩 중이 아니면
+        ) {
+          fetchProductsBySeller(); // 데이터 fetch!
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    // 3. loadMoreRef 요소 관찰 시작
+    observer.observe(loadMoreRef.current);
+
+    // 3. cleanup: 컴포넌트 언마운트 시 관찰 중지
+    return () => observer.disconnect();
+  }, [hasNext, loading]);
+
+  // UX 강화
+  // - 새로고침 시 첫 페이지부터 로드
+  // - 판매자 화면 이동 시 상태 reset
+  // useEffect(() => {
+  //   setItems([]);
+  //   setCursor({ cursorProductId: null, cursorCreatedAt: null });
+  //   setHasNext(true);
+  //   loadData();
+  // }, [sellerId]);
 
   const onCardClick = (reviewId) => {
     navigate(`/reviews/${reviewId}`);
@@ -73,13 +120,13 @@ export default function ReceivedReviewListPage() {
         <p className="text-gray-700">{ratingLabel}</p>
         <span className="flex items-center gap-1">
           <p className="text-brand-green font-bold text-lg">
-            {pageInfo.totalCount ?? 0}
+            {/* {pageInfo.totalCount ?? 0} */}
           </p>
           <p>건</p>
         </span>
       </div>
 
-      {pageInfo.totalCount > 0 ? (
+      {!loading && list.length > 0 ? (
         <div>
           <div className="space-y-6">
             {list.map((item) => (
@@ -91,28 +138,20 @@ export default function ReceivedReviewListPage() {
             ))}
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center items-center gap-2 mt-6">
-            <button
-              className="px-3 py-1 border rounded disabled:opacity-30"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              이전
-            </button>
+          {/* 다음 로딩 중 */}
+          {loading && (
+            <p className="text-center mt-10 text-gray-600 text-sm">로딩중...</p>
+          )}
 
-            <span className="text-sm">
-              {page} / {pageInfo.totalPages ?? 1}
-            </span>
+          {/* 데이터 끝 */}
+          {!hasNext && (
+            <p className="text-center mt-10 text-gray-600 text-sm">
+              마지막입니다.
+            </p>
+          )}
 
-            <button
-              className="px-3 py-1 border rounded disabled:opacity-30"
-              disabled={page === pageInfo.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              다음
-            </button>
-          </div>
+          {/* 무한 스크롤 적용 - loadMoreRef */}
+          <div ref={loadMoreRef} style={{ height: "10px" }} />
         </div>
       ) : (
         <div className=" bg-gray-200 rounded-lg text-gray-400 p-6 text-sm">
