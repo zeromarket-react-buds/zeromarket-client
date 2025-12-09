@@ -1,22 +1,64 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Camera, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
-import { getProfileApi, updateProfileApi } from "@/common/api/user.api";
+import {
+  checkNicknameApi,
+  getProfileApi,
+  updateProfileApi,
+} from "@/common/api/user.api";
 import { useProfileToast } from "@/components/GlobalToast";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
+import ProfileImageSection from "@/components/profile/ProfileImageSection";
+import NicknameSection from "@/components/profile/NicknameSection";
+import IntroSection from "@/components/profile/IntroSection";
+
+// 한글 2, 그 외 1로 계산하는 길이
+const getWeightedLength = (str) => {
+  let len = 0;
+
+  for (const ch of str) {
+    if (/[ㄱ-ㅎ가-힣]/.test(ch)) {
+      len += 2; // 한글
+    } else {
+      len += 1; // 영문, 숫자, 기타
+    }
+  }
+
+  return len;
+};
 
 const MyProfilePage = () => {
   const navigate = useNavigate();
   const { showProfileUpdatedToast } = useProfileToast();
   const { setHeader } = useHeader();
 
+  // 초기값 보관용
+  const [initialNickname, setInitialNickname] = useState("");
+  const [initialProfileImg, setInitialProfileImg] = useState("");
+  const [initialIntro, setInitialIntro] = useState("");
+
+  // 현재 값
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
   const [intro, setIntro] = useState("");
   const [loading, setLoading] = useState(false);
-  const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
 
+  // 입력 최댓값
+  const maxNicknameLength = 20;
+  const maxIntroLength = 100;
+
+  // 에러
+  const [introError, setIntroError] = useState("");
+  const [dupError, setDupError] = useState("");
+  const [lengthError, setLengthError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+
+  // 현재 길이들
+  const currentNicknameLength = getWeightedLength(nickname);
+  const currentIntroLength = getWeightedLength(intro);
+
+  const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
   const fileInputRef = useRef(null);
 
   const fetchMyProfileSetting = async () => {
@@ -27,9 +69,19 @@ const MyProfilePage = () => {
       const data = await getProfileApi();
       console.log("프로필 응답:", data);
 
-      setProfileImg(data.profileImage || "");
-      setNickname(data.nickname || "");
-      setIntro(data.introduction || "");
+      const img = data.profileImage || "";
+      const nick = data.nickname || "";
+      const introText = data.introduction || "";
+
+      // 초기값
+      setInitialProfileImg(img);
+      setInitialNickname(nick);
+      setInitialIntro(introText);
+
+      // 현재 값
+      setProfileImg(img);
+      setNickname(nick);
+      setIntro(introText);
     } catch (err) {
       console.error("프로필 불러오기 실패:", err);
     } finally {
@@ -42,21 +94,117 @@ const MyProfilePage = () => {
     fetchMyProfileSetting();
   }, []);
 
-  // 저장 처리: JSON 형태로 서버에 전송
+  // 닉네임 입력 시: 값은 그대로, 에러만 갱신
+  const handleNicknameChange = (e) => {
+    const next = e.target.value;
+    const currentLength = getWeightedLength(next);
+
+    if (currentLength > maxNicknameLength) {
+      setLengthError(
+        "닉네임은 글자당 한글 2, 영문/숫자 1을 기준으로 최대 20자까지 가능합니다."
+      );
+    } else {
+      setLengthError("");
+    }
+
+    setNickname(next);
+  };
+
+  // 닉네임 중복 체크
+  useEffect(() => {
+    if (!nickname.trim()) {
+      setDupError("");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsChecking(true);
+      try {
+        const exists = await checkNicknameApi(nickname);
+        if (exists) {
+          setDupError("이미 사용 중인 닉네임입니다.");
+        } else {
+          setDupError("");
+        }
+      } catch (err) {
+        console.error("닉네임 중복 체크 실패:", err);
+        setDupError("중복 확인 중 오류가 발생했습니다.");
+      } finally {
+        setIsChecking(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [nickname]);
+
+  // 한줄 소개 입력
+  const handleIntroChange = (e) => {
+    const next = e.target.value;
+    const currentLength = getWeightedLength(next);
+
+    if (currentLength > maxIntroLength) {
+      setIntroError(
+        `한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.`
+      );
+    } else {
+      setIntroError("");
+    }
+
+    setIntro(next);
+  };
+
+  // 저장 처리: 글자수/중복만 검증 후 patch
   const handleSave = useCallback(async () => {
+    const trimmed = nickname.trim();
+    if (!trimmed) {
+      setLengthError("닉네임을 입력해주세요.");
+      return;
+    }
+
+    const nicknameLength = getWeightedLength(trimmed);
+    if (nicknameLength > maxNicknameLength) {
+      const msg =
+        "닉네임은 글자당 한글 2, 영문/숫자 1을 기준으로 최대 20자까지 가능합니다.";
+      window.alert(msg + "\n입력 내용을 수정하신 후 다시 저장을 시도해주세요.");
+      setLengthError(msg);
+      return;
+    }
+
+    if (dupError) {
+      window.alert("이미 사용 중인 닉네임은 사용할 수 없습니다.");
+      return;
+    }
+
+    const introLength = getWeightedLength(intro);
+    if (introLength > maxIntroLength) {
+      window.alert(
+        "한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.\n입력 내용을 줄여주세요."
+      );
+      return;
+    }
+
     try {
+      setIsSaving(true);
       await updateProfileApi({
         profileImage: profileImg,
-        nickname,
+        nickname: trimmed,
         introduction: intro,
       });
+
+      // 저장 성공 시 초기값 갱신
+      setInitialNickname(trimmed);
+      setInitialProfileImg(profileImg);
+      setInitialIntro(intro);
 
       showProfileUpdatedToast();
       navigate("/me");
     } catch (err) {
       console.error("프로필 수정 실패:", err);
+      alert("프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSaving(false);
     }
-  }, [profileImg, nickname, intro, navigate]);
+  }, [nickname, dupError, intro, profileImg, navigate]);
 
   // 페이지 진입 시 헤더 설정
   useEffect(() => {
@@ -70,11 +218,12 @@ const MyProfilePage = () => {
           key: "save",
           label: "완료",
           onClick: handleSave,
-          className: "text-brand-green font-semibold text-sm",
+          className: "font-semibold text-lg",
+          disabled: isSaving,
         },
       ],
     });
-  }, [setHeader, handleSave]);
+  }, [setHeader, handleSave, isSaving]);
 
   // 프로필 이미지 업로드 처리
   const handleProfileChange = async (e) => {
@@ -105,61 +254,31 @@ const MyProfilePage = () => {
       {/* 헤더는 RootLayout + TitleHeader에서 렌더링됨 */}
 
       {/* 프로필 이미지 */}
-      <section className="flex flex-col items-center mb-10">
-        <div className="relative">
-          <div
-            className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center overflow-hidden"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {!profileImg ? (
-              <UserRound className="text-brand-ivory size-25" />
-            ) : (
-              <img
-                src={profileImg}
-                alt="profile"
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-
-          {/* 카메라 버튼 */}
-          <button
-            className="absolute bottom-2 right-1 w-8 h-8 bg-brand-ivory border border-brand-green rounded-full flex items-center justify-center"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Camera size={20} className="text-brand-green" />
-          </button>
-
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleProfileChange}
-          />
-        </div>
-      </section>
+      <ProfileImageSection
+        profileImg={profileImg}
+        fileInputRef={fileInputRef}
+        onChange={handleProfileChange}
+      />
 
       {/* 닉네임 입력 */}
-      <div className="mb-6">
-        <label className="block mb-3 pl-1 text-base">닉네임</label>
-        <input
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="w-full border border-brand-green rounded-xl py-2 px-5 text-base"
-        />
-      </div>
+      <NicknameSection
+        nickname={nickname}
+        onChange={handleNicknameChange}
+        lengthError={lengthError}
+        dupError={dupError}
+        isChecking={isChecking}
+        currentLength={currentNicknameLength}
+        maxLength={maxNicknameLength}
+      />
 
       {/* 한줄 소개 입력 */}
-      <div>
-        <label className="block mb-3 pl-1 text-base">한줄 소개</label>
-        <textarea
-          value={intro ?? ""}
-          onChange={(e) => setIntro(e.target.value)}
-          rows={3}
-          className="w-full border border-brand-green rounded-xl py-2 px-5 text-base resize-none"
-        />
-      </div>
+      <IntroSection
+        intro={intro}
+        onChange={handleIntroChange}
+        introError={introError}
+        maxLength={maxIntroLength}
+        currentLength={currentIntroLength}
+      />
     </div>
   );
 };
