@@ -3,11 +3,13 @@ import { GreenRadio } from "../ui/greenradio";
 import { CircleX } from "lucide-react";
 import { reportReasonApi } from "@/common/api/report.api";
 
-const ReportModal = ({ isOpen, onclose, onSubmit }) => {
+const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
   const [mode, setMode] = useState("DEFAULT");
   const [etcText, setEtcText] = useState("");
   const [reasons, setReasons] = useState([]);
   const [selectedReasonId, setSelectedReasonId] = useState(null);
+
+  const ETC_REASON_ID = targetType === "PRODUCT" ? 12 : 7;
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
@@ -25,14 +27,14 @@ const ReportModal = ({ isOpen, onclose, onSubmit }) => {
 
     const load = async () => {
       try {
-        const reasonList = await reportReasonApi();
+        const reasonList = await reportReasonApi(targetType);
         setReasons(reasonList);
       } catch (error) {
         console.error("신고 사유 불러오기 실패:", error);
       }
     };
     load();
-  }, [isOpen]);
+  }, [isOpen, targetType]);
 
   if (!isOpen) return null;
 
@@ -54,22 +56,22 @@ const ReportModal = ({ isOpen, onclose, onSubmit }) => {
   };
 
   const reasonClick = (reasonId, label) => {
-    if (reasonId === 7) {
+    if (reasonId === ETC_REASON_ID) {
       setMode("ETC");
-    } else {
-      setSelectedReasonId(reasonId);
-      const ok = window.confirm(
-        `신고 사유로 "${label}" 를 선택하셨습니다.\n제출하시겠습니까?`
-      );
-      if (!ok) return;
-
-      onSubmit({ reasonId, reasonText: null });
-      console.log("신고접수:", label);
-      onclose();
-      setMode("DEFAULT");
-      setEtcText("");
-      setSelectedReasonId(null);
+      return;
     }
+    setSelectedReasonId(reasonId);
+    const ok = window.confirm(
+      `신고 사유로 "${label}" 를 선택하셨습니다.\n제출하시겠습니까?`
+    );
+    if (!ok) return;
+
+    onSubmit({ reasonId, reasonText: null });
+    console.log("신고접수:", label);
+    onclose();
+    setMode("DEFAULT");
+    setEtcText("");
+    setSelectedReasonId(null);
   };
 
   return (
@@ -134,7 +136,7 @@ const ReportModal = ({ isOpen, onclose, onSubmit }) => {
                 const text = etcText.trim();
                 if (!text) return alert("사유를 입력해주세요.");
                 onSubmit({
-                  reasonId: 7,
+                  reasonId: ETC_REASON_ID,
                   reasonText: text,
                 });
               }}

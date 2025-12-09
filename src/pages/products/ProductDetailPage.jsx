@@ -376,6 +376,7 @@ const ProductDetailPage = () => {
               isOpen={isReportModalOpen}
               onclose={handleCloseReportModal}
               onSubmit={handleSubmitReport}
+              targetType="PRODUCT"
             />
 
             {/* 비슷한 상품 */}
