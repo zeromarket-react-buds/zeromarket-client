@@ -22,10 +22,10 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductEditPage = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [images, setImages] = useState([]);
   const { id } = useParams();
-  const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
@@ -45,8 +45,20 @@ const ProductEditPage = () => {
     sellingArea: "서울 관악구",
   });
 
+  //인증상태확인
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      navigate("/login", { replace: true });
+      return;
+    }
+  }, [authLoading, isAuthenticated, navigate]);
+
   //기존 정보 불러오기
   useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+
     const fetchDetail = async () => {
       try {
         const data = await getProductDetailApi(id);
@@ -87,15 +99,17 @@ const ProductEditPage = () => {
           }))
         );
 
-        setLoading(false);
+        setSubmitLoading(false);
       } catch (e) {
         console.error(e);
         alert("상품 정보를 불러오는데에 실패했습니다.");
       }
     };
     fetchDetail();
-  }, [id, user?.memberId]);
+  }, [id, user, isAuthenticated]);
+
   useEffect(() => {
+    if (authLoading) return;
     setHeader({
       title: "상품 수정",
       showBack: true,
@@ -112,8 +126,18 @@ const ProductEditPage = () => {
         />,
       ],
     });
-  }, [isAuthenticated, navigate]);
-  if (loading) return <div>로딩중...</div>;
+  }, [isAuthenticated, navigate, authLoading, setHeader]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  if (submitLoading) return <div>로딩중...</div>;
   if (error) return <div>{error}</div>;
 
   //상품 수정
@@ -139,6 +163,9 @@ const ProductEditPage = () => {
       alert("거래 방법을 1개 이상 선택해주세요.");
       return;
     }
+
+    setSubmitLoading(true);
+    setError("");
 
     //대표이미지 자동설정 로직
     let adjustedImages = [...images];
@@ -190,6 +217,7 @@ const ProductEditPage = () => {
 
     try {
       const response = await updateProductApi(id, body);
+      window.removeEventListener("beforeunload", () => {});
       if (response && response.ok) {
         alert(`상품 수정 완료! 상품ID: ${id}`);
         navigate(`/products/${id}`, { replace: true });
@@ -200,6 +228,8 @@ const ProductEditPage = () => {
     } catch (error) {
       console.error(error);
       alert("상품 수정 실패: 서버 또는 네트워크 오류");
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
