@@ -14,8 +14,8 @@ const TitleHeader = ({
   showHome = true,
   rightButtonText, // 기존 단일 버튼 유지
   rightButtonEvent, // 기존 단일 버튼 유지
-
   rightActions, // ⭐ HeaderContext에서 내려오는 멀티 버튼
+  onBack,
 }) => {
   const navigate = useNavigate();
   // 멀티 액션이 존재하는지
@@ -87,6 +87,15 @@ const TitleHeader = ({
     return <button>{rightSlot ? rightSlot : <Bell size={24} />}</button>;
   };
 
+  // 공통 뒤로가기 처리
+  const handleBackClick = () => {
+    if (typeof onBack === "function") {
+      onBack();
+    } else {
+      // 기본 동작
+      window.history.back();
+    }
+  };
   return (
     <Container className="relative z-20">
       <header
@@ -99,7 +108,7 @@ const TitleHeader = ({
           <div className="w-6" />
         ) : showBack ? (
           <div className="flex items-center gap-1 min-w-12">
-            <button onClick={() => window.history.back()}>
+            <button onClick={handleBackClick}>
               <ChevronLeft size={24} />
             </button>
             {showHome && (
