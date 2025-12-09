@@ -2,17 +2,20 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Camera, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
-import { getProfileApi } from "@/common/api/user.api";
+import { getProfileApi, updateProfileApi } from "@/common/api/user.api";
+import { useProfileToast } from "@/components/GlobalToast";
+import { uploadToSupabase } from "@/lib/supabaseUpload";
 
 const MyProfilePage = () => {
   const navigate = useNavigate();
+  const { showProfileUpdatedToast } = useProfileToast();
   const { setHeader } = useHeader();
 
-  const [profileFile, setProfileFile] = useState(null); // 실제 파일 저장
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
   const [intro, setIntro] = useState("");
   const [loading, setLoading] = useState(false);
+  const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
 
   const fileInputRef = useRef(null);
 
@@ -24,9 +27,9 @@ const MyProfilePage = () => {
       const data = await getProfileApi();
       console.log("프로필 응답:", data);
 
-      setProfileImg(data.profileImage);
-      setNickname(data.nickname);
-      setIntro(data.introduction);
+      setProfileImg(data.profileImage || "");
+      setNickname(data.nickname || "");
+      setIntro(data.introduction || "");
     } catch (err) {
       console.error("프로필 불러오기 실패:", err);
     } finally {
@@ -39,22 +42,21 @@ const MyProfilePage = () => {
     fetchMyProfileSetting();
   }, []);
 
-  // 저장 처리
+  // 저장 처리: JSON 형태로 서버에 전송
   const handleSave = useCallback(async () => {
-    const formData = new FormData();
-    if (profileFile) formData.append("profileImage", profileFile);
-    formData.append("nickname", nickname);
-    formData.append("introduction", intro);
+    try {
+      await updateProfileApi({
+        profileImage: profileImg,
+        nickname,
+        introduction: intro,
+      });
 
-    // 실제 저장 API 연동 코드 자리
-    // await apiClient("/api/me/profile", {
-    //   method: "POST",
-    //   body: formData,
-    // });
-
-    alert("프로필이 저장되었습니다!");
-    navigate("/me"); // 마이페이지로 이동
-  }, [profileFile, nickname, intro, navigate]);
+      showProfileUpdatedToast();
+      navigate("/me");
+    } catch (err) {
+      console.error("프로필 수정 실패:", err);
+    }
+  }, [profileImg, nickname, intro, navigate]);
 
   // 페이지 진입 시 헤더 설정
   useEffect(() => {
@@ -72,16 +74,30 @@ const MyProfilePage = () => {
         },
       ],
     });
-  }, [handleSave]);
+  }, [setHeader, handleSave]);
 
   // 프로필 이미지 업로드 처리
-  const handleProfileChange = (e) => {
-    const file = e.target.files[0];
+  const handleProfileChange = async (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setProfileImg(imageUrl);
-    setProfileFile(file);
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!allowedExtensions.includes(extension)) {
+      alert("이미지 파일(JPG, JPEG, PNG, WebP)만 업로드할 수 있습니다.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      // 파일 업로드 후 Supabase public URL 확보
+      const publicUrl = await uploadToSupabase(file);
+
+      // 화면 상태에 반영
+      setProfileImg(publicUrl);
+    } catch (error) {
+      console.error("프로필 이미지 업로드 실패:", error);
+      alert("프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    }
   };
 
   return (
@@ -111,7 +127,7 @@ const MyProfilePage = () => {
             className="absolute bottom-2 right-1 w-8 h-8 bg-brand-ivory border border-brand-green rounded-full flex items-center justify-center"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Camera size={18} className="text-brand-green" />
+            <Camera size={20} className="text-brand-green" />
           </button>
 
           <input

@@ -6,4 +6,17 @@ const getProfileApi = async () => {
   return data;
 };
 
-export { getProfileApi };
+const updateProfileApi = async ({ profileImage, nickname, introduction }) => {
+  const { data } = await apiClient(`/api/me/profile`, {
+    method: "PATCH",
+    body: {
+      profileImage,
+      nickname,
+      introduction,
+    },
+  });
+
+  return data;
+};
+
+export { getProfileApi, updateProfileApi };
