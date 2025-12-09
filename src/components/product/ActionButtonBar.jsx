@@ -98,9 +98,7 @@ const ActionButtonBar = ({
   };
 
   const handleButtonClick = (action) => {
-    if (!handleNotLoggedIn()) return;
-
-    // let confirmation = false;
+    if (handleNotLoggedIn()) return;
 
     if (action === "채팅하기") {
       enterChatRoom();

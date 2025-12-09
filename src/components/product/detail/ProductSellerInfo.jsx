@@ -26,7 +26,11 @@ const ProductSellerInfo = ({ detail }) => {
           {/* 추후 판매자id별 이동 구현 필요 */}
           <div className="flex items-center gap-3 ">
             {/* 프사+닉네임 */}
-            <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center overflow-hidden ">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ${
+                profileImage ? "bg-white:" : "bg-brand-green"
+              }`}
+            >
               {profileImage ? (
                 <img
                   src={profileImage}
@@ -67,7 +71,7 @@ const ProductSellerInfo = ({ detail }) => {
           </div>
 
           {/* 신뢰점수 :) */}
-          <div className="flex flex-col items-center  w-5" title="신뢰점수">
+          <div className="flex flex-col items-center  w-8" title="신뢰점수">
             <span className="text-lg font-semibold text-brand-green">
               {trustScore}
             </span>

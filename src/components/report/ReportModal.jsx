@@ -74,11 +74,11 @@ const ReportModal = ({ isOpen, onclose, onSubmit }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/50 z-60 flex items-center justify-center"
       onClick={handleOverlayClick}
     >
       <div
-        className="bg-white rounded-2xl p-3 w-sm shadow-xl "
+        className="bg-white rounded-2xl p-3 w-sm shadow-xl"
         onClick={handleContentClick}
       >
         <div className="mb-2">
