@@ -13,9 +13,10 @@ const createReportApi = async (payload) => {
   }
 };
 
-const reportReasonApi = async () => {
+const reportReasonApi = async (targetType) => {
   try {
-    const { data } = await apiClient("/api/reports/reasons", {
+    const query = targetType ? `?targetType=${targetType}` : "";
+    const { data } = await apiClient(`/api/reports/reasons${query}`, {
       method: "GET",
     });
     return data;

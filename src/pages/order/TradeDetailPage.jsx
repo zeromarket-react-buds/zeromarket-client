@@ -27,6 +27,10 @@ const getHeaderDate = (trade) => {
 };
 
 function formatPhone(phone = "") {
+  if (!phone) {
+    return ""; // 핸드폰번호 없을때 방어로직 (실제로 안들어오면 오류로 안 그려짐)
+  }
+
   // 숫자만 추출
   const digits = phone.replace(/\D/g, "");
 

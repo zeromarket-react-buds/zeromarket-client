@@ -10,12 +10,19 @@ const ProductDescriptionEditor = ({ value, onChange }) => {
     const formatted = formatNumber(input);
     setDescription(formatted);
   };
+
+  const consoleCheck = () => {
+    console.log("자주 쓰는 문구 클릭");
+  };
   return (
     <div className="mt-6">
       {/* 상품 설명 */}
       <div className="flex justify-between mb-2">
         <span className="font-medium text-lg">상품 설명</span>
-        <button className="text-sm font-light border px-2 py-1 rounded-lg">
+        <button
+          className="text-sm font-light border px-2 py-1 rounded-lg cursor-pointer"
+          onClick={consoleCheck}
+        >
           자주 쓰는 문구
         </button>
       </div>

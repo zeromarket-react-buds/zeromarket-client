@@ -56,7 +56,7 @@ const processTradePendingApi = async (productId, buyerId, callback) => {
     }
   } catch (error) {
     console.error(error);
-    alert("거래 정보를 생성하는 데 실패했습니다.");
+    alert(error.message);
   }
 };
 
@@ -81,7 +81,7 @@ const processTradeCompleteApi = async (productId, buyerId, callback) => {
     }
   } catch (error) {
     console.error(error);
-    alert("거래 정보를 생성하는 데 실패했습니다.");
+    alert(error.message);
   }
 };
 

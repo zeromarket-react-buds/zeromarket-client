@@ -6,7 +6,10 @@ import {
 import { useAuth } from "@/hooks/AuthContext";
 
 const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
-  const { productId, sellerId, buyerId, tradeStatus } = productProps;
+  const { productId, sellerId, buyerId, tradeStatus, salesStatus } =
+    productProps;
+
+  console.log("productProps", productProps);
   const { user } = useAuth();
   const isMyProduct = user?.memberId === sellerId;
 
@@ -40,7 +43,7 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
     <div className="flex gap-2  my-0 pt-3 py-4">
       {isMyProduct && (
         <>
-          {!tradeStatus && (
+          {["FOR_SALE"].includes(salesStatus?.name) && (
             <Button
               className="flex-1 border font-bold bg-brand-green border-brand-green text-brand-ivory py-2"
               onClick={() => handleChangeStatus("PENDING")}
@@ -48,7 +51,7 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
               예약중으로
             </Button>
           )}
-          {(!tradeStatus || tradeStatus.name === "PENDING") && (
+          {["FOR_SALE", "PENDING"].includes(salesStatus?.name) && (
             <Button
               className="flex-1 border font-bold bg-brand-green border-brand-green text-brand-ivory py-2"
               onClick={() => handleChangeStatus("COMPLETE")}

@@ -344,6 +344,7 @@ const SellerShopPage = () => {
         isOpen={isReportModalOpen}
         onclose={handleCloseReportModal}
         onSubmit={handleSubmitReport}
+        targetType="MEMBER"
       />
 
       {/* ==== 차단 모달 ==== */}

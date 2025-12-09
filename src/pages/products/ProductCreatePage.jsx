@@ -18,10 +18,12 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductCreatePage = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
   const { setHeader } = useHeader();
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // 입력 데이터 (DTO 매칭)
   const [form, setForm] = useState({
@@ -38,15 +40,16 @@ const ProductCreatePage = () => {
     sellingArea: "서울 관악구",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // 미로그인시 상품등록X
   useEffect(() => {
-    if (!isAuthenticated) {
+    // if (authLoading) return;
+    if (!isAuthenticated && !authLoading) {
       alert("로그인 후 상품을 등록할 수 있습니다.");
       navigate("/login", { replace: true });
     }
+  }, [authLoading, isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (authLoading) return;
     setHeader({
       title: "상품 등록",
       showBack: true,
@@ -63,8 +66,34 @@ const ProductCreatePage = () => {
         />,
       ],
     });
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, authLoading, setHeader]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault(); //브라우저 기본동작 막기
+      e.returnValue = ""; //기본 confirm 창 띄우게
+    };
+    const handlePopState = (e) => {
+      const confirmation = window.confirm(
+        "작업 내용이 저장되지 않았습니다. 이 페이지를 떠나시겠습니까?"
+      );
+      if (!confirmation) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload); //"beforeunload"기존 정의 특수이벤
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  if (authLoading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        인증 확인 중...
+      </div>
+    );
+  }
   const handleSubmit = async () => {
     if (!form.productTitle.trim()) {
       alert("상품명을 입력해주세요.");
@@ -86,7 +115,7 @@ const ProductCreatePage = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitLoading(true);
     setError("");
     console.log("상품 등록 요청 시작");
 
@@ -124,6 +153,7 @@ const ProductCreatePage = () => {
 
     try {
       const response = await createProductApi(jsonData);
+      window.removeEventListener("beforeunload", () => {}); //새로고침 confirm감지 제거
       if (response && response.productId) {
         console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
         alert(`상품 등록 완료! 상품ID: ${response.productId}`);
@@ -144,7 +174,7 @@ const ProductCreatePage = () => {
       console.error(error);
       setError("상품 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
   return (
