@@ -23,11 +23,6 @@ const NicknameSection = ({
           ({currentLength} / {maxLength}자)
         </div>
 
-        {/* 중복 체크 상태 */}
-        {isChecking && (
-          <div className=" text-brand-mediumgra">중복 확인 중</div>
-        )}
-
         {/* 길이 에러 */}
         {lengthError && <div className=" text-brand-red">{lengthError}</div>}
 
