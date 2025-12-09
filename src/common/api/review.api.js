@@ -28,6 +28,14 @@ export const getReceivedReviewSummaryApi = async (memberId) => {
 };
 
 /**
+ * 마이페이지에서 보여줄 받은 후기 갯수 카운트
+ */
+export const getCountReceivedReviewsOnMyPage = async (memberId) => {
+  const { data } = await apiClient(`/api/reviews/received/count/${memberId}`);
+  return data;
+};
+
+/**
  * 특정 회원이 받은 리뷰 전체 목록 (특정 평점 기준, 페이징 포함)
  */
 export const getReceivedReviewsByRatingApi = async (

@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { getAverageRatingApi } from "@/common/api/review.api";
+import {
+  getAverageRatingApi,
+  getCountReceivedReviewsOnMyPage,
+} from "@/common/api/review.api";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
@@ -12,6 +15,7 @@ export default function MyPage() {
   const navigate = useNavigate();
   const { user, loading, logout } = useAuth();
   const [trustScore, setTrustScore] = useState(0.0);
+  const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -37,11 +41,23 @@ export default function MyPage() {
     setTrustScore(score);
   };
 
+  const fetchReceivedReviewCount = async () => {
+    if (loading) {
+      return;
+    }
+    const count = await getCountReceivedReviewsOnMyPage(user.memberId);
+    setReceivedReviewCount(count);
+  };
+
   // ⭐ 페이지 로드될 때 찜 개수 불러오기
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     fetchWishCount();
     fetchTrustScore();
-  }, []);
+    fetchReceivedReviewCount();
+  }, [loading]);
 
   const handleLogout = () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
@@ -142,7 +158,9 @@ export default function MyPage() {
             />
             <div className="flex items-center gap-2">
               <span>받은 후기</span>
-              <span className="font-bold text-brand-green">3</span>
+              <span className="font-bold text-brand-green">
+                {receivedReviewCount}
+              </span>
               <span className="text-black">건</span>
             </div>
           </Link>
