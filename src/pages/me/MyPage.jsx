@@ -59,7 +59,7 @@ export default function MyPage() {
         <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
           <UserRound className="text-brand-ivory size-10" />
         </div>
-        <div className="text-lg font-semibold">닉네임 표시란</div>
+        <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>
 
       {/* 점수 카드 */}
@@ -84,9 +84,9 @@ export default function MyPage() {
 
       {/* 한줄 소개 */}
       <section className="mb-6">
-        <h2 className="font-semibold mb-2">한줄 소개</h2>
+        <h2 className="font-semibold mb-2">한 줄 소개</h2>
         <div className="border rounded-2xl p-3 text-gray-700">
-          빠른 확인 가능합니다
+          {user?.introduction || "한 줄 소개가 비어있어요."}
         </div>
       </section>
 
