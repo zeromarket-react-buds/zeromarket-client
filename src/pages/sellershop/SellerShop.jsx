@@ -2,9 +2,10 @@ import Container from "@/components/Container";
 import { useNavigate } from "react-router-dom";
 import { UserRound, Heart } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { createReportApi } from "@/common/api/report.api";
 import ReportModal from "@/components/report/ReportModal";
+import { getProductsBySeller } from "@/common/api/sellerShop.api";
 
 const SellerShopPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
@@ -43,6 +44,15 @@ const SellerShopPage = () => {
       },
     ],
   });
+  // 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
+  const [items, setItems] = useState([]);
+  const [cursor, setCursor] = useState({
+    cursorProductId: null,
+    cursorCreatedAt: null,
+  });
+  const [hasNext, setHasNext] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const loadMoreRef = useRef(null);
 
   // 메뉴 & 모달 상태
   const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
@@ -56,6 +66,66 @@ const SellerShopPage = () => {
 
     return () => window.removeEventListener("seller-menu-open", handler);
   }, []);
+
+  // 판매상품 목록 조회 요청 함수
+  const fetchProductsBySeller = useCallback(async () => {
+    if (!hasNext || loading) return;
+    setLoading(true);
+
+    try {
+      const data = await getProductsBySeller({
+        // TODO: sellerId 가져오기
+        sellerId: 1,
+        cursorProductId: cursor.cursorProductId,
+        cursorCreatedAt: cursor.cursorCreatedAt,
+      });
+      console.log(data);
+
+      setItems((prev) => [...prev, ...data.items]);
+      setCursor({
+        cursorProductId: data.nextCursorProductId,
+        cursorCreatedAt: data.nextCursorCreatedAt,
+      });
+      setHasNext(data.hasNext);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // 판매상품 목록 조회 useEffect
+  useEffect(() => {
+    fetchProductsBySeller();
+  }, []); // 최초 렌더링 딱 한 번
+
+  // 판매상품 목록 조회 - 페이지네이션(커서 기반)
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNext && !loading) {
+          fetchProductsBySeller();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
+
+  // UX 강화
+  // - 새로고침 시 첫 페이지부터 로드
+  // - 판매자 화면 이동 시 상태 reset
+  // useEffect(() => {
+  //   setItems([]);
+  //   setCursor({ cursorProductId: null, cursorCreatedAt: null });
+  //   setHasNext(true);
+  //   loadData();
+  // }, [sellerId]);
 
   const handleOpenReportModal = () => {
     if (!isAuthenticated) {
@@ -197,7 +267,17 @@ const SellerShopPage = () => {
               판매 상품
             </h3>
 
-            <ProductCard products={detail.products} onToggleLike={() => {}} />
+            {/* <ProductCard products={detail.products} onToggleLike={() => {}} /> */}
+            <ProductCard products={items} onToggleLike={() => {}} />
+
+            {/* 다음 로딩 중 */}
+            {loading && <p>로딩중...</p>}
+
+            {/* 데이터 끝 */}
+            {!hasNext && <p>마지막입니다.</p>}
+
+            {/* 무한 스크롤 적용 - loadMoreRef */}
+            <div ref={loadMoreRef} style={{ height: "10px" }} />
           </div>
         </div>
       </Container>
