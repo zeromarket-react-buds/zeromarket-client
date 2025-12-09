@@ -36,6 +36,13 @@ const ProductDetailPage = () => {
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
+  if (user === undefined) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        인증 상태 확인 중...
+      </div>
+    );
+  }
   //목데이터
   // const formattedProducts = products.map((p) => ({
   //   productId: p.product_id,

@@ -149,32 +149,31 @@ const ActionButtonBar = ({
   return (
     <div>
       {/* 1. 찜하트 , 채팅하기 , 바로구매 - 구매자*/}
-      {!user ||
-        (role === "BUYER" && (
-          <div className="flex gap-2 my-0 px-3 pt-7 py-7">
-            <div className="py-1 text-brand-green">
-              <Heart
-                className="size-7 cursor-pointer"
-                onClick={handleHeartClick}
-                fill={isWished ? "red" : "white"} //
-                stroke={isWished ? "red" : "currentColor"} //
-              />
-            </div>
-
-            <Button
-              className="flex-1 border border-brand-green font-bold bg-brand-ivory  text-brand-green py-2 "
-              onClick={() => handleButtonClick("채팅하기")}
-            >
-              채팅하기
-            </Button>
-            <Button
-              className="flex-1 font-bold bg-brand-green text-brand-ivory  py-2 "
-              onClick={() => handleButtonClick("바로 구매")}
-            >
-              바로 구매
-            </Button>
+      {(!user || role === "BUYER") && (
+        <div className="flex gap-2 my-0 px-3 pt-7 py-7">
+          <div className="py-1 text-brand-green">
+            <Heart
+              className="size-7 cursor-pointer"
+              onClick={handleHeartClick}
+              fill={isWished ? "red" : "white"} //
+              stroke={isWished ? "red" : "currentColor"} //
+            />
           </div>
-        ))}
+
+          <Button
+            className="flex-1 border border-brand-green font-bold bg-brand-ivory  text-brand-green py-2 "
+            onClick={() => handleButtonClick("채팅하기")}
+          >
+            채팅하기
+          </Button>
+          <Button
+            className="flex-1 font-bold bg-brand-green text-brand-ivory  py-2 "
+            onClick={() => handleButtonClick("바로 구매")}
+          >
+            바로 구매
+          </Button>
+        </div>
+      )}
 
       {/* 2. 숨기기<>숨기기해제 , 상품수정 , 상품삭제 - 판매자*/}
       {role === "SELLER" && (
