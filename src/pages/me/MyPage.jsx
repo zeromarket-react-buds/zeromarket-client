@@ -4,11 +4,14 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getAverageRatingApi } from "@/common/api/review.api";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
+  const [trustScore, setTrustScore] = useState(0.0);
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -26,12 +29,20 @@ export default function MyPage() {
     }
   };
 
+  const fetchTrustScore = async () => {
+    if (loading) {
+      return;
+    }
+    const score = await getAverageRatingApi(user.memberId);
+    setTrustScore(score);
+  };
+
   // ⭐ 페이지 로드될 때 찜 개수 불러오기
   useEffect(() => {
     fetchWishCount();
+    fetchTrustScore();
   }, []);
 
-  const { logout } = useAuth();
   const handleLogout = () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
       return;
@@ -56,7 +67,7 @@ export default function MyPage() {
         <div className="flex justify-between mb-2 text-[16px]">
           <span>신뢰점수</span>
           <span className="text-brand-green font-bold text-lg text-[20px]">
-            4.5
+            {trustScore.toFixed(1)}
           </span>
         </div>
         <div className="flex justify-between text-[16px]">
@@ -123,16 +134,18 @@ export default function MyPage() {
         </Link>
 
         <div className="flex flex-col items-center">
-          <Pen
-            color="var(--color-brand-green)"
-            size={32}
-            className="mx-auto mb-2.5"
-          />
-          <div className="flex items-center gap-2">
-            <span>받은 후기</span>
-            <span className="font-bold text-brand-green">3</span>
-            <span className="text-black">건</span>
-          </div>
+          <Link to={`/reviews/received/summary/${user?.memberId}`}>
+            <Pen
+              color="var(--color-brand-green)"
+              size={32}
+              className="mx-auto mb-2.5"
+            />
+            <div className="flex items-center gap-2">
+              <span>받은 후기</span>
+              <span className="font-bold text-brand-green">3</span>
+              <span className="text-black">건</span>
+            </div>
+          </Link>
         </div>
       </section>
 
