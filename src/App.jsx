@@ -408,6 +408,22 @@ const router = createBrowserRouter([
           },
         ],
       },
+      // 셀러샵 후기 조회 페이지(점수별)
+      {
+        path: "/sellershop/:sellerId/reviews",
+        element: <ReceivedReviewListPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: "후기" },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
 
       // 마이페이지 - 거래내역
       {
@@ -438,7 +454,7 @@ const router = createBrowserRouter([
 
       // 셀러샵 페이지 라우터
       {
-        path: "sellershop",
+        path: "sellershop/:sellerId",
         element: <SellerShopPage />,
         handle: {
           layout: {

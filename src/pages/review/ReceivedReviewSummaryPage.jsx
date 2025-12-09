@@ -9,10 +9,14 @@ const ratingLabels = {
   4: "이런 점이 최고예요",
 };
 
-const SectionItem = ({ title, data }) => {
+export const SectionItem = ({ title, data, memberId = null }) => {
   const navigate = useNavigate();
 
   const handleMoreClick = (rating) => {
+    if (memberId) {
+      navigate(`/sellershop/${memberId}/reviews?rating=${rating}`);
+      return;
+    }
     navigate(`/me/reviews?rating=${rating}`);
   };
 

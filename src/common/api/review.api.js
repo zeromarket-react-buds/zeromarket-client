@@ -20,14 +20,6 @@ export const getReviewByIdApi = async (reviewId) => {
 };
 
 /**
- * 특정 회원이 받은 리뷰 요약 (평점별 3개씩 + 총 개수)
- */
-export const getReceivedReviewSummaryApi = async () => {
-  const { data } = await apiClient(`/api/reviews/received/summary`);
-  return data;
-};
-
-/**
  * 마이페이지에서 보여줄 받은 후기 갯수 카운트
  */
 export const getCountReceivedReviewsOnMyPage = async (memberId) => {
@@ -36,15 +28,38 @@ export const getCountReceivedReviewsOnMyPage = async (memberId) => {
 };
 
 /**
+ * 특정 회원이 받은 리뷰 요약 (평점별 3개씩 + 총 개수)
+ * @param {number|null} memberId - 회원 ID (없으면 본인)
+ */
+export const getReceivedReviewSummaryApi = async (memberId = null) => {
+  const endpoint = memberId
+    ? `/api/reviews/received/summary/${memberId}`
+    : `/api/reviews/received/summary`;
+
+  const { data } = await apiClient(endpoint);
+  return data;
+};
+
+/**
  * 특정 회원이 받은 리뷰 전체 목록 (특정 평점 기준, 페이징 포함)
+ * @param {number|null} memberId - 회원 ID (없으면 본인)
+ * @param {number} rating - 평점 (4 또는 5)
+ * @param {number|null} cursorReviewId - 커서 리뷰 ID
+ * @param {string|null} cursorCreatedAt - 커서 생성일
+ * @param {number} size - 페이지 크기
  */
 export const getReceivedReviewsByRatingApi = async ({
+  memberId = null,
   rating,
   cursorReviewId = null,
   cursorCreatedAt = null,
   size = 10,
 } = {}) => {
-  const { data } = await apiClient(`/api/reviews/received`, {
+  const endpoint = memberId
+    ? `/api/reviews/received/${memberId}`
+    : `/api/reviews/received`;
+
+  const { data } = await apiClient(endpoint, {
     params: {
       rating,
       size,
@@ -52,46 +67,6 @@ export const getReceivedReviewsByRatingApi = async ({
       ...(cursorCreatedAt && { cursorCreatedAt }),
     },
   });
-  return data;
-};
-
-/**
- * 모든 리뷰 조회 (GET /api/reviews)
- */
-export const getAllReviewsApi = async () => {
-  const { data } = await apiClient(`/api/reviews`);
-  return data;
-};
-
-/**
- * 작성자 ID로 조회 (GET /api/reviews/writer/{writerId})
- */
-export const getReviewsByWriterIdApi = async (writerId) => {
-  const { data } = await apiClient(`/api/reviews/writer/${writerId}`);
-  return data;
-};
-
-/**
- * 거래 ID로 조회 (GET /api/reviews/trade/{tradeId})
- */
-export const getReviewsByTradeIdApi = async (tradeId) => {
-  const { data } = await apiClient(`/api/reviews/trade/${tradeId}`);
-  return data;
-};
-
-/**
- * 특정 회원이 받은 리뷰 조회 (GET /api/reviews/member/{memberId})
- */
-export const getReviewsByMemberIdApi = async (memberId) => {
-  const { data } = await apiClient(`/api/reviews/member/${memberId}`);
-  return data;
-};
-
-/**
- * 평점별 리뷰 조회 (GET /api/reviews/rating/{rating})
- */
-export const getReviewsByRatingApi = async (rating) => {
-  const { data } = await apiClient(`/api/reviews/rating/${rating}`);
   return data;
 };
 

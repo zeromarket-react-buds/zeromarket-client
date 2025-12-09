@@ -1,13 +1,17 @@
 import Container from "@/components/Container";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UserRound, Heart } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { createReportApi } from "@/common/api/report.api";
 import ReportModal from "@/components/report/ReportModal";
 import { getProductsBySeller } from "@/common/api/sellerShop.api";
+import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
+import { SectionItem } from "../review/ReceivedReviewSummaryPage";
 
 const SellerShopPage = () => {
+  const { sellerId } = useParams();
+
   const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
@@ -59,6 +63,13 @@ const SellerShopPage = () => {
   const [reportModal, setReportModal] = useState(false); // 신고 모달
   const [blockModal, setBlockModal] = useState(false); // 차단 모달
 
+  // 후기
+  const [reviewSummary, setReviewSummary] = useState({
+    rating5: { totalCount: 0, latestReviews: [], rating: 5 },
+    rating4: { totalCount: 0, latestReviews: [], rating: 4 },
+  });
+  const [reviewLoading, setReviewLoading] = useState(true);
+
   // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
   useEffect(() => {
     const handler = () => setMenuOpen(true);
@@ -67,15 +78,31 @@ const SellerShopPage = () => {
     return () => window.removeEventListener("seller-menu-open", handler);
   }, []);
 
-  // 판매상품 목록 조회 요청 함수
+  // 리뷰 요약 목록
+  const fetchReviewsSummary = useCallback(async () => {
+    setReviewLoading(true);
+
+    try {
+      const data = await getReceivedReviewSummaryApi(sellerId);
+      console.log(data);
+
+      const { nickname, rating5, rating4 } = data;
+      setReviewSummary({ rating5, rating4 });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReviewLoading(false);
+    }
+  }, [sellerId]);
+
+  // '판매상품 목록' 조회 요청 함수
   const fetchProductsBySeller = useCallback(async () => {
     if (!hasNext || loading) return;
     setLoading(true);
 
     try {
       const data = await getProductsBySeller({
-        // TODO: sellerId 가져오기
-        sellerId: 1,
+        sellerId,
         cursorProductId: cursor.cursorProductId,
         cursorCreatedAt: cursor.cursorCreatedAt,
       });
@@ -92,16 +119,27 @@ const SellerShopPage = () => {
     } finally {
       setLoading(false);
     }
-  });
+  }, [sellerId, cursor, hasNext, loading]); // cursor, hasNext, loading
 
-  // 판매상품 목록 조회 useEffect
+  // 초기 fetch
   useEffect(() => {
+    setItems([]);
+    setCursor({
+      cursorProductId: null,
+      cursorCreatedAt: null,
+    });
+    setHasNext(true);
+    setReviewSummary({});
+
     fetchProductsBySeller();
-  }, []); // 최초 렌더링 딱 한 번
+    fetchReviewsSummary();
+  }, [sellerId]);
+  // 무한 스크롤이면서 첫 로딩도 호출해야 하므로, -> 더 안전하게 동작(??)
 
-  // 판매상품 목록 조회 - 페이지네이션(커서 기반)
+  // IntersectionObserver (첫 호출 완료 후 활성화)
   useEffect(() => {
-    if (!loadMoreRef.current) return;
+    if (!loadMoreRef.current || items.length === 0) return;
+    if (!hasNext) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -116,16 +154,6 @@ const SellerShopPage = () => {
 
     return () => observer.disconnect();
   }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
-
-  // UX 강화
-  // - 새로고침 시 첫 페이지부터 로드
-  // - 판매자 화면 이동 시 상태 reset
-  // useEffect(() => {
-  //   setItems([]);
-  //   setCursor({ cursorProductId: null, cursorCreatedAt: null });
-  //   setHasNext(true);
-  //   loadData();
-  // }, [sellerId]);
 
   const handleOpenReportModal = () => {
     if (!isAuthenticated) {
@@ -164,6 +192,7 @@ const SellerShopPage = () => {
       alert("신고 처리 중 문제가 발생했습니다.");
     }
   };
+
   return (
     <>
       <Container>
@@ -205,79 +234,53 @@ const SellerShopPage = () => {
             </div>
           </div>
 
-          {/* 이런 점이 좋았어요 */}
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-3">
-              <span className=" text-[16px]">이런 점이 좋았어요</span>
-              {/*건수증가, 건텍스트 크기*/}
-              <span className=" text-[16px]">
-                {/*증가 숫자 색상크기 지정*/}
-                <span className="text-brand-green text-lg font-semibold">
-                  {detail.bestReviews.length}
-                </span>
-                건
-              </span>
-            </div>
+          {/* ------------- 후기 ------------- */}
+          {reviewLoading ? (
+            <div>로딩 중...</div>
+          ) : (
+            <div>
+              {reviewSummary.rating5 && (
+                <SectionItem
+                  title="이런 점이 최고예요"
+                  data={reviewSummary.rating5}
+                  memberId={sellerId}
+                />
+              )}
 
-            <div className="border rounded-2xl p-4">
-              <ul className="list-disc pl-5 text-gray-700 text-[15px] space-y-1">
-                {/* 최대 3건까지만 표시하도록 slice */}
-                {detail.goodReviews.slice(0, 3).map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex justify-center mt-2">
-              <p className="text-sm">더 보기</p>
-            </div>
-          </div>
+              {reviewSummary.rating4 && (
+                <SectionItem
+                  title="이런 점이 좋았어요"
+                  data={reviewSummary.rating4}
+                  memberId={sellerId}
+                />
+              )}
 
-          {/* 이런 점이 최고예요  */}
-          <div className="mb-6">
-            <div className="flex justify-between mb-3">
-              <span className=" text-[16px]">이런 점이 최고예요</span>
-              <span className="text-[16px]">
-                <span className="text-brand-green text-lg font-semibold">
-                  {detail.bestReviews.length}
-                </span>
-                건
-              </span>
+              <p className="text-gray-400 text-[14px] -mt-1">
+                후기는 최신순으로 3건만 보입니다
+              </p>
             </div>
-
-            <div className="border rounded-2xl p-4">
-              <ul className="list-disc pl-5 text-gray-700 text-[15px] space-y-1">
-                {/* 최대 3건까지만 표시하도록 slice */}
-                {detail.bestReviews.slice(0, 3).map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex justify-center mt-2">
-              <p className="text-sm">더 보기</p>
-            </div>
-          </div>
-
-          <p className="text-gray-400 text-[14px] -mt-1">
-            후기는 최신순으로 3건만 보입니다
-          </p>
+          )}
 
           {/* ---------- 판매 상품 ---------- */}
+
           <div className="mt-8 mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               판매 상품
             </h3>
 
-            {/* <ProductCard products={detail.products} onToggleLike={() => {}} /> */}
-            <ProductCard products={items} onToggleLike={() => {}} />
+            <div>
+              {/* <ProductCard products={detail.products} onToggleLike={() => {}} /> */}
+              <ProductCard products={items} onToggleLike={() => {}} />
 
-            {/* 다음 로딩 중 */}
-            {loading && <p>로딩중...</p>}
+              {/* 다음 로딩 중 */}
+              {loading && <p>로딩중...</p>}
 
-            {/* 데이터 끝 */}
-            {!hasNext && <p>마지막입니다.</p>}
+              {/* 데이터 끝 */}
+              {!hasNext && <p className="text-center mt-10">마지막입니다.</p>}
 
-            {/* 무한 스크롤 적용 - loadMoreRef */}
-            <div ref={loadMoreRef} style={{ height: "10px" }} />
+              {/* 무한 스크롤 적용 - loadMoreRef */}
+              <div ref={loadMoreRef} style={{ height: "10px" }} />
+            </div>
           </div>
         </div>
       </Container>

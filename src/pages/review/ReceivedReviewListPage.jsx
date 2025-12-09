@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import Container from "@/components/Container";
 import { getReceivedReviewsByRatingApi } from "@/common/api/review.api";
+import { useAuth } from "@/hooks/AuthContext";
+// import { getReviewsByRatingApi } from "@/common/api/sellerShop.api";
 
 const ReviewCard = ({ info, onClick }) => {
   return (
@@ -23,11 +25,19 @@ const ReviewCard = ({ info, onClick }) => {
 
 export default function ReceivedReviewListPage() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
 
+  const { sellerId } = useParams();
+
+  const [params] = useSearchParams();
   const rating = Number(params.get("rating"));
+
   const ratingLabel =
     rating === 5 ? "이런 점이 최고예요 ;)" : "이런 점이 좋았어요 :)";
+
+  const { isAuthenticated, user: currentUser } = useAuth();
+
+  const isMyPage =
+    isAuthenticated && currentUser && String(currentUser.memberId) === sellerId;
 
   const [list, setList] = useState([]);
   const [cursor, setCursor] = useState({
@@ -42,12 +52,22 @@ export default function ReceivedReviewListPage() {
     if (!hasNext || loading) return;
     setLoading(true);
 
+    let data;
     try {
-      const data = await getReceivedReviewsByRatingApi({
-        rating,
-        cursorCreatedAt: cursor.cursorCreatedAt,
-        cursorReviewId: cursor.cursorReviewId,
-      });
+      if (isMyPage) {
+        data = await getReceivedReviewsByRatingApi({
+          rating,
+          cursorCreatedAt: cursor.cursorCreatedAt,
+          cursorReviewId: cursor.cursorReviewId,
+        });
+      } else {
+        data = await getReceivedReviewsByRatingApi({
+          memberId: sellerId,
+          rating,
+          cursorCreatedAt: cursor.cursorCreatedAt,
+          cursorReviewId: cursor.cursorReviewId,
+        });
+      }
 
       setList(data.reviewList);
       setHasNext(data.hasNext);
@@ -98,16 +118,6 @@ export default function ReceivedReviewListPage() {
     // 3. cleanup: 컴포넌트 언마운트 시 관찰 중지
     return () => observer.disconnect();
   }, [hasNext, loading]);
-
-  // UX 강화
-  // - 새로고침 시 첫 페이지부터 로드
-  // - 판매자 화면 이동 시 상태 reset
-  // useEffect(() => {
-  //   setItems([]);
-  //   setCursor({ cursorProductId: null, cursorCreatedAt: null });
-  //   setHasNext(true);
-  //   loadData();
-  // }, [sellerId]);
 
   const onCardClick = (reviewId) => {
     navigate(`/reviews/${reviewId}`);
