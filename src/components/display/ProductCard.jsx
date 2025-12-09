@@ -62,8 +62,8 @@ const ProductCard = ({ products, onToggleLike }) => {
                       e.stopPropagation();
                       handleHeartClick(p.productId);
                     }}
-                    fill={p.isWished ? "red" : "none"}
-                    stroke={p.isWished ? "red" : "currentColor"}
+                    fill={p.wished ? "red" : "none"}
+                    stroke={p.wished ? "red" : "currentColor"}
                   />
                 </div>
               </div>
