@@ -295,6 +295,7 @@ const MyProfilePage = () => {
         profileImg={profileImg}
         fileInputRef={fileInputRef}
         onChange={handleProfileChange}
+        setProfileImg={setProfileImg}
       />
 
       {/* 닉네임 입력 */}
