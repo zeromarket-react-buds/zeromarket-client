@@ -5,73 +5,49 @@ import iconLogin from "@/assets/ico_login.svg";
 import iconJoin from "@/assets/ico_join.svg";
 import iconCart from "@/assets/ico_cart.svg";
 import iconSearch from "@/assets/ico_search.svg";
+import { useAuth } from "@/hooks/AuthContext";
+import { Bell, UserRound } from "lucide-react";
 
 const DefaultHeader = () => {
+  const { user, isAuthenticated } = useAuth();
+  console.log("user", user);
+
   return (
     <Container>
       <header className="border-b border-gray-200 py-4">
-        <div className="h-[30px] space-x-4 flex justify-end items-center text-gray-500 text-xs">
-          <Link to="/" className="hover:text-black hover:underline">
-            홈
-          </Link>
-          <Link to="/me" className="hover:text-black hover:underline">
-            마이페이지
-          </Link>
-        </div>
-        <div className="flex space-x-16 justify-between h-[60px]">
+        <div className="flex space-x-16 justify-between h-[60px] px-4">
           <Link to="/" className="h-[50px] shrink-0">
             <img src={logo} className="h-full" alt="logo" />
           </Link>
-          {/* <div className="flex-grow"></div> */}
-          <div className="flex space-x-2 items-center mr-2">
-            <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864] ">
-              <Link to="/boards" className="flex items-center gap-1 px-3 py-2 ">
-                <img
-                  src={iconLogin}
-                  alt="board"
-                  className="text-white w-5 h-5 block"
-                />
-                <span className="w-10">게시판</span>
-              </Link>
-            </div>
-            <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864]">
-              <Link
-                to="/login"
-                className="flex space-x-1 items-center px-3 py-2"
-              >
-                <img
-                  src={iconLogin}
-                  alt="cart"
-                  className="text-white w-5 h-5"
-                />
-                <span className="w-10">로그인</span>
-              </Link>
-
-              {/* <button className="flex space-x-1 items-center px-3 py-2">
-                <img src={iconLogin} className="w-5 h-5" />
-                <span className="w-13">로그아웃</span>
-              </button> */}
-            </div>
-
-            <div className="flex text-sm font-bold rounded-lg text-white bg-[#203864]">
-              <Link
-                to="/join"
-                className="flex space-x-1 items-center px-3 py-2"
-              >
-                <img src={iconJoin} alt="cart" className="text-white w-5 h-5" />
-                <span className="w-13">회원가입</span>
-              </Link>
-            </div>
-            <Link to="/shopping/cart" className="relative cursor-pointer w-5 ">
-              <img src={iconCart} alt="cart" className="w-5 h-5" />
-              <div className="absolute -top-1.5 -right-2 h-4 w-4 rounded-full bg-[#0063ba] flex items-center justify-center">
-                <div className="text-white text-[8pt] font-bold">0</div>
+          {!isAuthenticated ? (
+            <div className="flex flex-row items-center">
+              <div className="flex text-sm font-bold">
+                <Link to="/login" className="px-3 py-2">
+                  <span className="w-10">로그인</span>
+                </Link>
               </div>
-            </Link>
-            {/* <div className="cursor-pointer">
-              <img src={iconSearch} alt="search" className="w-5 h-5" />
-            </div> */}
-          </div>
+
+              <div className="flex text-sm font-bold">
+                <Link to="/join" className="px-3 py-2">
+                  <span className="w-13">회원가입</span>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-row items-center gap-5">
+              <Bell className="w-9 h-9" />
+              <Link to="/me" className="">
+                {user?.profileImage ? (
+                  <img
+                    src={user?.profileImage}
+                    className="w-9 h-9 rounded-full"
+                  />
+                ) : (
+                  <UserRound className="w-9 h-9 bg-brand-green rounded-full text-brand-ivory" />
+                )}
+              </Link>
+            </div>
+          )}
         </div>
       </header>
     </Container>
