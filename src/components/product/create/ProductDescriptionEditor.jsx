@@ -1,19 +1,22 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 const ProductDescriptionEditor = ({ value, onChange }) => {
-  // const [description, setDescription] = useState(value || "");
-  const inputRef = useRef(null);
   const maxLength = 2000;
 
-  const handlePrice = (e) => {
-    const input = e.target.value;
-    const formatted = formatNumber(input);
-    setDescription(formatted);
+  const handleChange = (e) => {
+    let text = e.target.value;
+
+    if (text.length > maxLength) {
+      text = text.substring(0, maxLength);
+    }
+
+    onChange(text);
   };
 
   const consoleCheck = () => {
     console.log("자주 쓰는 문구 클릭");
   };
+
   return (
     <div className="mt-6">
       {/* 상품 설명 */}
@@ -28,11 +31,10 @@ const ProductDescriptionEditor = ({ value, onChange }) => {
       </div>
       <div className="relative">
         <textarea
-          ref={inputRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleChange}
           maxLength={maxLength}
-          className="w-full border p-3 rounded-lg h-32 text-sm overflow-x-auto"
+          className="w-full border p-3 rounded-lg h-32 max-h-100 text-sm overflow-x-auto"
           placeholder="상품명
 사용(유효) 기간
 거래 방법
