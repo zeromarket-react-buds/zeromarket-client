@@ -1,7 +1,7 @@
-const EnvGradeGuide = () => {
+const EnvGradeGuidePage = () => {
   return (
     <div className="-mt-5 px-15">
-      {/* 제목 + 설명 */}
+      {/* 환경점수 안내 영역 */}
       <div>
         <div className="text-2xl text-brand-green font-semibold py-3">
           환경점수는 뭔가요?
@@ -60,4 +60,4 @@ const EnvGradeGuide = () => {
   );
 };
 
-export default EnvGradeGuide;
+export default EnvGradeGuidePage;
