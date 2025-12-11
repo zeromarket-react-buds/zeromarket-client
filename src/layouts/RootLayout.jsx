@@ -51,7 +51,7 @@ const ToTheTop = () => {
       className={clsx(
         `cursor-pointer border-white border-2 rounded-full h-[60px] w-[60px] 
         flex flex-col items-center justify-center
-        bg-[#0063ba] hover:bg-[#203864] text-white 
+        bg-brand-ivory hover:bg-[#F4E2CAFF]/80 text-brand-green 
         transition-colors duration-200 
       `,
         visible
@@ -144,7 +144,7 @@ const RootLayout = function () {
 
         {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
 
-        <div className="fixed bottom-24 right-6 z-50">
+        <div className="fixed bottom-24 right-6 z-45">
           <ToTheTop />
         </div>
       </div>

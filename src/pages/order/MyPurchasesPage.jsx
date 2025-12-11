@@ -8,7 +8,11 @@ import {
   getTradeStatusKey,
   tradeFlowLabels,
 } from "@/components/order/tradeFlow";
-import { getTradeListApi, updateTradeStatusApi } from "@/common/api/trade.api";
+import {
+  getTradeListApi,
+  updateTradeStatusApi,
+  softDeleteTradeApi,
+} from "@/common/api/trade.api";
 import TradeReviewButton from "@/components/order/TradeReviewButton";
 import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
 import TradeFilterModal from "@/components/order/TradeFilterModal";
@@ -219,15 +223,21 @@ const MyPurchasesPage = () => {
 
             const statusDesc = hasTrade ? tradeStatus.description : null;
 
-            const isCanceled = statusDesc === "취소";
-            const isHidden = productIsHidden === true; // 버튼 제어용으로 유지
-            const hideActions = isCanceled || isHidden;
-
             // 거래가 있는 경우만 flowType/상태 계산
             const flowType = hasTrade ? tradeFlowLabels({ tradeType }) : null;
 
             const statusKey = hasTrade ? tradeStatus.name : null;
             const tradeStatusKey = getTradeStatusKey(statusDesc, statusKey);
+
+            // 상태 관련 변수들
+            const isCanceled = statusDesc === "취소";
+            const isHidden = productIsHidden === true;
+            const hideActions = isCanceled || isHidden;
+            const isCompleted = tradeStatusKey === "COMPLETED";
+
+            // 숨기기 뱃지 별도로 계산 (구매내역에서는 완료나 취소 상태일 땐 숨기기 뱃지 표시 X)
+            const isHiddenBadge =
+              productIsHidden === true && !isCanceled && !isCompleted;
 
             return (
               <div key={tradeId}>
@@ -258,7 +268,7 @@ const MyPurchasesPage = () => {
                     isDelivery={isDelivery}
                     tradeStatus={statusDesc}
                     thumbnailUrl={thumbnailUrl}
-                    isHidden={isHidden}
+                    isHidden={isHiddenBadge}
                   />
 
                   {!hideActions && hasTrade && (

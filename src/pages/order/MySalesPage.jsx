@@ -246,16 +246,16 @@ const MySalesPage = () => {
 
             const statusDesc = hasTrade ? tradeStatus.description : null;
 
-            // 상태 관련 플래그
-            const isCanceled = statusDesc === "취소";
-            const isHidden = productIsHidden === true;
-            const hideActions = isCanceled || isHidden;
-
             // 거래가 있는 경우만 flowType/상태 계산
             const flowType = hasTrade ? tradeFlowLabels({ tradeType }) : null;
 
             const statusKey = hasTrade ? tradeStatus.name : null;
             const tradeStatusKey = getTradeStatusKey(statusDesc, statusKey);
+
+            // 상태 관련 변수들
+            const isCanceled = statusDesc === "취소";
+            const isHidden = productIsHidden === true;
+            const hideActions = isCanceled || isHidden;
 
             return (
               <div key={tradeId ?? productId}>

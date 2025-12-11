@@ -16,6 +16,7 @@ const ActionButtonBar = ({
   isHidden,
   onHide,
   onUnhide,
+  loading,
 }) => {
   const { user, isAuthenticated } = useAuth(); // 로긴상태,사용자정보 가져오기
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
@@ -158,13 +159,15 @@ const ActionButtonBar = ({
           </div>
 
           <Button
-            className="flex-1 border border-brand-green font-bold bg-brand-ivory  text-brand-green py-2 "
+            variant="ivory"
+            className="flex-1 py-5 "
             onClick={() => handleButtonClick("채팅하기")}
           >
             채팅하기
           </Button>
           <Button
-            className="flex-1 font-bold bg-brand-green text-brand-ivory  py-2 "
+            variant="green"
+            className="flex-1 py-5 "
             onClick={() => handleButtonClick("바로 구매")}
           >
             바로 구매
@@ -174,31 +177,35 @@ const ActionButtonBar = ({
 
       {/* 2. 숨기기<>숨기기해제 , 상품수정 , 상품삭제 - 판매자*/}
       {role === "SELLER" && (
-        <div className="flex gap-2  my-0 px-3 pt-7 py-7">
+        <div className="flex gap-2 px-3 pt-6 py-6">
           {isHidden ? (
             <Button
               onClick={requestUnhide}
-              className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2"
+              variant="ivory"
+              className="flex-1 py-5"
             >
               숨기기 해제
             </Button>
           ) : (
             <Button
               onClick={requestHide}
-              className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2"
+              variant="ivory"
+              className="flex-1 py-5"
             >
               숨기기
             </Button>
           )}
 
           <Button
-            className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
+            variant="ivory"
+            className="flex-1 py-5 "
             onClick={handleEditClick}
           >
             상품수정
           </Button>
           <Button
-            className="flex-1 font-bold bg-brand-green text-brand-ivory  py-2 "
+            variant="green"
+            className="flex-1 py-5 "
             onClick={requestDelete}
           >
             상품삭제
@@ -208,27 +215,31 @@ const ActionButtonBar = ({
 
       {/* 3. 끌올 , 숨기기 , 상품수정 , 상품삭제 - 판매자(2차)*/}
       {role === "SELLER2" && (
-        <div className="flex gap-1 mt-5 border p-3">
+        <div className="flex gap-1 px-3 pt-6 py-6">
           <Button
-            className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
+            variant="ivory"
+            className="flex-1 py-5 "
             onClick={() => handleButtonClick("끌어 올리기")}
           >
             끌어 올리기
           </Button>
           <Button
-            className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
+            variant="ivory"
+            className="flex-1 py-5 "
             onClick={() => handleButtonClick("숨기기")}
           >
             숨기기
           </Button>
           <Button
-            className="flex-1 border font-bold bg-brand-ivory border-brand-green text-brand-green py-2 "
+            variant="ivory"
+            className="flex-1 py-5 "
             onClick={handleEditClick}
           >
             상품수정
           </Button>
           <Button
-            className="flex-1 font-bold bg-brand-green text-brand-ivory  py-2 "
+            variant="green"
+            className="flex-1 py-5 "
             onClick={() => handleButtonClick("상품삭제")}
           >
             상품삭제
@@ -240,8 +251,10 @@ const ActionButtonBar = ({
       {role === "WRITER" && (
         <div className="p-3 ">
           <Button
-            className="w-full bg-brand-green text-white py-7 pt-7 text-lg rounded-lg mb-3 mt-6"
+            variant="green"
+            className="w-full py-7 pt-7 text-lg mb-3 mt-6"
             onClick={onSubmit}
+            disabled={loading}
           >
             판매하기
           </Button>
@@ -252,7 +265,8 @@ const ActionButtonBar = ({
       {role === "EDITOR" && (
         <div className="p-3 ">
           <Button
-            className="w-full bg-brand-green text-white py-7 pt-7 text-lg rounded-lg mb-3 mt-6"
+            variant="green"
+            className="w-full py-7 pt-7 text-lg mb-3 mt-6"
             onClick={onSubmit}
           >
             수정 완료

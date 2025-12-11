@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { GreenRadio } from "../ui/greenradio";
 import { CircleX } from "lucide-react";
 import { reportReasonApi } from "@/common/api/report.api";
-
+import { Button } from "../ui/button";
 const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
   const [mode, setMode] = useState("DEFAULT");
   const [etcText, setEtcText] = useState("");
@@ -80,13 +80,12 @@ const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
       onClick={handleOverlayClick}
     >
       <div
-        className="bg-white rounded-2xl p-3 w-sm shadow-xl"
+        className="bg-white rounded-2xl p-3 w-sm shadow-xl select-none"
         onClick={handleContentClick}
       >
         <div className="mb-2">
           <div className="flex justify-end mb-3">
             <CircleX
-              // size={25}
               className="cursor-pointer bg-brand-green rounded-full text-white"
               onClick={onclose}
             />
@@ -98,7 +97,7 @@ const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
         {/* 신고사유 선택화면 */}
         {mode === "DEFAULT" && (
           <div className="px-5 mb-8">
-            <div className="text-brand-darkgray mb-6">
+            <div className="text-brand-darkgray mb-6 ">
               해당하는 부분을 클릭해주세요
             </div>
             {reasons.map((r) => (

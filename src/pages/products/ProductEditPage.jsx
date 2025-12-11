@@ -1,12 +1,11 @@
-import Container from "@/components/Container";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import {
   updateProductApi,
   getProductDetailApi,
 } from "@/common/api/product.api";
-
+import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
 import AiWriteSection from "@/components/product/create/AiWriteSection";
@@ -21,29 +20,37 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 
+// 입력 데이터 (DTO 매칭)
+const INITIAL_FORM = {
+  // sellerId: 1, // 로그인 구현 전 임시 값
+  productTitle: "",
+  categoryDepth1: null,
+  categoryDepth2: null,
+  categoryDepth3: null,
+  sellPrice: "",
+  productDescription: "",
+  productStatus: "USED", //초기값
+  direct: false,
+  delivery: false,
+  sellingArea: "서울 관악구",
+};
+
+//안전성위해 외부분리,한번만 생성
+const handleBeforeUnload = (e) => {
+  e.preventDefault();
+  e.returnValue = "";
+};
+
 const ProductEditPage = () => {
+  const [form, setForm] = useState(INITIAL_FORM);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [images, setImages] = useState([]);
   const { id } = useParams();
-  const [submitLoading, setSubmitLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true); //읽기로딩
+  const [submitLoading, setSubmitLoading] = useState(false); //등록로딩
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
-
-  // 입력 데이터 (DTO 매칭)
-  const [form, setForm] = useState({
-    // sellerId: 1, // 로그인 구현 전 임시 값
-    productTitle: "",
-    categoryDepth1: null,
-    categoryDepth2: null,
-    categoryDepth3: null,
-    sellPrice: "",
-    productDescription: "",
-    productStatus: "USED", //초기값
-    direct: false,
-    delivery: false,
-    sellingArea: "서울 관악구",
-  });
 
   //인증상태확인
   useEffect(() => {
@@ -61,6 +68,7 @@ const ProductEditPage = () => {
 
     const fetchDetail = async () => {
       try {
+        setPageLoading(true);
         const data = await getProductDetailApi(id);
 
         // console.log("서버에서 받은 productStatus:", data.productStatus);
@@ -98,15 +106,15 @@ const ProductEditPage = () => {
             sortOrder: img.sortOrder, //기존순서
           }))
         );
-
-        setSubmitLoading(false);
       } catch (e) {
         console.error(e);
         alert("상품 정보를 불러오는데에 실패했습니다.");
+      } finally {
+        setPageLoading(false);
       }
     };
     fetchDetail();
-  }, [id, user, isAuthenticated]);
+  }, [id, user, isAuthenticated, authLoading]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -129,19 +137,12 @@ const ProductEditPage = () => {
   }, [isAuthenticated, navigate, authLoading, setHeader]);
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  if (submitLoading) return <div>로딩중...</div>;
-  if (error) return <div>{error}</div>;
-
   //상품 수정
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     console.log("상품 수정 요청 시작");
 
     if (!form.productTitle.trim()) {
@@ -166,58 +167,47 @@ const ProductEditPage = () => {
 
     setSubmitLoading(true);
     setError("");
-
-    //대표이미지 자동설정 로직
-    let adjustedImages = [...images];
-
-    const hasMain = adjustedImages.some((img) => img.isMain);
-
-    if (!hasMain && adjustedImages.length > 0) {
-      adjustedImages = adjustedImages.map((img, idx) => ({
-        ...img,
-        isMain: idx === 0,
-      }));
-    }
-
-    //새 이미지 파일만 supabase 업로드 + 정렬 + 메인지정
-    const finalImages = [];
-    let order = 1;
-
-    for (const img of adjustedImages) {
-      let url = img.imageUrl;
-
-      //새로 업로드 필요 이미지
-      if (img.file) {
-        url = await uploadToSupabase(img.file);
+    try {
+      //대표이미지 자동설정 로직
+      let adjustedImages = [...images];
+      if (
+        !adjustedImages.some((img) => img.isMain) &&
+        adjustedImages.length > 0
+      ) {
+        adjustedImages = adjustedImages.map((img, idx) => ({
+          ...img,
+          isMain: idx === 0,
+        }));
       }
 
-      finalImages.push({
-        imageId: img.imageId ?? null,
-        imageUrl: url,
-        sortOrder: order,
-        isMain: img.isMain,
-      });
-      order++;
-    }
+      //새 이미지 파일만 supabase 업로드 + 정렬 + 메인지정
+      const finalImages = [];
+      let order = 1;
 
-    //수정내용 서버로 보내는 patch전용 json 데이터
-    const body = {
-      productTitle: form.productTitle,
-      categoryDepth1: form.categoryDepth1,
-      categoryDepth2: form.categoryDepth2,
-      categoryDepth3: form.categoryDepth3,
-      sellPrice: form.sellPrice,
-      productDescription: form.productDescription,
-      productStatus: form.productStatus,
-      direct: form.direct,
-      delivery: form.delivery,
-      sellingArea: form.sellingArea,
-      images: finalImages,
-    };
+      for (const img of adjustedImages) {
+        let url = img.imageUrl;
 
-    try {
+        //새로 업로드 필요 이미지
+        if (img.file) {
+          url = await uploadToSupabase(img.file);
+        }
+
+        finalImages.push({
+          imageId: img.imageId ?? null,
+          imageUrl: url,
+          sortOrder: order++,
+          isMain: img.isMain,
+        });
+      }
+
+      //수정내용 서버로 보내는 patch전용 json 데이터
+      const body = {
+        ...form,
+        images: finalImages,
+      };
+
       const response = await updateProductApi(id, body);
-      window.removeEventListener("beforeunload", () => {});
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (response && response.ok) {
         alert(`상품 수정 완료! 상품ID: ${id}`);
         navigate(`/products/${id}`, { replace: true });
@@ -231,10 +221,31 @@ const ProductEditPage = () => {
     } finally {
       setSubmitLoading(false);
     }
-  };
+  }, [form, images, navigate, id]);
 
+  // if (submitLoading) return <div>로딩중...</div>;
+  // if (error) return <div>{error}</div>;
+
+  if (pageLoading) {
+    return (
+      <Container>
+        <div>불러오는 중…</div>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container>
+        <div className="text-center p-4 text-red-600 font-semibold">
+          {error}
+        </div>
+      </Container>
+    );
+  }
   return (
     <Container>
+      {submitLoading && <div>로딩중...</div>}
+
       <div className="max-w-full mx-auto bg-gray-0 -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
@@ -268,14 +279,21 @@ const ProductEditPage = () => {
                 depth3: form.categoryDepth3,
               }}
               onChange={(depth1, depth2, depth3) =>
+                // setForm((prev) => ({
+                //   ...prev,
+                //   categoryDepth1:
+                //     depth1 != null && depth1 !== "" ? Number(depth1) : null,
+                //   categoryDepth2:
+                //     depth2 != null && depth2 !== "" ? Number(depth2) : null,
+                //   categoryDepth3:
+                //     depth3 != null && depth3 !== "" ? Number(depth3) : null,
+                // }))
                 setForm((prev) => ({
+                  //truthy,falsy 체크
                   ...prev,
-                  categoryDepth1:
-                    depth1 != null && depth1 !== "" ? Number(depth1) : null,
-                  categoryDepth2:
-                    depth2 != null && depth2 !== "" ? Number(depth2) : null,
-                  categoryDepth3:
-                    depth3 != null && depth3 !== "" ? Number(depth3) : null,
+                  categoryDepth1: depth1 ? Number(depth1) : null,
+                  categoryDepth2: depth2 ? Number(depth2) : null,
+                  categoryDepth3: depth3 ? Number(depth3) : null,
                 }))
               }
             />
@@ -309,9 +327,10 @@ const ProductEditPage = () => {
           <div>
             <TradeMethodSelector
               value={{ delivery: form.delivery, direct: form.direct }}
-              onChange={({ delivery, direct }) =>
-                setForm((prev) => ({ ...prev, delivery, direct }))
-              }
+              // onChange={({ delivery, direct }) =>
+              //   setForm((prev) => ({ ...prev, delivery, direct }))
+              // }
+              onChange={(v) => setForm((prev) => ({ ...prev, ...v }))}
             />
           </div>
 
@@ -322,7 +341,11 @@ const ProductEditPage = () => {
         </div>
 
         <div className="sticky bottom-0  bg-white border-t z-50 ">
-          <ActionButtonBar role="EDITOR" onSubmit={handleSubmit} />
+          <ActionButtonBar
+            role="EDITOR"
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
         </div>
       </div>
     </Container>

@@ -32,6 +32,7 @@ import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage"
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import MyProfilePage from "@/pages/me/MyProfilePage";
+import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 
 const router = createBrowserRouter([
   {
@@ -399,6 +400,25 @@ const router = createBrowserRouter([
                 header: {
                   component: "TitleHeader",
                   props: { title: "후기" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+          // 환경 점수 안내 페이지
+          {
+            path: "envgradeguide",
+            element: <EnvGradeGuidePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "환경점수",
+                    hideRight: true,
+                  },
                 },
                 footer: {
                   component: "DefaultFooter",

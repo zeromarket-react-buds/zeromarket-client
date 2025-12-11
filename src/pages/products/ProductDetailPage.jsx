@@ -18,6 +18,8 @@ import ProductCategoryTimeSection from "@/components/product/detail/ProductCateg
 import DetailEcoScoreSection from "@/components/product/detail/DetailEcoScoreSection";
 import SimilarProductsSection from "@/components/product/detail/SimilarProductsSection";
 import ProductImageCarousel from "@/components/product/detail/ProductImageCarousel";
+import ProductDescriptionSection from "@/components/product/detail/ProductDescriptionSection";
+import ProductStatusSection from "@/components/product/detail/ProductStatusSection";
 import ReportModal from "@/components/report/ReportModal";
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
@@ -77,14 +79,6 @@ const ProductDetailPage = () => {
         setError("HIDDEN");
         alert("숨겨진 게시글입니다.");
         navigate(-1);
-        //로그인권한 구현 전 숨김화면에서 숨김해제 버튼표시용, 추후 삭제예정
-        // setDetail({
-        //   productId: id,
-        //   images: [],
-        //   seller: {},
-        //   isHidden: true,
-        //   sellerId: user.memberId,
-        // });
         return;
       }
       if (status === 404 || status === 410) {
@@ -336,7 +330,7 @@ const ProductDetailPage = () => {
   return (
     <div>
       <Container>
-        <div className="relative ">
+        <div className="relative">
           <div>
             {/* 상품 이미지 */}
             <ProductImageCarousel images={sortedImages} />
@@ -353,31 +347,20 @@ const ProductDetailPage = () => {
           <div className="px-6">
             {/* 판매자 정보*/}
             <ProductSellerInfo detail={detail} />
-
             {/* 상품명 & 가격 & 판매상태*/}
             <DetailTitlePriceSection detail={detail} />
-
             {/* 카테고리 + n시간전 */}
             <ProductCategoryTimeSection detail={detail} />
-
             {/* 상품상태 */}
-            <div className="flex justify-between items-center my-5 w-full border rounded-lg px-3 py-2 text-sm">
-              <span>상품상태</span>
-              <span>{detail.productStatus?.description}</span>
-            </div>
-
-            {/* 설명 */}
-            <div className="mb-4">
-              <div className=" font-semibold mb-2">설명</div>
-              <p className="whitespace-pre-line">{detail.productDescription}</p>
-            </div>
-
+            <ProductStatusSection status={detail.productStatus} />
+            {/* 상품설명 */}
+            <ProductDescriptionSection
+              description={detail.productDescription}
+            />
             {/* 환경점수 - 2,3차 */}
             <DetailEcoScoreSection detail={detail} />
-
             {/* 거래 정보 + 맵 */}
             <ProductTradeInfoSection detail={detail} />
-
             {/* 신고하기 버튼 */}
             <div className="mb-6">
               <button
@@ -387,7 +370,6 @@ const ProductDetailPage = () => {
                 신고하기
               </button>
             </div>
-
             {/* 신고하기 모달 */}
             <ReportModal
               isOpen={isReportModalOpen}
@@ -395,7 +377,6 @@ const ProductDetailPage = () => {
               onSubmit={handleSubmitReport}
               targetType="PRODUCT"
             />
-
             {/* 비슷한 상품 */}
             <SimilarProductsSection
               products={similarProducts}

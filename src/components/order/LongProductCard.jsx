@@ -40,7 +40,12 @@ const LongProductCard = ({
   return (
     <div className="flex flex-row gap-10 items-center">
       <div className="overflow-hidden">
-        <Link to={`/products/${productId}`}>
+        <Link
+          to={`/products/${productId}`}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <img
             src={thumbnailUrl}
             className="w-[140px] h-[100px] object-cover rounded-2xl"

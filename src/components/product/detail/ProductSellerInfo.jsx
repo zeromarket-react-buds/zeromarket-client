@@ -2,7 +2,14 @@ import { UserRound, Heart, Eye, Smile } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ProductSellerInfo = ({ detail }) => {
-  const profileImage = detail.seller?.profileImage;
+  // const profileImage = detail.seller?.profileImage;
+  // const sellerId = detail.seller?.sellerId;
+  const {
+    profileImage,
+    sellerId,
+    sellerNickName,
+    trustScore: rawScore,
+  } = detail.seller || {};
 
   const formatCount = (num) => {
     if (num < 1000) return num.toString();
@@ -15,20 +22,17 @@ const ProductSellerInfo = ({ detail }) => {
   const viewCount = formatCount(detail.viewCount);
   const wishCount = formatCount(detail.wishCount);
 
-  const rawScore = detail.seller?.trustScore;
   const trustScore = !rawScore || rawScore === 0 ? "0" : rawScore.toFixed(1);
 
   return (
     <div className="max-w-lg mx-auto py-5 bg-white">
       {/* 판매자 정보 */}
       <div className="flex items-center justify-between mb-1">
-        <Link to={"/sellershop"}>
-          {/* 추후 판매자id별 이동 구현 필요 */}
+        <Link to={`/sellershop/${sellerId}`}>
           <div className="flex items-center gap-3 ">
-            {/* 프사+닉네임 */}
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ${
-                profileImage ? "bg-white:" : "bg-brand-green"
+                profileImage ? "bg-white" : "bg-brand-green"
               }`}
             >
               {profileImage ? (
@@ -42,7 +46,7 @@ const ProductSellerInfo = ({ detail }) => {
             </div>
             <span className="font-semibold text-brand-green text-2xl truncate max-w-[200px] block">
               {/* 가나다라마바사아자차카타파하 */}
-              {detail.seller?.sellerNickName}
+              {sellerNickName}
             </span>
           </div>
         </Link>
@@ -52,7 +56,6 @@ const ProductSellerInfo = ({ detail }) => {
           {/* 조회수 */}
           <div className="flex flex-col items-center w-8" title="조회수">
             <span className="text-lg font-semibold text-brand-green">
-              {/* 12 */}
               {viewCount}
             </span>
             <span className="text-sm text-brand-mediumgray">
