@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
@@ -17,31 +17,35 @@ import { createProductApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 
+// 입력 데이터 (DTO 매칭
+const INITIAL_FORM = {
+  productTitle: "",
+  categoryDepth1: null,
+  categoryDepth2: null,
+  categoryDepth3: null,
+  sellPrice: "",
+  productDescription: "",
+  productStatus: "USED", //초기값
+  direct: false,
+  delivery: false,
+  sellingArea: "서울 관악구",
+};
+
+const handleBeforeUnload = (e) => {
+  e.preventDefault(); //브라우저 기본동작 막기
+  e.returnValue = ""; //기본 confirm 창 띄우게
+};
+
 const ProductCreatePage = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const [form, setForm] = useState(INITIAL_FORM);
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
   const { setHeader } = useHeader();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 입력 데이터 (DTO 매칭)
-  const [form, setForm] = useState({
-    // sellerId: 1, // 로그인 구현 전 임시 값
-    productTitle: "",
-    categoryDepth1: null,
-    categoryDepth2: null,
-    categoryDepth3: null,
-    sellPrice: "",
-    productDescription: "",
-    productStatus: "USED", //초기값
-    direct: false,
-    delivery: false,
-    sellingArea: "서울 관악구",
-  });
-
   useEffect(() => {
-    // if (authLoading) return;
     if (!isAuthenticated && !authLoading) {
       alert("로그인 후 상품을 등록할 수 있습니다.");
       navigate("/login", { replace: true });
@@ -69,32 +73,13 @@ const ProductCreatePage = () => {
   }, [isAuthenticated, navigate, authLoading, setHeader]);
 
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      e.preventDefault(); //브라우저 기본동작 막기
-      e.returnValue = ""; //기본 confirm 창 띄우게
-    };
-    const handlePopState = (e) => {
-      const confirmation = window.confirm(
-        "작업 내용이 저장되지 않았습니다. 이 페이지를 떠나시겠습니까?"
-      );
-      if (!confirmation) {
-        e.preventDefault();
-      }
-    };
     window.addEventListener("beforeunload", handleBeforeUnload); //"beforeunload"기존 정의 특수이벤
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
-  if (authLoading) {
-    return (
-      <div className="w-full h-screen flex justify-center items-center">
-        인증 확인 중...
-      </div>
-    );
-  }
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!form.productTitle.trim()) {
       alert("상품명을 입력해주세요.");
       return;
@@ -119,41 +104,38 @@ const ProductCreatePage = () => {
     setError("");
     console.log("상품 등록 요청 시작");
 
-    //대표이미지 자동설정 로직
-    let adjustedImages = [...images];
-    const hasMain = adjustedImages.some((img) => img.isMain);
-
-    if (!hasMain && adjustedImages.length > 0) {
-      adjustedImages = adjustedImages.map((img, idx) => ({
-        ...img,
-        isMain: idx === 0,
-      }));
-    }
-
-    //supabase 이미지 업로드
-    const uploadedImages = [];
-    let order = 1;
-
-    for (const img of adjustedImages) {
-      const imageUrl = await uploadToSupabase(img.file);
-
-      uploadedImages.push({
-        imageUrl,
-        // sortOrder: img.sortOrder,
-        sortOrder: order,
-        isMain: img.isMain,
-      });
-      order++;
-    }
-
-    const jsonData = {
-      ...form,
-      images: uploadedImages,
-    };
-
     try {
+      //대표이미지 자동설정 로직
+      let adjustedImages = [...images];
+      if (!adjustedImages.some((i) => i.isMain) && adjustedImages.length > 0) {
+        adjustedImages = adjustedImages.map((img, idx) => ({
+          ...img,
+          isMain: idx === 0,
+        }));
+      }
+
+      //supabase 이미지 업로드
+      const uploadedImages = [];
+      let order = 1;
+
+      for (const img of adjustedImages) {
+        const imageUrl = await uploadToSupabase(img.file);
+
+        uploadedImages.push({
+          imageUrl,
+          // sortOrder: img.sortOrder,
+          sortOrder: order++,
+          isMain: img.isMain,
+        });
+      }
+
+      const jsonData = {
+        ...form,
+        images: uploadedImages,
+      };
+
       const response = await createProductApi(jsonData);
-      window.removeEventListener("beforeunload", () => {}); //새로고침 confirm감지 제거
+      window.removeEventListener("beforeunload", handleBeforeUnload); //새로고침 confirm감지 제거
       if (response && response.productId) {
         console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
         alert(`상품 등록 완료! 상품ID: ${response.productId}`);
@@ -176,9 +158,20 @@ const ProductCreatePage = () => {
     } finally {
       setSubmitLoading(false);
     }
-  };
+  }, [form, images, navigate]);
+
+  if (error) {
+    return (
+      <Container>
+        <div className="text-center p-4 text-red-600 font-semibold">
+          {error}
+        </div>
+      </Container>
+    );
+  }
   return (
     <Container>
+      {submitLoading && <div>로딩중...</div>}
       <div className="max-w-full mx-auto bg-gray-0  -mb-4 ">
         <div className="px-6">
           <div className="border-b py-4">
@@ -214,12 +207,9 @@ const ProductCreatePage = () => {
               onChange={(depth1, depth2, depth3) =>
                 setForm((prev) => ({
                   ...prev,
-                  categoryDepth1:
-                    depth1 != null && depth1 !== "" ? Number(depth1) : null,
-                  categoryDepth2:
-                    depth2 != null && depth2 !== "" ? Number(depth2) : null,
-                  categoryDepth3:
-                    depth3 != null && depth3 !== "" ? Number(depth3) : null,
+                  categoryDepth1: depth1 ? Number(depth1) : null,
+                  categoryDepth2: depth2 ? Number(depth2) : null,
+                  categoryDepth3: depth3 ? Number(depth3) : null,
                 }))
               }
             />
@@ -253,9 +243,7 @@ const ProductCreatePage = () => {
           <div>
             <TradeMethodSelector
               value={{ delivery: form.delivery, direct: form.direct }}
-              onChange={({ delivery, direct }) =>
-                setForm((prev) => ({ ...prev, delivery, direct }))
-              }
+              onChange={(v) => setForm((prev) => ({ ...prev, ...v }))}
             />
           </div>
 
@@ -266,7 +254,11 @@ const ProductCreatePage = () => {
         </div>
         {/* 하단 버튼 */}
         <div className="sticky bottom-0  bg-white border-t z-50 ">
-          <ActionButtonBar role="WRITER" onSubmit={handleSubmit} />
+          <ActionButtonBar
+            role="WRITER"
+            onSubmit={handleSubmit}
+            loading={submitLoading}
+          />
         </div>
       </div>
     </Container>
