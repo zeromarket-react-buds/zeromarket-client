@@ -14,7 +14,7 @@ const buttonVariants = cva(
         green:
           "bg-brand-green text-brand-ivory hover:bg-brand-green/80 cursor-pointer",
         ivory:
-          "bg-brand-ivory text-brand-green border border-brand-green hover:bg-brand-mediumgray/20 cursor-pointer",
+          "bg-brand-ivory text-brand-green border border-brand-green hover:bg-[#F4E2CAFF]/80 cursor-pointer",
         gray: "bg-brand-mediumgray text-white hover:bg-brand-mediumgray/80 cursor-pointer",
         red: "bg-brand-red text-white hover:bg-white/20 cursor-pointer",
       },
