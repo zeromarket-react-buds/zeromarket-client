@@ -4,10 +4,13 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom"; //건수 증가
 import {
   getAverageRatingApi,
   getCountReceivedReviewsOnMyPage,
 } from "@/common/api/review.api";
+// fetch 쓰면 토큰이 안 붙어서 count가 변하지 않음 → apiClient 사용해야 함
+import { apiClient } from "@/common/client";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
@@ -17,17 +20,26 @@ export default function MyPage() {
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
+  // ⭐ 추가됨: 현재 페이지 정보를 가져옴
+  const location = useLocation();
+
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:8080/api/products/wishlist/count"
-      );
+      // const res = await fetch(
+      //   "http://localhost:8080/api/products/wishlist/count"
+      // );
 
-      if (!res.ok) throw new Error("찜 개수 조회 실패");
+      // if (!res.ok) throw new Error("찜 개수 조회 실패");
 
-      const count = await res.json();
-      setWishCount(count);
+      // const count = await res.json();
+      // setWishCount(count);
+      // ⭐ 수정됨: apiClient 사용 → JWT 자동 포함 → userDetails 정상 전달
+      const { data } = await apiClient("/api/products/wishlist/count", {
+        method: "GET",
+      });
+
+      setWishCount(data);
     } catch (err) {
       console.error("🔥 찜 개수 에러:", err);
     }
@@ -57,7 +69,8 @@ export default function MyPage() {
     fetchWishCount();
     fetchTrustScore();
     fetchReceivedReviewCount();
-  }, [loading]);
+  }, [location.pathname, loading]);
+  //location.pathname,추가 찜 후 MyPage로 다시 올 때마다 갱신됨!
 
   const handleLogout = () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {

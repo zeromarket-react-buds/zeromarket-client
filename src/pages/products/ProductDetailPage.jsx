@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/AuthContext";
-import { useLikeToggle } from "@/hooks/useLikeToggle";
+import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import {
   getProductDetailApi,
   getSimilarProductsApi,
@@ -28,13 +28,15 @@ const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-  const { onToggleLike } = useLikeToggle([]);
+  //const { onToggleLike } = useLikeToggle([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
   const [similarProducts, setSimilarProducts] = useState([]);
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
   if (user === undefined) {
     return (
@@ -54,7 +56,7 @@ const ProductDetailPage = () => {
   //   liked: false,
   // }));
 
-  /** ⭐ 수정됨: memberId를 인자로 받아 상세조회 */
+  /** ⭐ 수정됨: apiClient 기반으로 상세조회 */
   const fetchProductDetail = async () => {
     try {
       // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
@@ -122,40 +124,60 @@ const ProductDetailPage = () => {
     }
   };
 
-  //찜 추가/삭제
+  //⭐ 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
   const toggleWish = async () => {
+    if (!detail) return; // 안전장치 추가
     try {
-      console.log("*** 현재 detail.wished:", detail?.wished);
+      // ⭐ apiClient 기반 찜 토글 함수 호출
+      // ⭐ onToggleLikeDetail → 서버에서 true/false 반환
+      const newState = await onToggleLikeDetail(detail.productId); // true/false
+      // 서버가 반환한 newState
+      console.log("*** 토글 후 받은 newState:", newState);
 
-      const method = detail.wished ? "DELETE" : "POST";
-      console.log("*** 실행될 HTTP method:", method);
-      console.log("*** 현재 wishCount:", detail?.wishCount);
+      // // ⭐ 업데이트된 detail을 계산
+      // const method = detail.wished ? "DELETE" : "POST";
+      // console.log("*** 실행될 HTTP method:", method);
+      // console.log("*** 현재 wishCount:", detail?.wishCount);
 
-      const res = await fetch(`http://localhost:8080/api/products/${id}/wish`, {
-        method,
-      });
+      // const res = await fetch(`http://localhost:8080/api/products/${id}/wish`, {
+      //   method,
+      // });
 
-      if (!res.ok) throw new Error("찜 토글 실패");
+      // if (!res.ok) throw new Error("찜 토글 실패");
 
-      const result = await res.json(); //서버응답 콘솔확인용
-      console.log("🔥 서버 응답:", result);
+      // const result = await res.json(); //서버응답 콘솔확인용
+      // console.log("🔥 서버 응답:", result);
 
-      const isAdded = method === "POST";
+      // const isAdded = method === "POST";
 
-      // ⭐ 업데이트된 detail을 계산
-      const updated = {
-        ...detail,
-        wished: isAdded,
-        wishCount: isAdded
-          ? detail.wishCount + 1
-          : Math.max((detail.wishCount || 1) - 1, 0),
-      };
+      // // ⭐ 업데이트된 detail을 계산
+      // const updated = {
+      //   ...detail,
+      //   wished: isAdded,
+      //   wishCount: isAdded
+      //     ? detail.wishCount + 1
+      //     : Math.max((detail.wishCount || 1) - 1, 0),
+      // };
 
-      // ⭐ 상태 반영
-      setDetail(updated);
-      console.log("🟡 토글 이후 detail 업데이트됨:", updated);
+      // // ⭐ 상태 반영
+      // setDetail(updated);
+      // console.log("🟡 토글 이후 detail 업데이트됨:", updated);
 
-      return isAdded; // ActionButtonBar에서 메시지 구분용
+      // return isAdded; // ActionButtonBar에서 메시지 구분용
+
+      // wishCount 계산
+      const newWishCount = newState
+        ? (detail.wishCount || 0) + 1
+        : Math.max((detail.wishCount || 1) - 1, 0);
+
+      // ⭐ detail 상태 업데이트
+      setDetail((prev) => ({
+        ...prev,
+        wished: newState,
+        wishCount: newWishCount,
+      }));
+
+      return newState;
     } catch (err) {
       console.error("찜 토글 실패 : ", err);
     }
@@ -377,7 +399,7 @@ const ProductDetailPage = () => {
             {/* 비슷한 상품 */}
             <SimilarProductsSection
               products={similarProducts}
-              onToggleLike={onToggleLike}
+              onToggleLike={onToggleLikeDetail} //onToggleLike 에서 변경. 상세찜 함수 전달
             />
           </div>
 
