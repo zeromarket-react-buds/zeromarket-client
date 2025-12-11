@@ -242,7 +242,7 @@ const TradeDetailPage = () => {
                 <span>판매자 정보</span>
                 <Button
                   className="text-lg text-black px-0"
-                  onClick={() => navigate(`/sellershop`)}
+                  onClick={() => navigate(`/sellershop/${sellerId}`)}
                 >
                   가게 보기 <ChevronRight className="-mr-3" />
                 </Button>
