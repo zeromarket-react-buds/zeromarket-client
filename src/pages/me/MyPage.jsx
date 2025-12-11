@@ -94,8 +94,8 @@ export default function MyPage() {
         </div>
       </section>
 
-      <p className="text-sm text-gray-500 text-center mb-6">
-        환경점수는 어떻게 사용할 수 있나요?
+      <p className="text-sm text-brand-mediumgray text-right mb-6">
+        <Link to="/me/envgradeguide">환경점수는 어떻게 사용할 수 있나요?</Link>
       </p>
 
       {/* 한줄 소개 */}
