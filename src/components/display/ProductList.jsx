@@ -43,17 +43,32 @@ const ProductList = () => {
   const [hasNext, setHasNext] = useState(true);
 
   // ⭐ 찜 토글 후 UI 즉시 반영 함수
-  const handleToggleWish = async (productId) => {
-    console.log("❤️ handleToggleWish 호출됨", productId);
+  //* ProductId를 clickedProductId로 분간 쉽게 변경
+  const handleToggleWish = async (clickedProductId) => {
+    console.log("❤️ handleToggleWish 호출됨", clickedProductId);
 
     // 백엔드 토글 API 수행 (true/false 반환)
-    const newState = await onToggleLike(productId);
+    const newState = await onToggleLike(clickedProductId);
 
     // UI 즉시 업데이트 — 여기가 핵심!
+    //*prev: products변수를 담은 상품배열(item은 상품을 담은것)
+    // productId 추적하기
+    // setProducts((prev) =>
+    //   prev.map((item) =>
+    //     item.productId === productId ? { ...item, isWished: newState } : item
+    //   )
+    // );
+    //위 삼항연산 코드를 아래 조건문으로 풀어서 작성한것
     setProducts((prev) =>
-      prev.map((item) =>
-        item.productId === productId ? { ...item, isWished: newState } : item
-      )
+      prev.map((item) => {
+        if (item.productId === clickedProductId) {
+          //조건문 클릭한 상품의 번호가 같으면
+          return { ...item, wished: newState }; //newState값으로 isWished 바꿈
+        } else {
+          //위조건이 다르면
+          return item; //리턴
+        }
+      })
     );
 
     return newState;
@@ -256,7 +271,12 @@ const ProductList = () => {
       {/* 상품 카드 목록 */}
       {/* 서버로 찜 토글 + UI 즉시반영 */}
       {/*onToggleLike는 UI 내부 상태만 바꾸던 오래된 함수라 서버값 반영이 안 됨*/}
-      <ProductCard products={products} onToggleLike={handleToggleWish} />
+      {/* *자식 컴포넌트로 products, onToggleLike 전달 */}
+      {/* *handleToggleWish가 프롭스로 들어와있는상태 <ProductCard로 보냄*/}
+      <ProductCard
+        products={products}
+        onToggleLikeInProductList={handleToggleWish}
+      />
 
       {/* 더보기 */}
       {hasNext && (

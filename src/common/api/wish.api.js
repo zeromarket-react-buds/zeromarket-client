@@ -8,9 +8,9 @@ export const toggleWishApi = async (productId) => {
   return data; // true or false
 };
 
-export const deleteWishApi = async (productId) => {
-  const { data } = await apiClient(`/api/products/${productId}/wish`, {
-    method: "DELETE",
-  });
-  return data;
-};
+// export const deleteWishApi = async (productId) => {
+//   const { data } = await apiClient(`/api/products/${productId}/wish`, {
+//     method: "DELETE",
+//   });
+//   return data;
+// };

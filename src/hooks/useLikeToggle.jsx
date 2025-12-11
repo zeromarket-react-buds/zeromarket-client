@@ -38,6 +38,25 @@ export const useLikeToggle = () => {
       return false;
     }
   };
+  //상품상세
+  const onToggleLikeDetail = async (productId) => {
+    try {
+      // ⭐ fetch 대신 team apiClient 기반 API 호출
+      const newState = await toggleWishApi(productId); // true 또는 false
 
+      // ⭐ UI 상태 업데이트
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.productId === productId ? { ...p, isWished: newState } : p
+        )
+      );
+
+      return newState;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+  
   return { products, setProducts, onToggleLike };
 };
