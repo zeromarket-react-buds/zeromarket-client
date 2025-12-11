@@ -66,7 +66,7 @@ export default function MyPage() {
     if (loading) {
       return;
     }
-    fetchWishCount();
+    fetchWishCount(); //count API 다시 호출됨
     fetchTrustScore();
     fetchReceivedReviewCount();
   }, [location.pathname, loading]);
