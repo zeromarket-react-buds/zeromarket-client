@@ -1,6 +1,6 @@
 import { apiClient } from "@/common/client";
 
-export const getProductsBySeller = async ({
+const getProductsBySeller = async ({
   sellerId,
   cursorProductId = null,
   cursorCreatedAt = null,
@@ -19,3 +19,19 @@ export const getProductsBySeller = async ({
 
   return data;
 };
+
+// 멤버 프로필 정보 조회 (셀러샵 사용)
+const getMemberProfile = async (memberId) => {
+  const { data } = await apiClient(`/api/members/${memberId}/profile`);
+  return data;
+};
+
+const toggleSellerLikeApi = async (sellerId) => {
+  const { data } = await apiClient(`/api/sellershop/${sellerId}/like`, {
+    method: "POST",
+  });
+
+  return data;
+};
+
+export { getProductsBySeller, getMemberProfile, toggleSellerLikeApi };

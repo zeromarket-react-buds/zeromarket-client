@@ -8,6 +8,8 @@ import ReportModal from "@/components/report/ReportModal";
 import { getProductsBySeller } from "@/common/api/sellerShop.api";
 import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
 import { SectionItem } from "../review/ReceivedReviewSummaryPage";
+import { getMemberProfile } from "@/common/api/sellerShop.api";
+import { toggleSellerLikeApi } from "@/common/api/sellerShop.api";
 
 const SellerShopPage = () => {
   const { sellerId } = useParams();
@@ -17,37 +19,6 @@ const SellerShopPage = () => {
   const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
   const navigate = useNavigate();
 
-  // UI 전용 더미 데이터 — 나중에 fetch로 교체 가능
-  const [detail] = useState({
-    sellerNickName: "판매자 닉네임",
-    trustScore: 4.5,
-    environmentScore: 4000,
-    introduction: "빠른 확인 가능합니다",
-    goodReviews: [
-      "이런 점이 좋았어요",
-      "저런 점이 좋았어요",
-      "요런 점이 좋았어요",
-    ],
-    bestReviews: ["정말 친절했어요", "응답이 빨랐어요", "거래가 최고였습니다!"],
-    products: [
-      {
-        productId: 1,
-        productTitle: "실제로 들어갈 상품명",
-        sellPrice: 20000,
-        thumbnailUrl: "",
-        salesStatus: "RESERVED",
-        liked: false,
-      },
-      {
-        productId: 2,
-        productTitle: "또 다른 상품명",
-        sellPrice: 35000,
-        thumbnailUrl: "",
-        salesStatus: "ON_SALE",
-        liked: false,
-      },
-    ],
-  });
   // 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
   const [items, setItems] = useState([]);
   const [cursor, setCursor] = useState({
@@ -70,6 +41,15 @@ const SellerShopPage = () => {
   });
   const [reviewLoading, setReviewLoading] = useState(true);
 
+  // 프로필
+  const [profile, setProfile] = useState({
+    description: "",
+    memberId: null,
+    nickname: "",
+    profileImage: "",
+    trustScore: null,
+  });
+
   // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
   useEffect(() => {
     const handler = () => setMenuOpen(true);
@@ -78,13 +58,25 @@ const SellerShopPage = () => {
     return () => window.removeEventListener("seller-menu-open", handler);
   }, []);
 
-  // 리뷰 요약 목록
+  // 프로필 함수
+  const fetchMemberProfile = useCallback(async () => {
+    try {
+      const data = await getMemberProfile(sellerId);
+      console.log(data);
+
+      setProfile(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [sellerId]);
+
+  // 리뷰 요약 목록 함수
   const fetchReviewsSummary = useCallback(async () => {
     setReviewLoading(true);
 
     try {
       const data = await getReceivedReviewSummaryApi(sellerId);
-      console.log(data);
+      // console.log(data);
 
       const { nickname, rating5, rating4 } = data;
       setReviewSummary({ rating5, rating4 });
@@ -106,7 +98,7 @@ const SellerShopPage = () => {
         cursorProductId: cursor.cursorProductId,
         cursorCreatedAt: cursor.cursorCreatedAt,
       });
-      console.log(data);
+      // console.log(data);
 
       setItems((prev) => [...prev, ...data.items]);
       setCursor({
@@ -133,6 +125,7 @@ const SellerShopPage = () => {
 
     fetchProductsBySeller();
     fetchReviewsSummary();
+    fetchMemberProfile();
   }, [sellerId]);
   // 무한 스크롤이면서 첫 로딩도 호출해야 하므로, -> 더 안전하게 동작(??)
 
@@ -154,6 +147,21 @@ const SellerShopPage = () => {
 
     return () => observer.disconnect();
   }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
+
+  const handleToggleLike = async () => {
+    try {
+      const data = await toggleSellerLikeApi(sellerId);
+      // console.log(data);
+
+      setProfile((prev) => ({
+        ...prev,
+        liked: data.liked,
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("좋아요 변경 실패");
+    }
+  };
 
   const handleOpenReportModal = () => {
     if (!isAuthenticated) {
@@ -201,12 +209,29 @@ const SellerShopPage = () => {
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 bg-brand-green rounded-full flex items-center justify-center">
-                <UserRound className="text-brand-ivory size-10" />
+                {profile.profileImage ? (
+                  <img
+                    src={profile.profileImage}
+                    alt=""
+                    className="rounded-full"
+                  />
+                ) : (
+                  <UserRound className="text-brand-ivory size-10" />
+                )}
               </div>
-              <span className="text-2xl">{detail.sellerNickName}</span>
+              <span className="text-2xl">{profile.nickname}</span>
             </div>
 
-            <Heart className="size-7 text-brand-green cursor-pointer" />
+            <button onClick={handleToggleLike} className="cursor-pointer">
+              {profile.liked ? (
+                <Heart
+                  fill="red"
+                  className="size-7 text-brand-green cursor-pointer"
+                />
+              ) : (
+                <Heart className="size-7 text-brand-green cursor-pointer" />
+              )}
+            </button>
           </div>
 
           {/* ---------- 점수 ---------- */}
@@ -214,23 +239,21 @@ const SellerShopPage = () => {
             <div className="flex justify-between mb-2">
               <span>신뢰점수</span>
               <span className="text-brand-green text-xl">
-                {detail.trustScore}
+                {profile.trustScore}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>환경점수</span>
-              <span className="text-brand-green font-bold text-xl">
-                {detail.environmentScore.toLocaleString()}
-              </span>
+              <span className="text-brand-green font-bold text-xl">0.000</span>
             </div>
           </div>
 
           {/* ---------- 한줄 소개 ---------- */}
           <div className="mb-6">
             <h2 className="mb-3 text-[16px]">한줄 소개</h2>
-            <div className="border rounded-2xl p-4 text-gray-700 text-[16px]">
-              {detail.introduction}
+            <div className="h-12 border rounded-2xl p-4 text-gray-700 text-[16px]">
+              {profile.description}
             </div>
           </div>
 
