@@ -10,6 +10,7 @@ import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
 import { SectionItem } from "../review/ReceivedReviewSummaryPage";
 import { getMemberProfile } from "@/common/api/sellerShop.api";
 import { toggleSellerLikeApi } from "@/common/api/sellerShop.api";
+import { useLikeToggle } from "@/hooks/useLikeToggle";
 
 const SellerShopPage = () => {
   const { sellerId } = useParams();
@@ -19,8 +20,10 @@ const SellerShopPage = () => {
   const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
   const navigate = useNavigate();
 
-  // 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
-  const [items, setItems] = useState([]);
+  // 판매 상품 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
+  // const [products, setProducts] = useState([]);
+  const { products, setProducts, onToggleLike } = useLikeToggle();
+  // const [items, setItems] = useState([]);
   const [cursor, setCursor] = useState({
     cursorProductId: null,
     cursorCreatedAt: null,
@@ -62,7 +65,7 @@ const SellerShopPage = () => {
   const fetchMemberProfile = useCallback(async () => {
     try {
       const data = await getMemberProfile(sellerId);
-      console.log(data);
+      // console.log(data);
 
       setProfile(data);
     } catch (err) {
@@ -98,9 +101,10 @@ const SellerShopPage = () => {
         cursorProductId: cursor.cursorProductId,
         cursorCreatedAt: cursor.cursorCreatedAt,
       });
-      // console.log(data);
+      console.log(data);
 
-      setItems((prev) => [...prev, ...data.items]);
+      setProducts((prev) => [...prev, ...data.items]);
+      // setItems((prev) => [...prev, ...data.items]);
       setCursor({
         cursorProductId: data.nextCursorProductId,
         cursorCreatedAt: data.nextCursorCreatedAt,
@@ -115,7 +119,8 @@ const SellerShopPage = () => {
 
   // 초기 fetch
   useEffect(() => {
-    setItems([]);
+    setProducts([]);
+    // setItems([]);
     setCursor({
       cursorProductId: null,
       cursorCreatedAt: null,
@@ -131,7 +136,7 @@ const SellerShopPage = () => {
 
   // IntersectionObserver (첫 호출 완료 후 활성화)
   useEffect(() => {
-    if (!loadMoreRef.current || items.length === 0) return;
+    if (!loadMoreRef.current || products.length === 0) return;
     if (!hasNext) return;
 
     const observer = new IntersectionObserver(
@@ -148,7 +153,8 @@ const SellerShopPage = () => {
     return () => observer.disconnect();
   }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
 
-  const handleToggleLike = async () => {
+  // 셀러 좋아요 토글
+  const handleToggleLikeSeller = async (productId) => {
     try {
       const data = await toggleSellerLikeApi(sellerId);
       // console.log(data);
@@ -160,6 +166,27 @@ const SellerShopPage = () => {
     } catch (err) {
       console.error(err);
       alert("좋아요 변경 실패");
+    }
+  };
+
+  // 상품 목록 좋아요 토글 기능
+  const handleToggleLikeProduct = async (productId) => {
+    try {
+      const newState = await onToggleLike(productId);
+      // console.log(newState);
+
+      setProducts((prev) =>
+        prev.map((item) => {
+          if (item.productId === productId) {
+            return { ...item, wished: newState };
+          } else {
+            return item;
+          }
+        })
+      );
+      return newState;
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -222,7 +249,7 @@ const SellerShopPage = () => {
               <span className="text-2xl">{profile.nickname}</span>
             </div>
 
-            <button onClick={handleToggleLike} className="cursor-pointer">
+            <button onClick={handleToggleLikeSeller} className="cursor-pointer">
               {profile.liked ? (
                 <Heart
                   fill="red"
@@ -293,7 +320,10 @@ const SellerShopPage = () => {
 
             <div>
               {/* <ProductCard products={detail.products} onToggleLike={() => {}} /> */}
-              <ProductCard products={items} onToggleLike={() => {}} />
+              <ProductCard
+                products={products}
+                onToggleLikeInProductList={handleToggleLikeProduct}
+              />
 
               {/* 다음 로딩 중 */}
               {loading && <p>로딩중...</p>}
