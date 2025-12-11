@@ -25,24 +25,24 @@ export const tradeFlowLabels = (params = {}) => {
 
 export const tradeFlows = {
   INSTANT_DELIVERY: [
-    { key: "PENDING", label: "결제완료" },
-    { key: "PENDING", label: "주문확인" },
-    { key: "PENDING", label: "배송중" },
-    { key: "PENDING", label: "배송완료" },
-    { key: "COMPLETED", label: "거래완료" },
+    { label: "결제완료", key: "PENDING" },
+    { label: "주문확인", key: "PENDING" },
+    { label: "배송중", key: "PENDING" },
+    { label: "배송완료", key: "PENDING" },
+    { label: "거래완료", key: "COMPLETED" },
   ],
   INSTANT_DIRECT: [
-    { key: "PENDING", label: "결제완료" },
-    { key: "PENDING", label: "주문확인" },
-    { key: "COMPLETED", label: "거래완료" },
+    { label: "결제완료", key: "PENDING" },
+    { label: "주문확인", key: "PENDING" },
+    { label: "거래완료", key: "COMPLETED" },
   ],
   CHAT_DIRECT: [
-    { key: "PENDING", label: "예약중" },
-    { key: "COMPLETED", label: "거래완료" },
+    { label: "예약중", key: "PENDING" },
+    { label: "거래완료", key: "COMPLETED" },
   ],
 };
 
-// tradeFlows를 한 번만 돌면서 "라벨 → 상태 key" 맵 생성
+// tradeFlows를 한 번 돌면서 { label(결제완료/예약중/거래완료) : 상태 key(PENDING/COMPLETED)} 맵 생성
 const tradeStatusKeyByLabel = {};
 
 Object.values(tradeFlows).forEach((steps) => {
