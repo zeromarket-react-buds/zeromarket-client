@@ -55,9 +55,10 @@ const ProductDetailPage = () => {
   // }));
 
   /** ⭐ 수정됨: memberId를 인자로 받아 상세조회 */
-  const fetchProductDetail = async (memberId) => {
+  const fetchProductDetail = async () => {
     try {
-      const data = await getProductDetailApi(id, memberId); //user?.memberId 전달
+      // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
+      const data = await getProductDetailApi(id, user?.memberId); //user?.memberId 전달
 
       console.log("🟢 서버에서 받은 상세 응답:", data);
       console.log("🟢 서버 wished:", data.wished, "wishCount:", data.wishCount);
@@ -162,7 +163,7 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     // 1) AuthContext 로딩 중이면 실행 금지
-    if (!user) return; // Context 초기 상태일 때는 아무것도 안 함
+    // if (!user) return; // Context 초기 상태일 때는 아무것도 안 함
 
     // 2) 로그인 여부가 결정될 때까지 기다림 (user === null이면 요청 금지)
     // if (user === null) return;

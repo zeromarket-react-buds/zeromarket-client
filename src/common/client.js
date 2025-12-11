@@ -5,7 +5,7 @@ const API_BASE = "http://localhost:8080";
 
 // 기본 옵션
 const defaultOptions = {
-  timeout: 5000,
+  timeout: 10000,
   retry: false,
 };
 
