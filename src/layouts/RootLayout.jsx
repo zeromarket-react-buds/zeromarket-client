@@ -144,7 +144,7 @@ const RootLayout = function () {
 
         {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
 
-        <div className="fixed bottom-24 right-6 z-50">
+        <div className="fixed bottom-24 right-6 z-45">
           <ToTheTop />
         </div>
       </div>
