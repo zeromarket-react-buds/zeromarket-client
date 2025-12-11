@@ -9,8 +9,8 @@ import { useLikeToast } from "@/components/GlobalToast";
 import dayjs from "@/utils/time";
 import { Badge } from "../ui/badge";
 import { useNavigate } from "react-router-dom";
-
-const ProductCard = ({ products, onToggleLike }) => {
+//자식. 컴포넌트로 products, onToggleLike 전달받음
+const ProductCard = ({ products, onToggleLikeInProductList }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
 
   const navigate = useNavigate();
@@ -24,9 +24,9 @@ const ProductCard = ({ products, onToggleLike }) => {
   // };
 
   // ⭐ 찜 목록 추가/삭제 함수 (백엔드 연동 버전)
-  const handleHeartClick = async (productId) => {
+  const handleHeartClick = async (clickedProductId) => {
     // ⭐ 백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
-    const newState = await onToggleLike(productId); // true / false
+    const newState = await onToggleLikeInProductList(clickedProductId); // true / false
 
     // ⭐ 토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
     if (newState) showLikeAddedToast();
@@ -35,7 +35,10 @@ const ProductCard = ({ products, onToggleLike }) => {
 
   // 상세 이동
   const goDetail = (id) => navigate(`/products/${id}`);
+  //*map 돌면서 카드 렌더링. p는 product배열의 하나에 원소
 
+  //*const [products, setProducts] = useState([]);
+  //ㄴ>useState함수: products변수의 변화를 감지해서 렌더링해준다
   return (
     <div className="grid grid-cols-2 gap-6">
       {products.map((p) => (
@@ -55,7 +58,7 @@ const ProductCard = ({ products, onToggleLike }) => {
                   ) : (
                     <div></div>
                   )}
-                  {/* 찜하기 버튼 */}
+                  {/* 찜하기 버튼  1.productId*/}
                   <Heart
                     className="size-6 mx-1 cursor-pointer"
                     onClick={(e) => {

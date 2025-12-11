@@ -60,12 +60,7 @@ const ProductDetailPage = () => {
       const data = await getProductDetailApi(id, memberId); //user?.memberId 전달
 
       console.log("🟢 서버에서 받은 상세 응답:", data);
-      console.log(
-        "🟢 서버 isWished:",
-        data.isWished,
-        "wishCount:",
-        data.wishCount
-      );
+      console.log("🟢 서버 wished:", data.wished, "wishCount:", data.wishCount);
 
       if (!data || typeof data !== "object") {
         setError("상품 정보를 불러오지 못했습니다.");
@@ -129,9 +124,9 @@ const ProductDetailPage = () => {
   //찜 추가/삭제
   const toggleWish = async () => {
     try {
-      console.log("*** 현재 detail.isWished:", detail?.isWished);
+      console.log("*** 현재 detail.wished:", detail?.wished);
 
-      const method = detail.isWished ? "DELETE" : "POST";
+      const method = detail.wished ? "DELETE" : "POST";
       console.log("*** 실행될 HTTP method:", method);
       console.log("*** 현재 wishCount:", detail?.wishCount);
 
@@ -149,7 +144,7 @@ const ProductDetailPage = () => {
       // ⭐ 업데이트된 detail을 계산
       const updated = {
         ...detail,
-        isWished: isAdded,
+        wished: isAdded,
         wishCount: isAdded
           ? detail.wishCount + 1
           : Math.max((detail.wishCount || 1) - 1, 0),
@@ -181,10 +176,10 @@ const ProductDetailPage = () => {
     if (detail) {
       console.log("🔥 상세상품 detail:", detail);
       console.log("🔥 salesStatus:", detail.salesStatus);
-      console.log("🔥 isWished:", detail.isWished);
+      console.log("🔥 wished:", detail.wished);
       console.log("🔥 wishCount:", detail.wishCount);
 
-      console.log("💛 현재 detail.isWished 값:", detail.isWished);
+      console.log("💛 현재 detail.wished 값:", detail.wished);
       console.log("💛 현재 wishCount 값:", detail.wishCount);
     }
   }, [detail]);
@@ -322,13 +317,13 @@ const ProductDetailPage = () => {
           <div>
             {/* 상품 이미지 */}
             <ProductImageCarousel images={sortedImages} />
-            {/*detail.isWished, wishCount값 들어오는지 ui,콘솔 확인용*/}
+            {/*detail.wished, wishCount값 들어오는지 ui,콘솔 확인용*/}
             {/* {detail && (
               <Heart
                 className="absolute top-4 right-4 size-8 cursor-pointer z-20"
                 onClick={toggleWish}
-                fill={detail.isWished ? "red" : "none"}
-                stroke={detail.isWished ? "red" : "currentColor"}
+                fill={detail.wished ? "red" : "none"}
+                stroke={detail.wished ? "red" : "currentColor"}
               />
             )} */}
           </div>
@@ -389,7 +384,7 @@ const ProductDetailPage = () => {
           <div className="sticky bottom-0 bg-white border-t z-20">
             <ActionButtonBar
               role={isAuthenticated && isProductOwner ? "SELLER" : "BUYER"}
-              isWished={detail.isWished}
+              wished={detail.wished}
               onToggleWish={toggleWish}
               productId={detail.productId}
               isHidden={isProductHidden}

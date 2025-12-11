@@ -10,7 +10,7 @@ const ActionButtonBar = ({
   role,
   //onToggleLike,
   onToggleWish,
-  isWished,
+  wished,
   onSubmit,
   productId,
   isHidden,
@@ -153,8 +153,8 @@ const ActionButtonBar = ({
             <Heart
               className="size-7 cursor-pointer"
               onClick={handleHeartClick}
-              fill={isWished ? "red" : "white"} //
-              stroke={isWished ? "red" : "currentColor"} //
+              fill={wished ? "red" : "white"} //dto/ProductDetailResponse의 wished(isWished)
+              stroke={wished ? "red" : "currentColor"}
             />
           </div>
 
