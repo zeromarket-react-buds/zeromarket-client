@@ -149,7 +149,7 @@ export default function MyPage() {
           </div>
         </Link>
         <div className="flex flex-col items-center">
-          <Link to={"me/reviews/summary"}>
+          <Link to={"/me/reviews/summary"}>
             <Pen
               color="var(--color-brand-green)"
               size={32}
