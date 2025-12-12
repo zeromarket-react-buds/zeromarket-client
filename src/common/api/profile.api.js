@@ -70,4 +70,21 @@ const checkNicknameApi = async (nickname) => {
   return data.exists;
 };
 
-export { getProfileApi, updateProfileApi, checkNicknameApi };
+/**
+ * 회원정보 설정 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
+ *
+ * GET /api/me/profile/edit
+ *
+ * @returns {Promise<{
+ *   profileImage?: string;
+ *   nickname?: string;
+ *   phone?: string;
+ *   email?: string;
+ * }>} 프로필 데이터
+ */
+const getProfileEditApi = async () => {
+  const { data } = await apiClient("/api/me/profile/edit");
+  return data;
+};
+
+export { getProfileApi, updateProfileApi, checkNicknameApi, getProfileEditApi };
