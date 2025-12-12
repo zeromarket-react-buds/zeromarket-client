@@ -1,10 +1,11 @@
 import { UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getProfileEditApi } from "@/common/api/me.api";
+import { getMemberEditApi } from "@/common/api/me.api";
 import { useEffect, useState } from "react";
 import PhoneEditModal from "@/components/profile/PhoneEditModal";
 import EmailEditModal from "@/components/profile/EmailEditModal";
 import formatPhone from "@/utils/formatPhone";
+import Container from "@/components/Container";
 
 const MemberEditPage = () => {
   // 현재 값
@@ -23,8 +24,8 @@ const MemberEditPage = () => {
     setLoading(true);
 
     try {
-      const data = await getProfileEditApi();
-      console.log("프로필 응답:", data);
+      const data = await getMemberEditApi();
+      console.log("회원 정보 응답:", data);
 
       const img = data.profileImage || "";
       const nick = data.nickname || "";
@@ -36,7 +37,7 @@ const MemberEditPage = () => {
       setPhone(phoneNumber);
       setEmail(EmailAddr);
     } catch (err) {
-      console.error("프로필 불러오기 실패:", err);
+      console.error("회원 정보 불러오기 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,7 @@ const MemberEditPage = () => {
   }, []);
 
   return (
-    <div>
+    <Container>
       {/* 프로필 영역 */}
       <section className="flex items-center gap-6 mb-10">
         <div className="relative">
@@ -163,7 +164,7 @@ const MemberEditPage = () => {
           </div>
         </div>
       </section>
-    </div>
+    </Container>
   );
 };
 
