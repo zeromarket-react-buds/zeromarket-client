@@ -6,7 +6,7 @@ const getProductsBySeller = async ({
   cursorCreatedAt = null,
   size = 10,
 }) => {
-  const { data } = await apiClient(`/api/products/seller/${sellerId}`, {
+  const { data } = await apiClient(`/api/seller/products/${sellerId}`, {
     params: {
       ...(cursorProductId && { cursorProductId }),
       ...(cursorCreatedAt && { cursorCreatedAt }),

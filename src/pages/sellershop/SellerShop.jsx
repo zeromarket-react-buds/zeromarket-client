@@ -23,7 +23,6 @@ const SellerShopPage = () => {
   // 판매 상품 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
   // const [products, setProducts] = useState([]);
   const { products, setProducts, onToggleLike } = useLikeToggle();
-  // const [items, setItems] = useState([]);
   const [cursor, setCursor] = useState({
     cursorProductId: null,
     cursorCreatedAt: null,
@@ -104,7 +103,6 @@ const SellerShopPage = () => {
       console.log(data);
 
       setProducts((prev) => [...prev, ...data.items]);
-      // setItems((prev) => [...prev, ...data.items]);
       setCursor({
         cursorProductId: data.nextCursorProductId,
         cursorCreatedAt: data.nextCursorCreatedAt,
@@ -120,7 +118,6 @@ const SellerShopPage = () => {
   // 초기 fetch
   useEffect(() => {
     setProducts([]);
-    // setItems([]);
     setCursor({
       cursorProductId: null,
       cursorCreatedAt: null,
@@ -235,7 +232,18 @@ const SellerShopPage = () => {
           {/* ---------- 판매자 프로필 ---------- */}
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-brand-green rounded-full flex items-center justify-center">
+              <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                {profile.profileImage ? (
+                  <img
+                    src={profile.profileImage}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="text-gray-400 size-10" />
+                )}
+              </div>
+              {/* <div className="w-14 h-14 rounded-full flex items-center justify-center">
                 {profile.profileImage ? (
                   <img
                     src={profile.profileImage}
@@ -243,21 +251,26 @@ const SellerShopPage = () => {
                     className="rounded-full"
                   />
                 ) : (
-                  <UserRound className="text-brand-ivory size-10" />
+                  <UserRound className="text-brand-green size-10" />
                 )}
-              </div>
+              </div> */}
               <span className="text-2xl">{profile.nickname}</span>
             </div>
 
             <button onClick={handleToggleLikeSeller} className="cursor-pointer">
-              {profile.liked ? (
+              {/* {profile.liked ? (
                 <Heart
                   fill="red"
                   className="size-7 text-brand-green cursor-pointer"
                 />
               ) : (
                 <Heart className="size-7 text-brand-green cursor-pointer" />
-              )}
+              )} */}
+              <Heart
+                className="size-7 cursor-pointer text-brand-green"
+                fill={profile.liked ? "red" : "none"}
+                stroke={profile.liked ? "red" : "currentColor"}
+              />
             </button>
           </div>
 
