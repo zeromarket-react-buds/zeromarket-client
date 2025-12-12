@@ -3,6 +3,25 @@ import { Button } from "@/components/ui/button";
 import { getProfileEditApi } from "@/common/api/profile.api";
 import { useEffect, useState } from "react";
 
+function formatPhone(phone = "") {
+  if (!phone) {
+    return ""; // 핸드폰번호 없을때 방어로직 (실제로 안들어오면 오류로 안 그려짐)
+  }
+
+  // 숫자만 추출
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.length === 11) {
+    // 010-1234-5678
+    return digits.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+  }
+
+  if (digits.length === 10) {
+    // 010-123-4567
+    return digits.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+  }
+}
+
 const MyProfileEditPage = () => {
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
@@ -73,7 +92,7 @@ const MyProfileEditPage = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className=" text-brand-mediumgray">휴대폰 번호</p>
-              <p className="font-semibold mt-1">{phone}</p>
+              <p className="font-semibold mt-1">{formatPhone(phone)}</p>
             </div>
 
             <Button variant="green" className="px-4 py-1 text-sm">
