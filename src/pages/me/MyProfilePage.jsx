@@ -5,7 +5,7 @@ import {
   checkNicknameApi,
   getProfileApi,
   updateProfileApi,
-} from "@/common/api/user.api";
+} from "@/common/api/profile.api";
 import { useProfileToast } from "@/components/GlobalToast";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import ProfileImageSection from "@/components/profile/ProfileImageSection";
