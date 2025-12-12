@@ -73,7 +73,7 @@ const checkNicknameApi = async (nickname) => {
 /**
  * 회원정보 설정 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
  *
- * GET /api/me/profile/edit
+ * GET /api/me/member
  *
  * @returns {Promise<{
  *   profileImage?: string;
@@ -83,7 +83,7 @@ const checkNicknameApi = async (nickname) => {
  * }>} 프로필 데이터
  */
 const getProfileEditApi = async () => {
-  const { data } = await apiClient("/api/me/profile/edit");
+  const { data } = await apiClient("/api/members/me/edit");
   return data;
 };
 
