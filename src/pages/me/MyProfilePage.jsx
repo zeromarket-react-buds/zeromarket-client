@@ -52,7 +52,6 @@ const MyProfilePage = () => {
   const [dupError, setDupError] = useState("");
   const [lengthError, setLengthError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
 
   // 현재 길이들
   const currentNicknameLength = getWeightedLength(nickname);
@@ -118,7 +117,6 @@ const MyProfilePage = () => {
     }
 
     const timer = setTimeout(async () => {
-      setIsChecking(true);
       try {
         const exists = await checkNicknameApi(nickname);
         if (exists) {
@@ -129,8 +127,6 @@ const MyProfilePage = () => {
       } catch (err) {
         console.error("닉네임 중복 체크 실패:", err);
         setDupError("중복 확인 중 오류가 발생했습니다.");
-      } finally {
-        setIsChecking(false);
       }
     }, 400);
 
@@ -304,7 +300,6 @@ const MyProfilePage = () => {
         onChange={handleNicknameChange}
         lengthError={lengthError}
         dupError={dupError}
-        isChecking={isChecking}
         currentLength={currentNicknameLength}
         maxLength={maxNicknameLength}
       />

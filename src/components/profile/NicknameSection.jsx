@@ -3,7 +3,6 @@ const NicknameSection = ({
   onChange,
   lengthError,
   dupError,
-  isChecking,
   currentLength,
   maxLength,
 }) => {
