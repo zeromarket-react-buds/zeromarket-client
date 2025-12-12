@@ -8,7 +8,6 @@ import formatPhone from "@/utils/formatPhone";
 import Container from "@/components/Container";
 
 const MemberEditPage = () => {
-  // 현재 값
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
   const [phone, setPhone] = useState("");
@@ -95,7 +94,11 @@ const MemberEditPage = () => {
           </div>
           {/*핸드폰 수정 모달*/}
           {isOpenPhoneModal && (
-            <PhoneEditModal onClose={() => setIsOpenPhoneModal(false)} />
+            <PhoneEditModal
+              onClose={() => setIsOpenPhoneModal(false)}
+              phone={phone}
+              setPhone={setPhone}
+            />
           )}
 
           {/* 이메일 */}
@@ -122,7 +125,11 @@ const MemberEditPage = () => {
         </div>
         {/*이메일 수정 모달*/}
         {isOpenEmailModal && (
-          <EmailEditModal onClose={() => setIsOpenEmailModal(false)} />
+          <EmailEditModal
+            onClose={() => setIsOpenEmailModal(false)}
+            email={email}
+            setEmail={setEmail}
+          />
         )}
       </section>
 
