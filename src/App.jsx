@@ -303,7 +303,7 @@ const router = createBrowserRouter([
 
           // 회원정보 설정
           {
-            path: "profile-edit",
+            path: "profile/edit",
             element: <MyProfileEditPage />,
             handle: {
               layout: {
