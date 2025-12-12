@@ -38,11 +38,15 @@ function AuthProvider({ children }) {
   // ✅ 앱 시작(로드) 시 로그인 상태 복구
   useEffect(() => {
     async function initAuth() {
-      // const refreshToken = localStorage.getItem("refreshToken");
-      // if (!refreshToken) {
-      //   setLoading(false); // 로딩 끝 -> 비로그인 상태
-      //   return;
-      // }
+      // refresh token 쿠키 존재 여부 확인
+      const hasRefreshToken = document.cookie
+        .split(";")
+        .some((cookie) => cookie.trim().startsWith("refreshToken="));
+
+      if (!hasRefreshToken) {
+        setLoading(false); // 로딩 끝 -> 비로그인 상태
+        return;
+      }
 
       try {
         await refreshAccessToken();

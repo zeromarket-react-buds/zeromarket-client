@@ -118,6 +118,16 @@ function LoginPage() {
     // return base;
   };
 
+  // oauth 화면 이동
+  const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
+  const loginWithKakao = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
+    window.location.href = kakaoAuthUrl;
+  };
+
   return (
     <Container>
       <div className="space-y-6">
@@ -231,7 +241,10 @@ function LoginPage() {
           </div>
 
           <div className="space-y-6">
-            <button className="w-full flex items-center justify-center border rounded-md py-2 cursor-pointer">
+            <button
+              onClick={loginWithKakao}
+              className="w-full flex items-center justify-center border rounded-md py-2 cursor-pointer"
+            >
               <div className="w-4 h-4 bg-yellow-400 rounded-full mr-2" />
               카카오톡으로 로그인
             </button>

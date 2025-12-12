@@ -33,6 +33,7 @@ import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import MyProfilePage from "@/pages/me/MyProfilePage";
 import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
+import KakaoCallback from "@/pages/auth/KakaoCallback";
 
 const router = createBrowserRouter([
   {
@@ -187,6 +188,11 @@ const router = createBrowserRouter([
             },
           },
         },
+      },
+      // OAuth 카카오
+      {
+        path: "oauth/kakao/callback",
+        element: <KakaoCallback />,
       },
       // 리뷰
       // /trades/:tradeId/review (후기 작성 페이지)
