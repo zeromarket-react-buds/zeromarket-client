@@ -2,6 +2,8 @@ import { UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getProfileEditApi } from "@/common/api/profile.api";
 import { useEffect, useState } from "react";
+import PhoneEditModal from "@/components/profile/PhoneEditModal";
+import EmailEditModal from "@/components/profile/EmailEditModal";
 
 function formatPhone(phone = "") {
   if (!phone) {
@@ -23,11 +25,16 @@ function formatPhone(phone = "") {
 }
 
 const MyProfileEditPage = () => {
+  // 현재 값
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 모달 열기용
+  const [isOpenPhoneModal, setIsOpenPhoneModal] = useState(false);
+  const [isOpenEmailModal, setIsOpenEmailModal] = useState(false);
 
   const fetchMyProfileEdit = async () => {
     if (loading) return;
@@ -95,10 +102,18 @@ const MyProfileEditPage = () => {
               <p className="font-semibold mt-1">{formatPhone(phone)}</p>
             </div>
 
-            <Button variant="green" className="px-4 py-1 text-sm">
+            <Button
+              variant="green"
+              className="px-4 py-1 text-sm"
+              onClick={() => setIsOpenPhoneModal(true)}
+            >
               변경하기
             </Button>
           </div>
+          {/*핸드폰 수정 모달*/}
+          {isOpenPhoneModal && (
+            <PhoneEditModal onClose={() => setIsOpenPhoneModal(false)} />
+          )}
 
           {/* 이메일 */}
           <div className="flex justify-between items-center">
@@ -113,11 +128,19 @@ const MyProfileEditPage = () => {
               )}
             </div>
 
-            <Button variant="green" className="px-4 py-1 text-sm">
+            <Button
+              variant="green"
+              className="px-4 py-1 text-sm"
+              onClick={() => setIsOpenEmailModal(true)}
+            >
               {email ? "변경하기" : "등록하기"}
             </Button>
           </div>
         </div>
+        {/*이메일 수정 모달*/}
+        {isOpenEmailModal && (
+          <EmailEditModal onClose={() => setIsOpenEmailModal(false)} />
+        )}
       </section>
 
       {/* 계정 관리 */}
