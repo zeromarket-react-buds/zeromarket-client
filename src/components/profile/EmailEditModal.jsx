@@ -2,8 +2,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
-const EmailEditModal = ({ onClose, email, setEmail }) => {
-  // 초기값 보관용
+const EmailEditModal = ({ onClose, email, onSubmit, isSaving }) => {
+  // 임시값 보관용
   const [tempEmail, setTempEmail] = useState("");
 
   // 초기값 세팅
@@ -14,6 +14,11 @@ const EmailEditModal = ({ onClose, email, setEmail }) => {
   // 취소 버튼
   const handleCancel = () => {
     onClose();
+  };
+
+  // 저장 버튼
+  const handleSubmit = () => {
+    onSubmit(tempEmail);
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -35,10 +40,20 @@ const EmailEditModal = ({ onClose, email, setEmail }) => {
           />
 
           <div className="mt-4 flex gap-2 justify-end">
-            <Button variant="line" type="button" onClick={handleCancel}>
+            <Button
+              variant="line"
+              type="button"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
               취소
             </Button>
-            <Button variant="green" type="button">
+            <Button
+              variant="green"
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSaving}
+            >
               저장하기
             </Button>
           </div>

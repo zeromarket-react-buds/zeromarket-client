@@ -1,6 +1,6 @@
 import { UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getMemberEditApi } from "@/common/api/me.api";
+import { getMemberEditApi, updateMemberEditApi } from "@/common/api/me.api";
 import { useEffect, useState } from "react";
 import PhoneEditModal from "@/components/profile/PhoneEditModal";
 import EmailEditModal from "@/components/profile/EmailEditModal";
@@ -13,6 +13,7 @@ const MemberEditPage = () => {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // 모달 열기용
   const [isOpenPhoneModal, setIsOpenPhoneModal] = useState(false);
@@ -46,6 +47,34 @@ const MemberEditPage = () => {
   useEffect(() => {
     fetchMyProfileEdit();
   }, []);
+
+  const submitPhone = async (nextPhone) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await updateMemberEditApi({ phone: nextPhone }); // 서버 저장
+      setPhone(nextPhone); // 성공 시 화면 반영
+      setIsOpenPhoneModal(false); // 닫기
+    } catch (e) {
+      console.error("휴대폰 번호 저장 실패:", e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const submitEmail = async (nextEmail) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await updateMemberEditApi({ email: nextEmail });
+      setEmail(nextEmail);
+      setIsOpenEmailModal(false);
+    } catch (e) {
+      console.error("이메일 저장 실패:", e);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Container>
@@ -97,7 +126,8 @@ const MemberEditPage = () => {
             <PhoneEditModal
               onClose={() => setIsOpenPhoneModal(false)}
               phone={phone}
-              setPhone={setPhone}
+              onSubmit={submitPhone}
+              isSaving={saving}
             />
           )}
 
@@ -128,7 +158,8 @@ const MemberEditPage = () => {
           <EmailEditModal
             onClose={() => setIsOpenEmailModal(false)}
             email={email}
-            setEmail={setEmail}
+            onSubmit={submitEmail}
+            isSaving={saving}
           />
         )}
       </section>
