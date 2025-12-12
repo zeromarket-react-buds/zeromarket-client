@@ -10,6 +10,7 @@ import {
   getCountReceivedReviewsOnMyPage,
 } from "@/common/api/review.api";
 // fetch 쓰면 토큰이 안 붙어서 count가 변하지 않음 → apiClient 사용해야 함
+import { getMyPageProfileApi } from "@/common/api/me.api";
 import { apiClient } from "@/common/client";
 
 export default function MyPage() {
@@ -17,11 +18,30 @@ export default function MyPage() {
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
   const { user, loading, logout } = useAuth();
+  const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
   // ⭐ 추가됨: 현재 페이지 정보를 가져옴
   const location = useLocation();
+
+  const fetchMyPage = async () => {
+    try {
+      const data = await getMyPageProfileApi();
+      console.log("마이페이지 응답:", data);
+
+      const img = data.profileImage || "";
+
+      setProfileImg(img);
+    } catch (err) {
+      console.error("마이페이지 불러오기 실패:", err);
+    }
+  };
+
+  // 처음 들어왔을 때 한번 호출
+  useEffect(() => {
+    fetchMyPage();
+  }, [loading]);
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -84,9 +104,17 @@ export default function MyPage() {
   return (
     <Container>
       {/* 프로필 */}
-      <section className="flex items-center gap-4 mb-6">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
-          <UserRound className="text-brand-ivory size-10" />
+      <section className="flex items-center gap-6 mb-6">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green overflow-hidden">
+          {!profileImg ? (
+            <UserRound className="text-brand-ivory size-10" />
+          ) : (
+            <img
+              src={profileImg}
+              alt="profile"
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
         <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>

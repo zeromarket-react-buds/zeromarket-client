@@ -1,6 +1,20 @@
 import { apiClient } from "@/common/client";
 
 /**
+ * 마이페이지 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
+ *
+ * GET /api/me
+ *
+ * @returns {Promise<{
+ *   profileImage?: string;
+ * }>} 프로필 데이터
+ */
+const getMyPageProfileApi = async () => {
+  const { data } = await apiClient("/api/members/me");
+  return data;
+};
+
+/**
  * 프로필 설정 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
  *
  * GET /api/me/profile
@@ -11,7 +25,7 @@ import { apiClient } from "@/common/client";
  *   introduction?: string;
  * }>} 프로필 데이터
  */
-const getProfileApi = async () => {
+const getProfileEditApi = async () => {
   const { data } = await apiClient("/api/me/profile");
   return data;
 };
@@ -82,9 +96,15 @@ const checkNicknameApi = async (nickname) => {
  *   email?: string;
  * }>} 프로필 데이터
  */
-const getProfileEditApi = async () => {
+const getMemberEditApi = async () => {
   const { data } = await apiClient("/api/members/me/edit");
   return data;
 };
 
-export { getProfileApi, updateProfileApi, checkNicknameApi, getProfileEditApi };
+export {
+  getMyPageProfileApi,
+  getProfileEditApi,
+  updateProfileApi,
+  checkNicknameApi,
+  getMemberEditApi,
+};
