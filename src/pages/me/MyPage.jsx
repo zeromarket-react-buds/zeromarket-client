@@ -126,7 +126,7 @@ export default function MyPage() {
             <Link to="/me/profile">프로필 설정</Link>
           </li>
           <li>
-            <Link to="/me/profile/edit">회원 정보 설정</Link>
+            <Link to="/me/member">회원 정보 설정</Link>
           </li>
           <li>
             <Link to="/me/selling">판매 내역</Link>
