@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
 import {
   checkNicknameApi,
-  getProfileApi,
+  getProfileEditApi,
   updateProfileApi,
 } from "@/common/api/me.api";
 import { useProfileToast } from "@/components/GlobalToast";
@@ -65,7 +65,7 @@ const MyProfileEditPage = () => {
     setLoading(true);
 
     try {
-      const data = await getProfileApi();
+      const data = await getProfileEditApi();
       console.log("프로필 응답:", data);
 
       const img = data.profileImage || "";
