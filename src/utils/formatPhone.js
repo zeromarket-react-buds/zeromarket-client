@@ -18,3 +18,5 @@ function formatPhone(phone = "") {
 
   return formatPhone;
 }
+
+export default formatPhone;
