@@ -65,9 +65,14 @@ const MemberEditPage = () => {
   const submitEmail = async (nextEmail) => {
     if (saving) return;
     setSaving(true);
+
+    const trimmed = (nextEmail ?? "").trim();
+    const payload = { email: trimmed ? trimmed : "" }; // 공란이면 "" 전송
+
     try {
-      await updateMemberEditApi({ email: nextEmail });
-      setEmail(nextEmail);
+      await updateMemberEditApi(payload);
+
+      setEmail(trimmed ? trimmed : ""); // 화면은 빈 값으로
       setIsOpenEmailModal(false);
     } catch (e) {
       console.error("이메일 저장 실패:", e);
