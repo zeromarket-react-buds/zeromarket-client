@@ -1,17 +1,9 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-} from "react";
-import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useState, useEffect } from "react";
 import {
   getMyInfoApi,
   loginApi,
-  // refreshTokenApi,
   logoutApi,
+  oauthLoginApi,
 } from "@/common/api/auth.api";
 import { refreshAccessToken } from "@/common/token";
 
@@ -24,9 +16,6 @@ import { refreshAccessToken } from "@/common/token";
 - loading : 인증상태 초기화 중 여부 
 */
 
-// TODO: refreshTokenApi -> refreshAccessToken (token.js) 변경해야 하는지 확인
-// TODO: 로그아웃 요청 보내기 (기존: 로컬 스토리지 accessToken 삭제)
-
 const AuthContext = createContext(null);
 
 function AuthProvider({ children }) {
@@ -38,24 +27,17 @@ function AuthProvider({ children }) {
   // ✅ 앱 시작(로드) 시 로그인 상태 복구
   useEffect(() => {
     async function initAuth() {
-      // refresh token 쿠키 존재 여부 확인
-      const hasRefreshToken = document.cookie
-        .split(";")
-        .some((cookie) => cookie.trim().startsWith("refreshToken="));
-
-      if (!hasRefreshToken) {
-        setLoading(false); // 로딩 끝 -> 비로그인 상태
-        return;
-      }
-
       try {
         await refreshAccessToken();
 
         const userData = await getMyInfoApi();
+
         setUser(userData);
+
         console.log("초기 인증 복구 성공");
       } catch (e) {
         setUser(null);
+
         console.error("초기 인증 복구 실패", e);
       } finally {
         setLoading(false);
@@ -69,10 +51,8 @@ function AuthProvider({ children }) {
   async function login(loginId, password) {
     const data = await loginApi(loginId, password);
 
-    // TODO: refresh token --> httpOnly cookie
     // 1) 토큰 저장
     localStorage.setItem("accessToken", data.accessToken);
-    // localStorage.setItem("refreshToken", data.refreshToken);
 
     // 2) 사용자 정보 조회
     const userData = await getMyInfoApi();
@@ -84,12 +64,27 @@ function AuthProvider({ children }) {
   // ✅ 로그아웃
   async function logout() {
     const data = await logoutApi();
-    console.log("로그아웃: ", data);
+
     localStorage.removeItem("accessToken");
-    // localStorage.removeItem("refreshToken");
 
     setUser(null);
+
+    console.log("로그아웃: ", data);
   }
+
+  // ✅ OAuth 로그인
+  const oauthLogin = async (code) => {
+    const data = await oauthLoginApi(code);
+
+    // 1) 로컬 스토리지 저장
+    localStorage.setItem("accessToken", data.accessToken);
+
+    // 2) 사용자 정보 조회
+    const userData = await getMyInfoApi();
+
+    // 3) 전역 상태 갱신
+    setUser(userData);
+  };
 
   return (
     <AuthContext.Provider
@@ -97,6 +92,7 @@ function AuthProvider({ children }) {
         user,
         isAuthenticated,
         login,
+        oauthLogin,
         logout,
         loading,
       }}
