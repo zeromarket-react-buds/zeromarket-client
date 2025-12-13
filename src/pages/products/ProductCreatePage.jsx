@@ -249,7 +249,7 @@ const ProductCreatePage = () => {
 
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection />
+            <EcoScoreSection images={images} />
           </div>
         </div>
         {/* 하단 버튼 */}
