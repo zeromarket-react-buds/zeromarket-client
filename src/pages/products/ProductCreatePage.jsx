@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
@@ -16,6 +16,7 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { createProductApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
+import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 
 // 입력 데이터 (DTO 매칭
 const INITIAL_FORM = {
@@ -44,6 +45,12 @@ const ProductCreatePage = () => {
   const { setHeader } = useHeader();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // vision / 환경점수 관련
+  const [vision, setVision] = useState({ caption: "", tags: [] });
+  const [envScore, setEnvScore] = useState(null);
+  const [visionLoading, setVisionLoading] = useState(false);
+  const [visionError, setVisionError] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -169,6 +176,27 @@ const ProductCreatePage = () => {
       </Container>
     );
   }
+
+  // 대표 이미지 계산
+  const mainImage = useMemo(() => {
+    if (!images || images.length === 0) return null;
+    return images.find((i) => i.isMain) ?? images[0];
+  }, [images]);
+
+  // Vision 결과 저장 + (임시) 환경점수 계산
+  const handleVisionResult = useCallback((v) => {
+    setVision(v);
+    setEnvScore(100); // 임시용
+  }, []);
+
+  // Vision 관련 상태 초기화(이미지 제거/변경 시 사용)
+  const handleVisionReset = useCallback(() => {
+    setVision({ caption: "", tags: [] });
+    setEnvScore(null);
+    setVisionError("");
+    setVisionLoading(false);
+  }, []);
+
   return (
     <Container>
       {submitLoading && <div>로딩중...</div>}
@@ -247,9 +275,23 @@ const ProductCreatePage = () => {
             />
           </div>
 
+          <ProductVisionBridge
+            file={mainImage?.file}
+            onLoading={setVisionLoading}
+            onResult={handleVisionResult}
+            onError={setVisionError}
+            onReset={handleVisionReset}
+          />
+
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection images={images} />
+            <EcoScoreSection
+              caption={vision.caption}
+              tags={vision.tags}
+              score={envScore}
+              loading={visionLoading}
+              error={visionError}
+            />
           </div>
         </div>
         {/* 하단 버튼 */}
