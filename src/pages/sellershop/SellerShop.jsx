@@ -15,9 +15,9 @@ import { useLikeToggle } from "@/hooks/useLikeToggle";
 const SellerShopPage = () => {
   const { sellerId } = useParams();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
+  // const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
+  // const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
   const navigate = useNavigate();
 
   // 판매 상품 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
@@ -243,29 +243,10 @@ const SellerShopPage = () => {
                   <UserRound className="text-gray-400 size-10" />
                 )}
               </div>
-              {/* <div className="w-14 h-14 rounded-full flex items-center justify-center">
-                {profile.profileImage ? (
-                  <img
-                    src={profile.profileImage}
-                    alt=""
-                    className="rounded-full"
-                  />
-                ) : (
-                  <UserRound className="text-brand-green size-10" />
-                )}
-              </div> */}
               <span className="text-2xl">{profile.nickname}</span>
             </div>
 
             <button onClick={handleToggleLikeSeller} className="cursor-pointer">
-              {/* {profile.liked ? (
-                <Heart
-                  fill="red"
-                  className="size-7 text-brand-green cursor-pointer"
-                />
-              ) : (
-                <Heart className="size-7 text-brand-green cursor-pointer" />
-              )} */}
               <Heart
                 className="size-7 cursor-pointer text-brand-green"
                 fill={profile.liked ? "red" : "none"}
@@ -332,7 +313,6 @@ const SellerShopPage = () => {
             </h3>
 
             <div>
-              {/* <ProductCard products={detail.products} onToggleLike={() => {}} /> */}
               <ProductCard
                 products={products}
                 onToggleLikeInProductList={handleToggleLikeProduct}

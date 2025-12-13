@@ -21,7 +21,6 @@ import SellerShopPage from "./pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창 //확인필요
 import MyPageLayout from "@/layouts/MyPageLayout";
 import TradeDetailPage from "@/pages/order/TradeDetailPage";
-import MyProfileEditPage from "./pages/me/MyProfileEditPage";
 import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
 import MyWishListPage from "./pages/me/MyWishListPage";
 import ChatListPage from "./pages/chat/ChatListPage";
@@ -31,9 +30,10 @@ import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
-import MyProfilePage from "@/pages/me/MyProfilePage";
 import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 import KakaoCallback from "@/pages/auth/KakaoCallback";
+import MemberEditPage from "@/pages/me/MemberEditPage";
+import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
 
 const router = createBrowserRouter([
   {
@@ -288,7 +288,7 @@ const router = createBrowserRouter([
           },
           {
             path: "profile",
-            element: <MyProfilePage />,
+            element: <MyProfileEditPage />,
             handle: {
               layout: {
                 header: {
@@ -309,8 +309,8 @@ const router = createBrowserRouter([
 
           // 회원정보 설정
           {
-            path: "profile-edit",
-            element: <MyProfileEditPage />,
+            path: "member",
+            element: <MemberEditPage />,
             handle: {
               layout: {
                 header: {

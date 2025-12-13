@@ -193,6 +193,21 @@ const deleteProductApi = async (productId) => {
   }
 };
 
+// ⭐ 상품 찜 토글 API
+const toggleWishApi = async (productId) => {
+  try {
+    const { data } = await apiClient(`/api/products/${productId}/wish`, {
+      method: "POST",
+    });
+
+    // 서버는 true 또는 false를 반환한다고 했음
+    return data;
+  } catch (error) {
+    console.error("찜 토글 API 오류:", error);
+    throw error;
+  }
+};
+
 export {
   getProductListApi,
   createProductApi,
@@ -204,4 +219,5 @@ export {
   fetchLevel3Categories,
   ProductHiddenApi,
   deleteProductApi,
+  toggleWishApi, // ⭐ 여기에 포함
 };

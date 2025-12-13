@@ -4,30 +4,62 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom"; //건수 증가
 import {
   getAverageRatingApi,
   getCountReceivedReviewsOnMyPage,
 } from "@/common/api/review.api";
+// fetch 쓰면 토큰이 안 붙어서 count가 변하지 않음 → apiClient 사용해야 함
+import { getMyPageProfileApi } from "@/common/api/me.api";
+import { apiClient } from "@/common/client";
 
 export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
   const { user, loading, logout } = useAuth();
+  const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
+
+  // ⭐ 추가됨: 현재 페이지 정보를 가져옴
+  const location = useLocation();
+
+  const fetchMyPage = async () => {
+    try {
+      const data = await getMyPageProfileApi();
+      console.log("마이페이지 응답:", data);
+
+      const img = data.profileImage || "";
+
+      setProfileImg(img);
+    } catch (err) {
+      console.error("마이페이지 불러오기 실패:", err);
+    }
+  };
+
+  // 처음 들어왔을 때 한번 호출
+  useEffect(() => {
+    fetchMyPage();
+  }, [loading]);
 
   // ⭐ 찜 개수 불러오기 API
   const fetchWishCount = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:8080/api/products/wishlist/count"
-      );
+      // const res = await fetch(
+      //   "http://localhost:8080/api/products/wishlist/count"
+      // );
 
-      if (!res.ok) throw new Error("찜 개수 조회 실패");
+      // if (!res.ok) throw new Error("찜 개수 조회 실패");
 
-      const count = await res.json();
-      setWishCount(count);
+      // const count = await res.json();
+      // setWishCount(count);
+      // ⭐ 수정됨: apiClient 사용 → JWT 자동 포함 → userDetails 정상 전달
+      const { data } = await apiClient("/api/products/wishlist/count", {
+        method: "GET",
+      });
+
+      setWishCount(data);
     } catch (err) {
       console.error("🔥 찜 개수 에러:", err);
     }
@@ -54,10 +86,11 @@ export default function MyPage() {
     if (loading) {
       return;
     }
-    fetchWishCount();
+    fetchWishCount(); //count API 다시 호출됨
     fetchTrustScore();
     fetchReceivedReviewCount();
-  }, [loading]);
+  }, [location.pathname, loading]);
+  //location.pathname,추가 찜 후 MyPage로 다시 올 때마다 갱신됨!
 
   const handleLogout = () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
@@ -71,9 +104,17 @@ export default function MyPage() {
   return (
     <Container>
       {/* 프로필 */}
-      <section className="flex items-center gap-4 mb-6">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green">
-          <UserRound className="text-brand-ivory size-10" />
+      <section className="flex items-center gap-6 mb-6">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green overflow-hidden">
+          {!profileImg ? (
+            <UserRound className="text-brand-ivory size-10" />
+          ) : (
+            <img
+              src={profileImg}
+              alt="profile"
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
         <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>
@@ -113,7 +154,7 @@ export default function MyPage() {
             <Link to="/me/profile">프로필 설정</Link>
           </li>
           <li>
-            <Link to="/me/profile-edit">회원 정보 설정</Link>
+            <Link to="/me/member">회원 정보 설정</Link>
           </li>
           <li>
             <Link to="/me/selling">판매 내역</Link>

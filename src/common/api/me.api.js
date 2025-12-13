@@ -1,6 +1,20 @@
 import { apiClient } from "@/common/client";
 
 /**
+ * 마이페이지 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
+ *
+ * GET /api/members/me
+ *
+ * @returns {Promise<{
+ *   profileImage?: string;
+ * }>} 프로필 데이터
+ */
+const getMyPageProfileApi = async () => {
+  const { data } = await apiClient("/api/members/me");
+  return data;
+};
+
+/**
  * 프로필 설정 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
  *
  * GET /api/me/profile
@@ -11,7 +25,7 @@ import { apiClient } from "@/common/client";
  *   introduction?: string;
  * }>} 프로필 데이터
  */
-const getProfileApi = async () => {
+const getProfileEditApi = async () => {
   const { data } = await apiClient("/api/me/profile");
   return data;
 };
@@ -70,4 +84,51 @@ const checkNicknameApi = async (nickname) => {
   return data.exists;
 };
 
-export { getProfileApi, updateProfileApi, checkNicknameApi };
+/**
+ * 회원정보 설정 페이지에서 로그인한 멤버의 프로필 정보를 조회하는 API
+ *
+ * GET /api/me/members/me/edit
+ *
+ * @returns {Promise<{
+ *   profileImage?: string;
+ *   nickname?: string;
+ *   phone?: string;
+ *   email?: string;
+ * }>} 프로필 데이터
+ */
+const getMemberEditApi = async () => {
+  const { data } = await apiClient("/api/members/me/edit");
+  return data;
+};
+
+/**
+ * 회원정보 설정 페이지에서 로그인한 멤버의 프로필 정보를 수정하는 API
+ *
+ * PATCH /api/me/members/me/edit
+ *
+ * @param {Object} params
+ * @param {string} [params.phone] - 핸드폰 번호
+ * @param {string} [params.email] - 이메일
+ *
+ * @returns {Promise<any>} 서버에서 반환하는 응답 데이터
+ */
+const updateMemberEditApi = async ({ phone, email }) => {
+  const { data } = await apiClient("/api/members/me/edit", {
+    method: "PATCH",
+    body: {
+      phone,
+      email,
+    },
+  });
+
+  return data;
+};
+
+export {
+  getMyPageProfileApi,
+  getProfileEditApi,
+  updateProfileApi,
+  checkNicknameApi,
+  getMemberEditApi,
+  updateMemberEditApi,
+};

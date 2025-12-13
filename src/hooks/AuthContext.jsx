@@ -50,9 +50,6 @@ function AuthProvider({ children }) {
 
       try {
         await refreshAccessToken();
-        // const res = await refreshTokenApi(refreshToken);
-        // localStorage.setItem("accessToken", res.accessToken);
-        // localStorage.setItem("refreshToken", res.refreshToken);
 
         const userData = await getMyInfoApi();
         setUser(userData);

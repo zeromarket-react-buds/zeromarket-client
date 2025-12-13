@@ -8,7 +8,14 @@ import dayjs from "dayjs";
 // ⭐ 상세 페이지 이동용
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
+import { apiClient } from "@/common/client";
+import { useAuth } from "@/hooks/AuthContext";
+
 const MyWishListPage = () => {
+  //fetch → apiClient로 바꾸기
+  ///api/products/wishlist 는 로그인 유저 기준으로 동작하는 API
+  //ㄴ>WishRestController.java
+  const { isAuthenticated } = useAuth();
   console.log("🔍 MyWishListPage 렌더됨");
 
   const navigate = useNavigate();
@@ -22,15 +29,19 @@ const MyWishListPage = () => {
 
   // ⭐ 찜 삭제(X 버튼)
   const handleDelete = async (productId) => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/products/${productId}/wish`,
-        {
-          method: "DELETE",
-        }
-      );
+    // try {
+    //   const res = await fetch(
+    //     `http://localhost:8080/api/products/${productId}/wish`,
+    //     {
+    //       method: "DELETE",
+    //     }
+    //   );
 
-      if (!res.ok) throw new Error("삭제 실패");
+    //   if (!res.ok) throw new Error("삭제 실패");
+    try {
+      await apiClient(`/api/products/${productId}/wish`, {
+        method: "DELETE",
+      });
 
       // 🔥 삭제 후 프론트에서 즉시 제거
       setWishItems((prev) =>
@@ -43,23 +54,29 @@ const MyWishListPage = () => {
 
   // ⭐ 찜 목록 로딩
   const fetchWishList = async () => {
+    // try {
+    //   console.log("📡 fetchWishList 함수 실행됨");
+    //   const response = await fetch(
+    //     "http://localhost:8080/api/products/wishlist",
+    //     {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     }
+    //   );
+
+    //   if (!response.ok) {
+    //     throw new Error("서버 응답 오류: " + response.status);
+    //   }
     try {
       console.log("📡 fetchWishList 함수 실행됨");
-      const response = await fetch(
-        "http://localhost:8080/api/products/wishlist",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("서버 응답 오류: " + response.status);
-      }
+      const { data } = await apiClient("/api/products/wishlist", {
+        method: "GET",
+      });
 
-      const data = await response.json();
+      // const data = await response.json();
       console.log("✅ 찜 목록 응답:", data);
       setWishItems(data);
     } catch (err) {
@@ -71,14 +88,29 @@ const MyWishListPage = () => {
   };
 
   // ⭐ 페이지에 들어올 때마다 찜 목록 새로고침
+  // useEffect(() => {
+  //   console.log("📡 찜 목록 요청 시작됨 (탭 이동 또는 페이지 방문 시)");
+  //   fetchWishList();
+  // }, [location.pathname]); // ← 여기가 핵심!
+
+  // if (loading) return <Container>불러오는 중...</Container>;
+  // if (error) return <Container>에러 발생: {error.message}</Container>;
+  // ⭐ 로그인 유저만 목록 호출
   useEffect(() => {
-    console.log("📡 찜 목록 요청 시작됨 (탭 이동 또는 페이지 방문 시)");
+    console.log("📡 찜 목록 요청 시작됨");
+
+    if (!isAuthenticated) {
+      console.log("❌ 비로그인 → 찜 목록 비움");
+      setWishItems([]);
+      setLoading(false);
+      return;
+    }
+
     fetchWishList();
-  }, [location.pathname]); // ← 여기가 핵심!
+  }, [location.pathname, isAuthenticated]);
 
   if (loading) return <Container>불러오는 중...</Container>;
   if (error) return <Container>에러 발생: {error.message}</Container>;
-
   return (
     <Container>
       {/* 탭 (상품 = 기존 버튼 유지, 셀러샵 = 링크 이동) */}
