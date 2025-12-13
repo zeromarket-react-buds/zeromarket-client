@@ -295,7 +295,7 @@ const ProductCreatePage = () => {
           </div>
         </div>
         {/* 하단 버튼 */}
-        <div className="sticky bottom-0  bg-white border-t z-50 ">
+        <div className="sticky bottom-0  bg-white border-t z-40 ">
           <ActionButtonBar
             role="WRITER"
             onSubmit={handleSubmit}
