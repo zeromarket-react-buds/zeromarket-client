@@ -154,7 +154,7 @@ const SellerShopPage = () => {
     return () => observer.disconnect();
   }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
 
-  // 셀러 좋아요 토글
+  // 셀러 찜 토글
   const handleToggleLikeSeller = async (e) => {
     e.stopPropagation(); // 점 3개 메뉴 이벤트, 상위 이벤트 충돌 방지(이벤트 버블링 방지)
 
@@ -168,7 +168,7 @@ const SellerShopPage = () => {
       }));
 
       if (data.liked) {
-        showLikeAddedToast(); // 글로벌토스트함수: 좋아요 메시지
+        showLikeAddedToast(); // 글로벌토스트함수: 추가 메시지
       } else {
         showLikeRemovedToast(); // 삭제 메시지
       }
