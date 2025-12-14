@@ -1,6 +1,7 @@
 import Container from "@/components/Container";
 import { UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLikeToast } from "@/components/GlobalToast";
 
 // ⭐ 페이지 이동용
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -20,8 +21,13 @@ const MyWishSellerListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { showLikeRemovedToast } = useLikeToast(); //글로벌토스트에서 찜삭제 메시지 함수 가져오기
+
   // ⭐ 셀러 찜 삭제
   const handleDelete = async (sellerId) => {
+    const ok = window.confirm("삭제하시겠습니까?");
+    if (!ok) return;
+
     try {
       //셀러 찜은 토글 API 재사용
       await apiClient(`/api/sellershop/${sellerId}/like`, {
@@ -32,6 +38,8 @@ const MyWishSellerListPage = () => {
       setSellerItems((prev) =>
         prev.filter((item) => item.sellerId !== sellerId)
       );
+
+      showLikeRemovedToast(); //글로벌토스트에서 가져온 삭제메시지 함수
     } catch (err) {
       console.error("셀러 찜 삭제 오류:", err);
     }

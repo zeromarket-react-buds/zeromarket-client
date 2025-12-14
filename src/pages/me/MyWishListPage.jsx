@@ -11,6 +11,8 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { apiClient } from "@/common/client";
 import { useAuth } from "@/hooks/AuthContext";
 
+import { useLikeToast } from "@/components/GlobalToast";
+
 const MyWishListPage = () => {
   //fetch → apiClient로 바꾸기
   ///api/products/wishlist 는 로그인 유저 기준으로 동작하는 API
@@ -27,8 +29,12 @@ const MyWishListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { showLikeRemovedToast } = useLikeToast(); //글로벌토스트에서 찜삭제 메시지 함수 가져오기. handleDelete블록 안에 넣어도 됨
+
   // ⭐ 찜 삭제(X 버튼)
   const handleDelete = async (productId) => {
+    const ok = window.confirm("삭제하시겠습니까?");
+    if (!ok) return;
     // try {
     //   const res = await fetch(
     //     `http://localhost:8080/api/products/${productId}/wish`,
@@ -47,6 +53,7 @@ const MyWishListPage = () => {
       setWishItems((prev) =>
         prev.filter((item) => item.productId !== productId)
       );
+      showLikeRemovedToast(); //글로벌토스트에서 가져온 삭제메시지 함수
     } catch (err) {
       console.error("찜 삭제 오류:", err);
     }
@@ -54,21 +61,6 @@ const MyWishListPage = () => {
 
   // ⭐ 찜 목록 로딩
   const fetchWishList = async () => {
-    // try {
-    //   console.log("📡 fetchWishList 함수 실행됨");
-    //   const response = await fetch(
-    //     "http://localhost:8080/api/products/wishlist",
-    //     {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
-
-    //   if (!response.ok) {
-    //     throw new Error("서버 응답 오류: " + response.status);
-    //   }
     try {
       console.log("📡 fetchWishList 함수 실행됨");
 
@@ -87,14 +79,9 @@ const MyWishListPage = () => {
     }
   };
 
-  // ⭐ 페이지에 들어올 때마다 찜 목록 새로고침
+  // 페이지에 들어올 때마다 찜 목록 새로고침
   // useEffect(() => {
-  //   console.log("📡 찜 목록 요청 시작됨 (탭 이동 또는 페이지 방문 시)");
-  //   fetchWishList();
-  // }, [location.pathname]); // ← 여기가 핵심!
 
-  // if (loading) return <Container>불러오는 중...</Container>;
-  // if (error) return <Container>에러 발생: {error.message}</Container>;
   // ⭐ 로그인 유저만 목록 호출
   useEffect(() => {
     console.log("📡 찜 목록 요청 시작됨");

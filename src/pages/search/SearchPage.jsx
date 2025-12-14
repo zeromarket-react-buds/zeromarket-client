@@ -291,7 +291,10 @@ const SearchPage = () => {
         />
 
         <div className="text-2xl font-semibold">"{keyword}" 검색 결과</div>
-        <ProductCard products={products} onToggleLike={onToggleLike} />
+        <ProductCard
+          products={products}
+          onToggleLikeInProductList={onToggleLike} //ProductList와 통일
+        />
       </div>
 
       {/* 무한 스크롤 */}
