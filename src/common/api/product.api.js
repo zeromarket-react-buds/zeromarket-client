@@ -71,6 +71,33 @@ const productVisionApi = async (file) => {
   return data;
 };
 
+// 상품등록 전 AI 초안 API 요청
+const productAiDraftApi = async (payload) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const res = await fetch(`${API_BASE}/api/products/aidraft`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(payload),
+    credentials: "include",
+  });
+
+  let data = null;
+  try {
+    data = await res.clone().json(); // 성공이든 실패든 응답 body를 미리 한 번 안전하게 읽어두기
+  } catch {}
+
+  if (!res.ok) {
+    const message = data?.message || "요청에 실패했습니다.";
+    throw new Error(message);
+  }
+
+  return data; // { title, description }
+};
+
 //상품등록
 const createProductApi = async (productData) => {
   try {
@@ -243,6 +270,7 @@ const toggleWishApi = async (productId) => {
 export {
   getProductListApi,
   productVisionApi,
+  productAiDraftApi,
   createProductApi,
   updateProductApi,
   getProductDetailApi,
