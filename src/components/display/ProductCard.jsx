@@ -50,15 +50,6 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
         // 본인 상품 여부 판단
         const isMyProduct = isAuthenticated && p.sellerId === user?.memberId;
 
-        // 자기찜방지 디버깅용 출력
-        console.log("🧪자기찜 방지작업 디버깅", {
-          productId: p.productId,
-          sellerId: p.sellerId,
-          loginMemberId: user?.memberId,
-          isAuthenticated,
-          isMyProduct,
-        });
-
         return (
           <div key={p.productId} onClick={() => goDetail(p.productId)}>
             <Card className="border-0 shadow-none w-full max-w-sm p-2">
