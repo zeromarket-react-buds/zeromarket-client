@@ -6,7 +6,7 @@ const getProductsBySeller = async ({
   cursorCreatedAt = null,
   size = 10,
 }) => {
-  const { data } = await apiClient(`/api/seller/products/${sellerId}`, {
+  const { data } = await apiClient(`/api/sellers/${sellerId}/products`, {
     params: {
       ...(cursorProductId && { cursorProductId }),
       ...(cursorCreatedAt && { cursorCreatedAt }),
@@ -26,12 +26,13 @@ const getMemberProfile = async (memberId) => {
   return data;
 };
 
-const toggleSellerLikeApi = async (sellerId) => {
-  const { data } = await apiClient(`/api/sellershop/${sellerId}/like`, {
-    method: "POST",
-  });
+// 셀러 찜 토글 wish.api.js로 분리
+// const toggleSellerLikeApi = async (sellerId) => {
+//   const { data } = await apiClient(`/api/sellershop/${sellerId}/like`, {
+//     method: "POST",
+//   });
 
-  return data;
-};
+//   return data;
+// };
 
-export { getProductsBySeller, getMemberProfile, toggleSellerLikeApi };
+export { getProductsBySeller, getMemberProfile };

@@ -34,6 +34,7 @@ import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
 import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
+import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
 
 const router = createBrowserRouter([
   {
@@ -363,7 +364,25 @@ const router = createBrowserRouter([
               },
             },
           },
-
+          //셀러샵 찜목록 페이지
+          {
+            path: "wishlist/sellers",
+            element: <MyWishSellerListPage />, //셀러샵 찜페이지 컴포분리
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "찜 목록",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+          //채팅 목록 페이지
           {
             path: "chats",
             index: true,

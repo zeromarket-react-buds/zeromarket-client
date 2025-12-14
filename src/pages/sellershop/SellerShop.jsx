@@ -9,8 +9,10 @@ import { getProductsBySeller } from "@/common/api/sellerShop.api";
 import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
 import { SectionItem } from "../review/ReceivedReviewSummaryPage";
 import { getMemberProfile } from "@/common/api/sellerShop.api";
-import { toggleSellerLikeApi } from "@/common/api/sellerShop.api";
+//import { toggleSellerLikeApi } from "@/common/api/sellerShop.api";
+import { toggleSellerLikeApi } from "@/common/api/wish.api";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
+import { useLikeToast } from "@/components/GlobalToast"; //찜토스트
 
 const SellerShopPage = () => {
   const { sellerId } = useParams();
@@ -19,6 +21,8 @@ const SellerShopPage = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   // const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
   const navigate = useNavigate();
+
+  const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast(); //찜토스트
 
   // 판매 상품 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
   // const [products, setProducts] = useState([]);
@@ -151,7 +155,9 @@ const SellerShopPage = () => {
   }, [hasNext, loading]); // loadMoreRef, fetchProductsBySeller 제거
 
   // 셀러 좋아요 토글
-  const handleToggleLikeSeller = async (productId) => {
+  const handleToggleLikeSeller = async (e) => {
+    e.stopPropagation(); // 점 3개 메뉴 이벤트, 상위 이벤트 충돌 방지(이벤트 버블링 방지)
+
     try {
       const data = await toggleSellerLikeApi(sellerId);
       // console.log(data);
@@ -160,6 +166,12 @@ const SellerShopPage = () => {
         ...prev,
         liked: data.liked,
       }));
+
+      if (data.liked) {
+        showLikeAddedToast(); // 글로벌토스트함수: 좋아요 메시지
+      } else {
+        showLikeRemovedToast(); // 삭제 메시지
+      }
     } catch (err) {
       console.error(err);
       alert("좋아요 변경 실패");

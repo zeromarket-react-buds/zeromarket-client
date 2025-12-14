@@ -113,24 +113,28 @@ const MyWishListPage = () => {
   if (error) return <Container>에러 발생: {error.message}</Container>;
   return (
     <Container>
-      {/* 탭 (상품 = 기존 버튼 유지, 셀러샵 = 링크 이동) */}
+      {/* 탭 영역 */}
+      {/* ✅ 상품 찜 (현재 페이지) */}
       <div className="flex border-b">
         <button
-          className={`flex-1 text-center py-2 font-medium ${
-            location.pathname === "/me/wishlist" ? "" : "bg-white"
-          } hover:bg-gray-200 transition-colors`}
+          className={`flex-1 text-center py-2 font-medium border-b-2 ${
+            location.pathname === "/me/wishlist"
+              ? "border-brand-green text-brand-green"
+              : "border-transparent text-gray-400"
+          }`}
+          disabled
         >
           상품
         </button>
 
-        {/* ⭐ 셀러샵 탭 → /sellershop 이동 */}
+        {/* ✅ 셀러 찜 → 전용 페이지로 이동 */}
         <Link
-          to="/sellershop"
-          className={`flex-1 text-center py-2 font-medium ${
-            location.pathname === "/sellershop"
-              ? "border-b-2 border-brand-green"
-              : "bg-white"
-          } hover:bg-gray-200 transition-colors`}
+          to="/me/wishlist/sellers"
+          className={`flex-1 text-center py-2 font-medium border-b-2 ${
+            location.pathname === "/me/wishlist/sellers"
+              ? "" //안넣어도 셀러찜 페이지 설정에서 적용됨
+              : "border-transparent text-gray-400"
+          }`}
         >
           셀러 샵
         </Link>
@@ -143,7 +147,7 @@ const MyWishListPage = () => {
           <div
             key={item.productId}
             className="mt-6 cursor-pointer"
-            // ⭐ 클릭하면 상세페이지로 이동!
+            // ⭐ 클릭하면 상세페이지로 이동
             onClick={() => navigate(`/products/${item.productId}`)}
           >
             {/* ⭐ 찜한 날짜 YYYY.MM.DD (박스 밖) */}
