@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
@@ -13,7 +13,7 @@ import ProductConditionSelector from "@/components/product/create/ProductConditi
 import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
-import { createProductApi } from "@/common/api/product.api";
+import { createProductApi, productAiDraftApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
@@ -51,6 +51,108 @@ const ProductCreatePage = () => {
   const [envScore, setEnvScore] = useState(null);
   const [visionLoading, setVisionLoading] = useState(false);
   const [visionError, setVisionError] = useState("");
+
+  // ai 초안 관련
+  const [aiDraftLoading, setAiDraftLoading] = useState(false);
+  const [aiDraftError, setAiDraftError] = useState("");
+  const [aiDraftDone, setAiDraftDone] = useState(false);
+
+  // 최신 form을 effect에서 안전하게 읽기 위한 ref
+  const formRef = useRef(form);
+
+  // 대표이미지 기준으로 자동입력 1회만 하도록 키 저장
+  const autoFilledKeyRef = useRef("");
+
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+
+  // 대표 이미지 계산
+  const mainImage = useMemo(() => {
+    if (!images || images.length === 0) return null;
+    return images.find((i) => i.isMain) ?? images[0];
+  }, [images]);
+
+  // aidraft 호출
+  useEffect(() => {
+    const file = mainImage?.file;
+
+    // 대표이미지 없으면 draft 불가
+    if (!file) return;
+
+    // vision 결과가 없으면 draft 불가
+    const hasVision =
+      (vision?.caption && vision.caption.trim()) ||
+      (Array.isArray(vision?.tags) && vision.tags.length > 0);
+    if (!hasVision) return;
+
+    // 대표이미지 기준 key
+    const fileKey = [file.name, file.size, file.lastModified].join("|");
+
+    // 이미 같은 대표이미지에 대해 자동입력을 한 번 수행했으면 중단
+    if (autoFilledKeyRef.current === fileKey) return;
+
+    // 사용자 입력 덮어쓰기 방지: 둘 다 이미 있으면 자동 작성 안 함
+    const titleEmpty = !formRef.current.productTitle?.trim();
+    const descEmpty = !formRef.current.productDescription?.trim();
+    if (!titleEmpty && !descEmpty) {
+      autoFilledKeyRef.current = fileKey; // 다음에 또 호출되는 것 방지
+      return;
+    }
+
+    let cancelled = false;
+
+    const run = async () => {
+      setAiDraftLoading(true);
+      setAiDraftError("");
+      setAiDraftDone(false);
+
+      try {
+        const payload = {
+          caption: vision.caption ?? "",
+          tags: Array.isArray(vision.tags) ? vision.tags : [],
+          sellPrice: formRef.current.sellPrice
+            ? Number(formRef.current.sellPrice)
+            : null,
+        };
+
+        const draft = await productAiDraftApi(payload); // { title, description }
+
+        if (cancelled) return;
+
+        setForm((prev) => ({
+          ...prev,
+          productTitle: titleEmpty // 상품명 비어있는지 체크
+            ? draft?.title ?? prev.productTitle
+            : prev.productTitle,
+          productDescription: descEmpty // 상품상세 비어있는지 체크
+            ? draft?.description ?? prev.productDescription
+            : prev.productDescription,
+        }));
+
+        autoFilledKeyRef.current = fileKey; //AI 자동완성이 이미 이 이미지에 대해 한 번 실행되었는지를 기억하기 위한 부분
+        setAiDraftDone(true);
+      } catch (e) {
+        if (cancelled) return;
+        console.error(e);
+        setAiDraftError("AI 자동 작성 중 오류가 발생했습니다.");
+      } finally {
+        if (cancelled) return;
+        setAiDraftLoading(false);
+      }
+    };
+
+    run(); // 조건이 맞으면 AI 초안 생성 작업을 한 번 실행
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    mainImage?.file,
+    vision.caption,
+    // tags는 참조가 바뀌면 effect가 너무 자주 돌 수 있으니 길이 정도만 의존성으로
+    vision.tags?.length,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -167,22 +269,6 @@ const ProductCreatePage = () => {
     }
   }, [form, images, navigate]);
 
-  if (error) {
-    return (
-      <Container>
-        <div className="text-center p-4 text-red-600 font-semibold">
-          {error}
-        </div>
-      </Container>
-    );
-  }
-
-  // 대표 이미지 계산
-  const mainImage = useMemo(() => {
-    if (!images || images.length === 0) return null;
-    return images.find((i) => i.isMain) ?? images[0];
-  }, [images]);
-
   // Vision 결과 저장 + (임시) 환경점수 계산
   const handleVisionResult = useCallback((v) => {
     setVision(v);
@@ -195,7 +281,23 @@ const ProductCreatePage = () => {
     setEnvScore(null);
     setVisionError("");
     setVisionLoading(false);
+
+    // draft 상태도 같이 초기화
+    setAiDraftLoading(false);
+    setAiDraftError("");
+    setAiDraftDone(false);
+    autoFilledKeyRef.current = "";
   }, []);
+
+  if (error) {
+    return (
+      <Container>
+        <div className="text-center p-4 text-red-600 font-semibold">
+          {error}
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -291,6 +393,9 @@ const ProductCreatePage = () => {
               score={envScore}
               loading={visionLoading}
               error={visionError}
+              draftLoading={aiDraftLoading}
+              draftDone={aiDraftDone}
+              draftError={aiDraftError}
             />
           </div>
         </div>
