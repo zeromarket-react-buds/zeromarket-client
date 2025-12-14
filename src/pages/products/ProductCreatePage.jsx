@@ -53,6 +53,7 @@ const ProductCreatePage = () => {
   const [visionError, setVisionError] = useState("");
 
   // ai 초안 관련
+  const [aiWriteEnabled, setAiWriteEnabled] = useState(false);
   const [aiDraftLoading, setAiDraftLoading] = useState(false);
   const [aiDraftError, setAiDraftError] = useState("");
   const [aiDraftDone, setAiDraftDone] = useState(false);
@@ -75,6 +76,9 @@ const ProductCreatePage = () => {
 
   // aidraft 호출
   useEffect(() => {
+    // ai 토글 안켜면 호출x
+    if (!aiWriteEnabled) return;
+
     const file = mainImage?.file;
 
     // 대표이미지 없으면 draft 불가
@@ -148,6 +152,7 @@ const ProductCreatePage = () => {
       cancelled = true;
     };
   }, [
+    aiWriteEnabled,
     mainImage?.file,
     vision.caption,
     // tags는 참조가 바뀌면 effect가 너무 자주 돌 수 있으니 길이 정도만 의존성으로
@@ -310,7 +315,10 @@ const ProductCreatePage = () => {
 
           {/* AI로 작성하기 - 2,3차 개발*/}
           <div>
-            <AiWriteSection />
+            <AiWriteSection
+              value={aiWriteEnabled}
+              onChange={setAiWriteEnabled}
+            />
           </div>
 
           {/* 상품 이미지 */}

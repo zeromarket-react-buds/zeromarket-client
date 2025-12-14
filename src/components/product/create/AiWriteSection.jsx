@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { GreenToggle } from "@/components/ui/greentoggle";
 
-const AiWriteSection = () => {
-  const [aiWrite, setAiWrite] = useState(false);
+const AiWriteSection = ({ value, onChange }) => {
   return (
     <div>
-      {/* AI로 작성하기 - 2,3차 개발*/}
       <div className="flex justify-between items-center p-4 py-5 my-5 bg-gray-200 rounded-xl">
         <span>
           <div className="font-medium text-lg">AI로 작성하기</div>
@@ -15,11 +12,7 @@ const AiWriteSection = () => {
         </span>
 
         <div className="flex items-center cursor-pointer">
-          <GreenToggle
-            checked={aiWrite}
-            onChange={setAiWrite}
-            className="size"
-          />
+          <GreenToggle checked={value} onChange={onChange} className="size" />
         </div>
       </div>
     </div>
