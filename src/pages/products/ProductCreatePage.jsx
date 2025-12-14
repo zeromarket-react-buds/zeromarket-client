@@ -246,6 +246,10 @@ const ProductCreatePage = () => {
       const jsonData = {
         ...form,
         images: uploadedImages,
+
+        // vision 결과를 product 테이블 컬럼으로 저장
+        aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
+        aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
       };
 
       const response = await createProductApi(jsonData);
