@@ -39,6 +39,38 @@ const getProductListApi = async (query = {}, memberId = 0) => {
   return data;
 };
 
+// 상품등록 전 Vision
+const API_BASE = "http://localhost:8080";
+
+const productVisionApi = async (file) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${API_BASE}/api/products/vision`, {
+    method: "POST",
+    headers: {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // 브라우저가 boundary 포함해서 자동으로 세팅
+    },
+    body: formData,
+    credentials: "include",
+  });
+
+  let data = null;
+  try {
+    data = await res.clone().json();
+  } catch {}
+
+  if (!res.ok) {
+    const message = data?.message || "요청에 실패했습니다.";
+    throw new Error(message);
+  }
+
+  return data;
+};
+
 //상품등록
 const createProductApi = async (productData) => {
   try {
@@ -210,6 +242,7 @@ const toggleWishApi = async (productId) => {
 
 export {
   getProductListApi,
+  productVisionApi,
   createProductApi,
   updateProductApi,
   getProductDetailApi,

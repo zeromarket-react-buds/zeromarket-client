@@ -21,6 +21,7 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import ProductDescriptionSection from "@/components/product/detail/ProductDescriptionSection";
 import ProductStatusSection from "@/components/product/detail/ProductStatusSection";
 import ReportModal from "@/components/report/ReportModal";
+
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
@@ -360,9 +361,11 @@ const ProductDetailPage = () => {
             {/* 환경점수 - 2,3차 */}
             <DetailEcoScoreSection detail={detail} />
             {/* 거래 정보 + 맵 */}
+
             <ProductTradeInfoSection detail={detail} />
+
             {/* 신고하기 버튼 */}
-            <div className="mb-6">
+            <div className="mb-4 mt-6 text-sm">
               <button
                 className="cursor-pointer"
                 onClick={handleOpenReportModal}

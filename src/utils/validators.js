@@ -98,15 +98,22 @@ export const validateNickname = (value) => {
 
 /**
  * 휴대폰 번호 검증
- * - 01000000000 형식
+ * - 0100000000(10자), 01000000000(11자) 형식
  */
 export const validatePhone = (value) => {
-  if (!value || !value.trim()) {
+  const trimmedValue = (value ?? "").trim();
+
+  if (!trimmedValue) {
     return createValidationResult(false, "휴대폰 번호를 입력해주세요.");
   }
 
-  if (!PHONE_WITHOUT_HYPHEN.test(value)) {
-    return createValidationResult(false, "01000000000 형식으로 입력해주세요.");
+  const digits = trimmedValue.replace(/\D/g, "");
+
+  if (digits.length !== 10 && digits.length !== 11) {
+    return createValidationResult(
+      false,
+      "휴대폰 번호는 10자리 또는 11자리여야 합니다."
+    );
   }
 
   return createValidationResult(true);
