@@ -4,6 +4,9 @@ const EcoScoreSection = ({
   score = null,
   loading = false,
   error = "",
+  draftLoading = false,
+  draftDone = false,
+  draftError = "",
 }) => {
   return (
     <div className="mt-8 mb-20">
@@ -12,7 +15,7 @@ const EcoScoreSection = ({
       <div className="bg-brand-green text-white w-full p-3 py-3 my-5 rounded-lg text-md font-white">
         <div className="flex justify-between mb-3">
           <span>환경점수</span>
-          <span>{score != null ? `${score}p` : "0p"}</span>
+          <span>{score != null ? `(임시값) ${score}p` : "0p"}</span>
         </div>
 
         <div className="flex justify-between">
@@ -33,9 +36,15 @@ const EcoScoreSection = ({
             <div className="mt-1">{tags.slice(0, 5).join(", ")}</div>
           </div>
         )}
+
+        <div className="flex justify-between mt-3">
+          <span>AI 자동 작성</span>
+          <span>{draftLoading ? "작성중" : draftDone ? "완료" : "대기"}</span>
+        </div>
       </div>
 
       {error && <p className="text-brand-red text-sm">{error}</p>}
+      {draftError && <p className="text-brand-red text-sm">{draftError}</p>}
     </div>
   );
 };
