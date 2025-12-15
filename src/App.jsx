@@ -35,6 +35,7 @@ import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
 import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
 import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
+import { ModalProvider } from "@/hooks/useModal";
 
 const router = createBrowserRouter([
   {
@@ -535,8 +536,10 @@ const App = function () {
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
       <AuthProvider>
-        <GlobalToast />
-        <RouterProvider router={router} />
+        <ModalProvider>
+          <GlobalToast />
+          <RouterProvider router={router} />
+        </ModalProvider>
       </AuthProvider>
     </Suspense>
   );
