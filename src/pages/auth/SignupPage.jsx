@@ -110,6 +110,16 @@ const SignupPage = () => {
     return `${base} border-gray-300 focus:border-blue-500`;
   };
 
+  // oauth 화면 이동
+  const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
+  const loginWithKakao = () => {
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
+    window.location.href = kakaoAuthUrl;
+  };
+
   return (
     <Container>
       <div className="flex flex-col gap-12">
@@ -313,7 +323,10 @@ const SignupPage = () => {
             <div className="border-t border-gray-300 flex-grow"></div>
           </div>
           <div className="space-y-6">
-            <button className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer">
+            <button
+              onClick={loginWithKakao}
+              className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer"
+            >
               <div className="bg-yellow-300 w-10 h-10 rounded-md flex justify-center items-center text-2xl font-bold">
                 K
               </div>
