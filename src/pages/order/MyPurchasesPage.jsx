@@ -106,7 +106,7 @@ const MyPurchasesPage = () => {
 
   const handleSoftDeleteTrade = async (tradeId) => {
     const ok = await confirm({
-      description: "거래 내역을 삭제하겠습니까?",
+      description: "거래 내역을 삭제하시겠습니까?",
       confirmText: "삭제",
       variant: "destructive",
     });
