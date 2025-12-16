@@ -182,7 +182,7 @@ const MyProfileEditPage = () => {
     if (ok) {
       navigate(-1);
     }
-  }, [hasChanges, navigate, confirm]);
+  }, [hasChanges]);
 
   // 저장 처리: 글자수/중복만 검증 후 patch
   const handleSave = useCallback(async () => {

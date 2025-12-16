@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTradeToast } from "@/components/GlobalToast";
 import formatPhone from "@/utils/formatPhone";
+import { useModal } from "@/hooks/useModal";
 
 // 공통 날짜 포맷 함수
 const formatDate = (isoString) => {
@@ -28,6 +29,7 @@ const getHeaderDate = (trade) => {
 };
 
 const TradeDetailPage = () => {
+  const { confirm } = useModal();
   const navigate = useNavigate();
   const { showCompletedUpdatedToast, showCanceledUpdatedToast } =
     useTradeToast();
@@ -107,6 +109,12 @@ const TradeDetailPage = () => {
   const paidDate = formatDate(createdAt);
 
   const handleUpdateCompleteTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "거래 완료로 변경하겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
     try {
       await updateTradeStatusApi({
         tradeId,
@@ -122,6 +130,14 @@ const TradeDetailPage = () => {
   };
 
   const handleUpdateCancelTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "거래를 취소하시겠습니까?",
+      confirmText: "거래 취소",
+      variant: "destructive",
+    });
+
+    if (!ok) return;
+
     try {
       await updateTradeStatusApi({
         tradeId,
@@ -203,14 +219,10 @@ const TradeDetailPage = () => {
               tradeStatusKey={tradeStatusKey}
               mode={mode}
               onComplete={() => {
-                if (window.confirm("거래완료로 변경하시겠습니까?")) {
-                  handleUpdateCompleteTrade(tradeId);
-                }
+                handleUpdateCompleteTrade(tradeId);
               }}
               onCancel={() => {
-                if (window.confirm("거래를 취소하시겠습니까?")) {
-                  handleUpdateCancelTrade(tradeId);
-                }
+                handleUpdateCancelTrade(tradeId);
               }}
               showStatusBar={false}
             />

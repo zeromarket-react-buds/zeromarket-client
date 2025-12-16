@@ -6,6 +6,7 @@ import CategoryFilterSection from "@/components/display/CategoryFilterSection";
 import PriceFilterSection from "@/components/display/PriceFilterSection";
 import AreaFilterSection from "@/components/display/AreaFilterSection";
 import SelectedFiltersSection from "@/components/display/SelectedFiltersSection";
+import { useModal } from "@/hooks/useModal";
 
 const ProductFilterModal = ({
   isOpen,
@@ -30,6 +31,8 @@ const ProductFilterModal = ({
   const keywordRef = useRef(null);
   const categoryFocusRef = useRef(null);
   const areaRef = useRef(null);
+
+  const { alert } = useModal();
 
   // 필터 값들에 대한 임시 상태값
   const [tempKeyword, setTempKeyword] = useState(keyword ?? "");
@@ -86,12 +89,12 @@ const ProductFilterModal = ({
     clearArea();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const trimmedKeyword = tempKeyword.trim();
     if (!trimmedKeyword) {
-      alert("키워드는 필수입니다");
+      await alert({ description: "키워드는 필수입니다" });
       return;
     }
 
@@ -100,7 +103,7 @@ const ProductFilterModal = ({
     const hasMax = tempMaxPrice !== null && tempMaxPrice !== "";
 
     if (hasMin && hasMax && tempMaxPrice <= tempMinPrice) {
-      alert("최소 금액은 최대 금액보다 작아야 합니다.");
+      await alert({ description: "최소 금액은 최대 금액보다 작아야 합니다." });
       return;
     }
 
