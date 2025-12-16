@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   createContext,
   useCallback,
@@ -132,16 +133,16 @@ export function ModalProvider({ children }) {
                   <div className="mt-5 flex gap-2 px-5 pb-5">
                     {/*confirm 모드일 때만 취소 버튼 노출*/}
                     {mode === "confirm" ? (
-                      <button
+                      <Button
                         type="button"
-                        className="h-11 flex-1 rounded-xl border border-brand-mediumgray text-brand-darkgray text-sm font-semibold"
+                        className="py-2 flex-1 rounded-xl border border-brand-mediumgray text-brand-darkgray text-sm "
                         onClick={() => closeWith(false)}
                       >
                         {payload.cancelText}
-                      </button>
+                      </Button>
                     ) : null}
 
-                    <button
+                    <Button
                       type="button"
                       className={[
                         "py-2 flex-1 rounded-xl text-sm font-semibold text-white",
@@ -152,7 +153,7 @@ export function ModalProvider({ children }) {
                       onClick={() => closeWith(true)}
                     >
                       {payload.confirmText}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
