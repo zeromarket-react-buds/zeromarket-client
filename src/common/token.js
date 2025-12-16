@@ -50,3 +50,16 @@ export async function refreshAccessToken() {
 
   return refreshPromise;
 }
+
+// oauth 로그인
+// const oauthLoginApi = async (code) => {
+//   const { data } = await apiClient("/api/oauth/kakao", {
+//     method: "POST",
+//     body: { code },
+//   });
+//   return data;
+// };
+
+// export const oauthLoginApi = async (code) => {
+//   await fetch()
+// }

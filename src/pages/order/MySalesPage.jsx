@@ -22,8 +22,10 @@ import {
 } from "@/components/order/filterOptions";
 import { Badge } from "@/components/ui/badge";
 import { useTradeToast } from "@/components/GlobalToast";
+import { useModal } from "@/hooks/useModal";
 
 const MySalesPage = () => {
+  const { confirm } = useModal();
   const navigate = useNavigate();
   const {
     showCompletedUpdatedToast,
@@ -91,6 +93,13 @@ const MySalesPage = () => {
   };
 
   const handleUpdateCompleteTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "거래 완료로 변경하시겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
+
     try {
       await updateTradeStatusApi({
         tradeId,
@@ -106,6 +115,14 @@ const MySalesPage = () => {
   };
 
   const handleUpdateCancelTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "거래를 취소하시겠습니까?",
+      confirmText: "거래 취소",
+      variant: "destructive",
+    });
+
+    if (!ok) return;
+
     try {
       await updateTradeStatusApi({
         tradeId,
@@ -121,7 +138,13 @@ const MySalesPage = () => {
   };
 
   const handleSoftDeleteTrade = async (tradeId) => {
-    if (!window.confirm("거래 내역을 삭제하겠습니까?")) return;
+    const ok = await confirm({
+      description: "거래 내역을 삭제하시겠습니까?",
+      confirmText: "삭제",
+      variant: "destructive",
+    });
+
+    if (!ok) return;
 
     try {
       await softDeleteTradeApi({
@@ -296,14 +319,10 @@ const MySalesPage = () => {
                       tradeStatusKey={tradeStatusKey}
                       mode="sales"
                       onComplete={() => {
-                        if (window.confirm("거래완료로 변경하시겠습니까?")) {
-                          handleUpdateCompleteTrade(tradeId);
-                        }
+                        handleUpdateCompleteTrade(tradeId);
                       }}
                       onCancel={() => {
-                        if (window.confirm("거래를 취소하시겠습니까?")) {
-                          handleUpdateCancelTrade(tradeId);
-                        }
+                        handleUpdateCancelTrade(tradeId);
                       }}
                     />
                   )}

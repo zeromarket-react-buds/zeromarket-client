@@ -34,7 +34,7 @@ const checkDuplicateIdApi = async (id) => {
 
 // 로그아웃
 const logoutApi = async () => {
-  const { data } = await apiClient(`/api/auth/logout`, { method: "POST" });
+  const { data } = await apiClient(`/api/members/logout`, { method: "POST" });
   return data;
 };
 
@@ -47,6 +47,12 @@ const oauthLoginApi = async (code) => {
   return data;
 };
 
+// 회원탈퇴
+const withdrawApi = async () => {
+  const { data } = await apiClient(`/api/members/withdraw`, { method: "POST" });
+  return data;
+};
+
 export {
   loginApi,
   registerApi,
@@ -54,4 +60,5 @@ export {
   checkDuplicateIdApi,
   logoutApi,
   oauthLoginApi,
+  withdrawApi,
 };

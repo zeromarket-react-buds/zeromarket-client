@@ -8,6 +8,7 @@ import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
+import ProductLocationSelectPage from "@/pages/products/ProductLocationSelectPage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import ProductEditPage from "@/pages/products/ProductEditPage";
 import { GlobalToast } from "@/components/GlobalToast";
@@ -35,6 +36,9 @@ import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
 import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
 import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
+import PurchasePanelPage from "./pages/trade/PurchasePanelPage";
+import PurchasePage from "./pages/trade/PurchasePage";
+import { ModalProvider } from "@/hooks/useModal";
 
 const router = createBrowserRouter([
   {
@@ -97,6 +101,23 @@ const router = createBrowserRouter([
                 footer: {
                   component: null,
                 },
+              },
+            },
+          },
+          {
+            path: "location",
+            element: <ProductLocationSelectPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "만날 장소 선택",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: null },
               },
             },
           },
@@ -195,8 +216,17 @@ const router = createBrowserRouter([
         path: "oauth/kakao/callback",
         element: <KakaoCallback />,
       },
+      // 결제 (거래 방법 선택 페이지)
+      {
+        path: "purchases/:tradeId", // trades/:tradeId
+        element: <PurchasePanelPage />,
+      },
+      // 결제
+      {
+        path: "purchases/:tradeId/payment", // trades/:tradeId/payment
+        element: <PurchasePage />,
+      },
       // 리뷰
-      // /trades/:tradeId/review (후기 작성 페이지)
       {
         path: "trades/:tradeId/review", // /trades/:tradeId/review (후기 작성 페이지)
         element: <ReviewCreatePage />,
@@ -535,8 +565,10 @@ const App = function () {
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
       <AuthProvider>
-        <GlobalToast />
-        <RouterProvider router={router} />
+        <ModalProvider>
+          <GlobalToast />
+          <RouterProvider router={router} />
+        </ModalProvider>
       </AuthProvider>
     </Suspense>
   );

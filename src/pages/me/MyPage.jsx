@@ -17,7 +17,7 @@ export default function MyPage() {
   // ⭐ 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, withdraw } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
@@ -98,6 +98,15 @@ export default function MyPage() {
     }
     logout();
     alert("로그아웃되었습니다. 홈으로 이동합니다.");
+    navigate("/");
+  };
+
+  const handleWithdrawal = () => {
+    if (!window.confirm("회원탈퇴 하시겠습니까?")) {
+      return;
+    }
+    withdraw();
+    alert("회원탈퇴되었습니다. 홈으로 이동합니다.");
     navigate("/");
   };
 
@@ -213,7 +222,9 @@ export default function MyPage() {
           <li className="cursor-pointer" onClick={handleLogout}>
             로그아웃
           </li>
-          <li className="cursor-pointer">탈퇴</li>
+          <li className="cursor-pointer" onClick={handleWithdrawal}>
+            탈퇴
+          </li>
         </ul>
       </section>
     </Container>

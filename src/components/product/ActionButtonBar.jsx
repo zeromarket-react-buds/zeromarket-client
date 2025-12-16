@@ -142,6 +142,15 @@ const ActionButtonBar = ({
     navigate(`/products/edit/${productId}`);
   };
 
+  // 바로가기 버튼 클릭
+  const handleTradeButtonClick = async () => {
+    // → POST /orders (productId 전달) → { orderId } 반환
+    // const { tradeId } = await createTradePendingApi(productId);
+
+    // → navigate(`/purchases/${orderId}/payment`)
+    navigate(`/purchases/${tradeId}/payment`);
+  };
+
   // // role을 AuthContext에서 받아오기
   // const role = user?.role;
   return (
@@ -168,7 +177,8 @@ const ActionButtonBar = ({
           <Button
             variant="green"
             className="flex-1 py-5 "
-            onClick={() => handleButtonClick("바로 구매")}
+            onClick={handleTradeButtonClick}
+            // onClick={() => handleButtonClick("바로 구매")}
           >
             바로 구매
           </Button>

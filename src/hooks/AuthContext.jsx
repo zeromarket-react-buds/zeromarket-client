@@ -4,6 +4,7 @@ import {
   loginApi,
   logoutApi,
   oauthLoginApi,
+  withdrawApi,
 } from "@/common/api/auth.api";
 import { refreshAccessToken } from "@/common/token";
 
@@ -86,6 +87,15 @@ function AuthProvider({ children }) {
     setUser(userData);
   };
 
+  // ✅ 회원탈퇴
+  const withdraw = async () => {
+    await withdrawApi();
+
+    localStorage.removeItem("accessToken");
+
+    setUser(null);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -94,6 +104,7 @@ function AuthProvider({ children }) {
         login,
         oauthLogin,
         logout,
+        withdraw,
         loading,
       }}
     >
