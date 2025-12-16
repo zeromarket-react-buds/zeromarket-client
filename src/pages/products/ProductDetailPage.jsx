@@ -10,7 +10,6 @@ import { createReportApi } from "@/common/api/report.api";
 
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
-
 import ProductSellerInfo from "@/components/product/detail/ProductSellerInfo";
 import DetailTitlePriceSection from "@/components/product/detail/DetailTitlePriceSection";
 import ProductTradeInfoSection from "@/components/product/detail/ProductTradeInfoSection";
