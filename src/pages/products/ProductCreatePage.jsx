@@ -6,7 +6,6 @@ import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
 import AiWriteSection from "@/components/product/create/AiWriteSection";
 import CategorySelector from "@/components/product/create/CategorySelector";
-import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
 import EcoScoreSection from "@/components/product/create/EcoScoreSection";
 import TradeMethodSelector from "@/components/product/create/TradeMethodSelector";
 import ProductConditionSelector from "@/components/product/create/ProductConditionSelector";
@@ -17,6 +16,8 @@ import { createProductApi, productAiDraftApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
+import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
+import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
 
 // 입력 데이터 (DTO 매칭
 const INITIAL_FORM = {
@@ -63,6 +64,9 @@ const ProductCreatePage = () => {
 
   // 대표이미지 기준으로 자동입력 1회만 하도록 키 저장
   const autoFilledKeyRef = useRef("");
+
+  // 자주 쓰는 문구 모달
+  const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
 
   useEffect(() => {
     formRef.current = form;
@@ -370,8 +374,15 @@ const ProductCreatePage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
             />
           </div>
+
+          {/*자주 쓰는 문구 모달 */}
+          <FrequentPhraseModal
+            open={isPhraseModalOpen}
+            onClose={() => setIsPhraseModalOpen(false)}
+          />
 
           {/* 상품 상태 */}
           <div>
