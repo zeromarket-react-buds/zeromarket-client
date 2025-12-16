@@ -11,6 +11,7 @@ import { uploadToSupabase } from "@/lib/supabaseUpload";
 import ProfileImageSection from "@/components/profile/ProfileImageSection";
 import NicknameSection from "@/components/profile/NicknameSection";
 import IntroSection from "@/components/profile/IntroSection";
+import { useModal } from "@/hooks/useModal";
 
 // 한글 2, 그 외 1로 계산하는 길이
 const getWeightedLength = (str) => {
@@ -28,6 +29,7 @@ const getWeightedLength = (str) => {
 };
 
 const MyProfileEditPage = () => {
+  const { alert, confirm } = useModal();
   const navigate = useNavigate();
   const { showProfileUpdatedToast } = useProfileToast();
   const { setHeader } = useHeader();
@@ -165,15 +167,18 @@ const MyProfileEditPage = () => {
     initialIntro,
   ]);
 
-  const handleBack = useCallback(() => {
+  const handleBack = useCallback(async () => {
     if (!hasChanges()) {
       navigate(-1);
       return;
     }
 
-    const ok = window.confirm(
-      "변경사항이 있습니다. 저장하지 않고 나가시겠습니까?"
-    );
+    const ok = await confirm({
+      description: "변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+      confirmText: "나가기",
+      variant: "destructive",
+    });
+
     if (ok) {
       navigate(-1);
     }
@@ -183,7 +188,10 @@ const MyProfileEditPage = () => {
   const handleSave = useCallback(async () => {
     const trimmed = nickname.trim();
     if (!trimmed) {
-      setLengthError("닉네임을 입력해주세요.");
+      await alert({
+        description: "닉네임을 입력해주세요.",
+      });
+
       return;
     }
 
@@ -191,26 +199,36 @@ const MyProfileEditPage = () => {
     if (nicknameLength > maxNicknameLength) {
       const msg =
         "닉네임은 글자당 한글 2, 영문/숫자 1을 기준으로 최대 20자까지 가능합니다.";
-      window.alert(msg + "\n입력 내용을 수정하신 후 다시 저장을 시도해주세요.");
-      setLengthError(msg);
+      await alert({
+        description:
+          msg + "\n입력 내용을 수정하신 후 다시 저장을 시도해주세요.",
+      });
       return;
     }
 
     if (dupError) {
-      window.alert("이미 사용 중인 닉네임은 사용할 수 없습니다.");
+      await alert({
+        description: "이미 사용 중인 닉네임은 사용할 수 없습니다.",
+      });
       return;
     }
 
     const introLength = getWeightedLength(intro);
     if (introLength > maxIntroLength) {
-      window.alert(
-        "한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.\n입력 내용을 줄여주세요."
-      );
+      await alert({
+        description:
+          "한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.\n입력 내용을 줄여주세요.",
+      });
       return;
     }
 
     // 완료 버튼 누르고 뜨는 컨펌창
-    const ok = window.confirm("이대로 저장하시겠습니까?");
+    const ok = await confirm({
+      description: "이대로 저장하시겠습니까?",
+      confirmText: "저장",
+      closeOnBackdrop: true,
+      closeOnEsc: true,
+    });
     if (!ok) {
       return; // 취소시 저장 안됨, 페이지 이동 없음
     }
@@ -232,7 +250,9 @@ const MyProfileEditPage = () => {
       navigate("/me");
     } catch (err) {
       console.error("프로필 수정 실패:", err);
-      alert("프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      await alert({
+        description: "프로필 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -256,7 +276,7 @@ const MyProfileEditPage = () => {
         },
       ],
     });
-  }, [setHeader, handleSave, isSaving]);
+  }, [setHeader, handleSave, handleBack, isSaving]);
 
   // 프로필 이미지 업로드 처리
   const handleProfileChange = async (e) => {
@@ -265,7 +285,10 @@ const MyProfileEditPage = () => {
 
     const extension = file.name.split(".").pop().toLowerCase();
     if (!allowedExtensions.includes(extension)) {
-      alert("이미지 파일(JPG, JPEG, PNG, WebP)만 업로드할 수 있습니다.");
+      await alert({
+        description:
+          "이미지 파일(JPG, JPEG, PNG, WebP)만 업로드할 수 있습니다.",
+      });
       e.target.value = "";
       return;
     }
@@ -278,7 +301,10 @@ const MyProfileEditPage = () => {
       setProfileImg(publicUrl);
     } catch (error) {
       console.error("프로필 이미지 업로드 실패:", error);
-      alert("프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      await alert({
+        description:
+          "프로필 이미지 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      });
     }
   };
 
