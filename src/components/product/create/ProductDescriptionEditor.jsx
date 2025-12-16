@@ -23,7 +23,7 @@ const ProductDescriptionEditor = ({ value, onChange, onOpenPhraseModal }) => {
 
         {/* 자주 쓰는 문구 버튼 */}
         <button
-          className="text-sm font-light border px-2 py-1 rounded-lg cursor-pointer"
+          className="text-sm font- border px-2 py-1 rounded-lg cursor-pointer"
           onClick={onOpenPhraseModal}
         >
           자주 쓰는 문구
