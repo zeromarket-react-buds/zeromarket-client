@@ -49,6 +49,7 @@ const ProductVisionBridge = ({
         onResultRef.current?.({
           caption: data?.caption ?? "",
           tags: Array.isArray(data?.tags) ? data.tags : [],
+          environmentScore: data?.environmentScore ?? null,
         });
       } catch (e) {
         console.error(e);

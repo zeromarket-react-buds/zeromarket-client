@@ -278,10 +278,10 @@ const ProductCreatePage = () => {
     }
   }, [form, images, navigate]);
 
-  // Vision 결과 저장 + (임시) 환경점수 계산
+  // Vision 결과 저장 + 환경점수 세팅
   const handleVisionResult = useCallback((v) => {
     setVision(v);
-    setEnvScore(100); // 임시용
+    setEnvScore(v.environmentScore);
   }, []);
 
   // Vision 관련 상태 초기화(이미지 제거/변경 시 사용)
