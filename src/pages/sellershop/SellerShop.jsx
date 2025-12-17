@@ -178,7 +178,7 @@ const SellerShopPage = () => {
     }
   };
 
-  // 상품 목록 좋아요 토글 기능
+  // 상품 목록 찜 토글 기능
   const handleToggleLikeProduct = async (productId) => {
     try {
       const newState = await onToggleLike(productId);

@@ -144,13 +144,13 @@ const updateProductApi = async (id, productData) => {
 // };
 const getProductDetailApi = async (id, memberId = 0) => {
   //const query = memberId ? `?memberId=${memberId}` : "";
-  // ⭕ apiClient는 params로 보내야 정상 동작함
-  const params = { memberId }; // ⭐ 수정됨: 서버가 로그인 사용자 기준으로 isWished 계산 가능
+  // ☆apiClient는 params로 보내야 정상 동작함
+  const params = { memberId }; // 수정됨: 서버가 로그인 사용자 기준으로 isWished 계산 가능
 
   //실제 API 호출 URL /api/products/${id}${query}
   const { data } = await apiClient(`/api/products/${id}`, {
     method: "GET",
-    params, // ⭐ 수정됨: apiClient가 자동으로 ?memberId=xxx 붙여줌
+    params, // 수정됨: apiClient가 자동으로 ?memberId=xxx 붙여줌
   });
 
   return data;
@@ -252,7 +252,7 @@ const deleteProductApi = async (productId) => {
   }
 };
 
-// ⭐ 상품 찜 토글 API
+// 상품 찜 토글 API
 const toggleWishApi = async (productId) => {
   try {
     const { data } = await apiClient(`/api/products/${productId}/wish`, {
@@ -280,5 +280,5 @@ export {
   fetchLevel3Categories,
   ProductHiddenApi,
   deleteProductApi,
-  toggleWishApi, // ⭐ 여기에 포함
+  toggleWishApi,
 };

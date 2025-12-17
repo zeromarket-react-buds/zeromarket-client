@@ -14,7 +14,7 @@ import { getMyPageProfileApi } from "@/common/api/me.api";
 import { apiClient } from "@/common/client";
 
 export default function MyPage() {
-  // ⭐ 찜 개수 상태 추가
+  // 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
   const { user, loading, logout, withdraw } = useAuth();
@@ -22,7 +22,7 @@ export default function MyPage() {
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
-  // ⭐ 추가됨: 현재 페이지 정보를 가져옴
+  // 추가됨: 현재 페이지 정보를 가져옴
   const location = useLocation();
 
   const fetchMyPage = async () => {
@@ -43,7 +43,7 @@ export default function MyPage() {
     fetchMyPage();
   }, [loading]);
 
-  // ⭐ 찜 개수 불러오기 API
+  // 찜 개수 불러오기 API
   const fetchWishCount = async () => {
     try {
       // const res = await fetch(
@@ -54,14 +54,15 @@ export default function MyPage() {
 
       // const count = await res.json();
       // setWishCount(count);
-      // ⭐ 수정됨: apiClient 사용 → JWT 자동 포함 → userDetails 정상 전달
+
+      //  수정됨: apiClient 사용 → JWT 자동 포함 → userDetails 정상 전달
       const { data } = await apiClient("/api/products/wishlist/count", {
         method: "GET",
       });
 
       setWishCount(data);
     } catch (err) {
-      console.error("🔥 찜 개수 에러:", err);
+      console.error("찜 개수 에러:", err);
     }
   };
 
@@ -81,7 +82,7 @@ export default function MyPage() {
     setReceivedReviewCount(count);
   };
 
-  // ⭐ 페이지 로드될 때 찜 개수 불러오기
+  // 페이지 로드될 때 찜 개수 불러오기
   useEffect(() => {
     if (loading) {
       return;

@@ -27,13 +27,13 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
   //   onToggleLike(productId);
   // };
 
-  // ⭐ 찜 목록 추가/삭제 함수 (백엔드 연동 버전)
+  //  찜 목록 추가/삭제 함수 (백엔드 연동 버전)
   const handleHeartClick = async (clickedProductId) => {
-    // ⭐ 백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
+    //  백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
     const newState = await onToggleLikeInProductList(clickedProductId);
     // true/false 반환 토스트 출력, 부모함수 호출
 
-    // ⭐ 토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
+    //  토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
     if (newState) showLikeAddedToast();
     else showLikeRemovedToast();
   };

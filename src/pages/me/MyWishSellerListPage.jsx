@@ -3,7 +3,7 @@ import { UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLikeToast } from "@/components/GlobalToast";
 
-// ⭐ 페이지 이동용
+// 페이지 이동용
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
 import { apiClient } from "@/common/client";
@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/AuthContext";
 const MyWishSellerListPage = () => {
   /// api/wish/sellers 는 로그인 유저 기준으로 동작
   const { isAuthenticated } = useAuth();
-  console.log("🔍 MyWishSellerListPage (셀러 찜) 렌더됨");
+  console.log(" MyWishSellerListPage (셀러 찜) 렌더됨");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,7 +23,7 @@ const MyWishSellerListPage = () => {
 
   const { showLikeRemovedToast } = useLikeToast(); //글로벌토스트에서 찜삭제 메시지 함수 가져오기
 
-  // ⭐ 셀러 찜 삭제
+  // 셀러 찜 삭제
   const handleDelete = async (sellerId) => {
     const ok = window.confirm("삭제하시겠습니까?");
     if (!ok) return;
@@ -34,7 +34,7 @@ const MyWishSellerListPage = () => {
         method: "POST",
       });
 
-      // 🔥 삭제 후 즉시 제거
+      // 삭제 후 즉시 제거
       setSellerItems((prev) =>
         prev.filter((item) => item.sellerId !== sellerId)
       );
@@ -45,16 +45,16 @@ const MyWishSellerListPage = () => {
     }
   };
 
-  // ⭐ 셀러 찜 목록 조회
+  // 셀러 찜 목록 조회
   const fetchWishSellerList = async () => {
     try {
-      console.log("📡 fetchWishSellerList 실행됨");
+      console.log("fetchWishSellerList 실행됨");
 
       const { data } = await apiClient("/api/me/wishlist/sellers", {
         method: "GET",
       });
 
-      console.log("✅ 셀러 찜 목록 응답:", data);
+      console.log("셀러 찜 목록 응답:", data);
       setSellerItems(data);
     } catch (err) {
       console.error("셀러 찜 목록 불러오기 실패:", err);
@@ -64,12 +64,12 @@ const MyWishSellerListPage = () => {
     }
   };
 
-  // ⭐ 로그인 유저만 조회
+  // 로그인 유저만 조회
   useEffect(() => {
-    console.log("📡 셀러 찜 목록 요청 시작");
+    console.log("셀러 찜 목록 요청 시작");
 
     if (!isAuthenticated) {
-      console.log("❌ 비로그인 → 셀러 찜 목록 비움");
+      console.log(" 비로그인 → 셀러 찜 목록 비움");
       setSellerItems([]);
       setLoading(false);
       return;

@@ -58,14 +58,14 @@ const ProductDetailPage = () => {
   //   liked: false,
   // }));
 
-  /** ⭐ 수정됨: apiClient 기반으로 상세조회 */
+  /** 수정됨: apiClient 기반으로 상세조회 */
   const fetchProductDetail = async () => {
     try {
       // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
       const data = await getProductDetailApi(id, user?.memberId); //user?.memberId 전달
 
-      console.log("🟢 서버에서 받은 상세 응답:", data);
-      console.log("🟢 서버 wished:", data.wished, "wishCount:", data.wishCount);
+      console.log(" 서버에서 받은 상세 응답:", data);
+      console.log(" 서버 wished:", data.wished, "wishCount:", data.wishCount);
 
       if (!data || typeof data !== "object") {
         setError("상품 정보를 불러오지 못했습니다.");
@@ -118,44 +118,15 @@ const ProductDetailPage = () => {
     }
   };
 
-  //⭐ 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
+  // 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
   const toggleWish = async () => {
     if (!detail) return; // 안전장치 추가
     try {
-      // ⭐ apiClient 기반 찜 토글 함수 호출
-      // ⭐ onToggleLikeDetail → 서버에서 true/false 반환
+      // apiClient 기반 찜 토글 함수 호출
+      //  onToggleLikeDetail → 서버에서 true/false 반환
       const newState = await onToggleLikeDetail(detail.productId); // true/false
       // 서버가 반환한 newState
-      console.log("*** 토글 후 받은 newState:", newState);
-
-      // // ⭐ 업데이트된 detail을 계산
-      // const method = detail.wished ? "DELETE" : "POST";
-      // console.log("*** 실행될 HTTP method:", method);
-      // console.log("*** 현재 wishCount:", detail?.wishCount);
-
-      // const res = await fetch(`http://localhost:8080/api/products/${id}/wish`, {
-      //   method,
-      // });
-
-      // if (!res.ok) throw new Error("찜 토글 실패");
-
-      // const result = await res.json(); //서버응답 콘솔확인용
-      // console.log("🔥 서버 응답:", result);
-
-      // const isAdded = method === "POST";
-
-      // // ⭐ 업데이트된 detail을 계산
-      // const updated = {
-      //   ...detail,
-      //   wished: isAdded,
-      //   wishCount: isAdded
-      //     ? detail.wishCount + 1
-      //     : Math.max((detail.wishCount || 1) - 1, 0),
-      // };
-
-      // // ⭐ 상태 반영
-      // setDetail(updated);
-      // console.log("🟡 토글 이후 detail 업데이트됨:", updated);
+      console.log("토글 후 받은 newState:", newState);
 
       // return isAdded; // ActionButtonBar에서 메시지 구분용
 
@@ -164,7 +135,7 @@ const ProductDetailPage = () => {
         ? (detail.wishCount || 0) + 1
         : Math.max((detail.wishCount || 1) - 1, 0);
 
-      // ⭐ detail 상태 업데이트
+      // detail 상태 업데이트
       setDetail((prev) => ({
         ...prev,
         wished: newState,
@@ -191,13 +162,13 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     if (detail) {
-      console.log("🔥 상세상품 detail:", detail);
-      console.log("🔥 salesStatus:", detail.salesStatus);
-      console.log("🔥 wished:", detail.wished);
-      console.log("🔥 wishCount:", detail.wishCount);
+      console.log(" 상세상품 detail:", detail);
+      console.log("salesStatus:", detail.salesStatus);
+      console.log(" wished:", detail.wished);
+      console.log("wishCount:", detail.wishCount);
 
-      console.log("💛 현재 detail.wished 값:", detail.wished);
-      console.log("💛 현재 wishCount 값:", detail.wishCount);
+      console.log("현재 detail.wished 값:", detail.wished);
+      console.log("현재 wishCount 값:", detail.wishCount);
     }
   }, [detail]);
 
@@ -284,7 +255,7 @@ const ProductDetailPage = () => {
 
   const handleStatusUpdateSuccess = () => {
     const memberId = user ? user.memberId : null;
-    fetchProductDetail(memberId); // ⭐ 숨김/해제 후 상세 재조회
+    fetchProductDetail(memberId); // 숨김/해제 후 상세 재조회
   };
 
   //신고하기
