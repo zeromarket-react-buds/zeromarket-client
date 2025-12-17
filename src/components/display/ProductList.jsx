@@ -16,14 +16,14 @@ const ProductList = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ⭐ 로그인 사용자 정보
+  //  로그인 사용자 정보
   const { user, isAuthenticated } = useAuth();
   // 로그인 안된 상태에서도 테스트용 memberId=1 사용
-  const memberId = isAuthenticated ? user.memberId : 1;
+  const memberId = isAuthenticated ? user.memberId : null;
 
   //찜하트 유지 안돼서 콘솔확인
   useEffect(() => {
-    console.log("📌 [ProductList] 현재 로그인한 memberId =", memberId);
+    console.log(" [ProductList] 현재 로그인한 memberId =", memberId);
   }, [memberId]);
 
   // 검색/sort 관련
@@ -42,10 +42,10 @@ const ProductList = () => {
   const [offset, setOffset] = useState(null);
   const [hasNext, setHasNext] = useState(true);
 
-  // ⭐ 찜 토글 후 UI 즉시 반영 함수
+  // 찜 토글 후 UI 즉시 반영 함수
   //* ProductId를 clickedProductId로 분간 쉽게 변경
   const handleToggleWish = async (clickedProductId) => {
-    console.log("❤️ handleToggleWish 호출됨", clickedProductId);
+    console.log(" handleToggleWish 호출됨", clickedProductId);
 
     // 백엔드 토글 API 수행 (true/false 반환)
     const newState = await onToggleLike(clickedProductId);
@@ -82,7 +82,7 @@ const ProductList = () => {
 
     try {
       //찜유지위해 memberId추가 콘솔확인
-      console.log("📌 [fetchHomeProducts] memberId 보내는 값 =", memberId);
+      console.log("[fetchHomeProducts] memberId 보내는 값 =", memberId);
 
       const query = {
         offset: nextOffset,
@@ -94,11 +94,11 @@ const ProductList = () => {
         area,
       };
       // 찜색유지 안돼는 문제콘솔 호출 직전 URL 모양 확인
-      console.log("📌 [fetchHomeProducts] query =", query);
+      console.log("[fetchHomeProducts] query =", query);
 
       //찜색유지 안돼는 문제콘솔. memberId전달
       const data = await getProductListApi(query, memberId);
-      console.log("📌 [fetchHomeProducts] API 응답 =", data);
+      console.log(" [fetchHomeProducts] API 응답 =", data);
 
       const fetched = data.content;
       const offset = data.offset;
@@ -130,10 +130,7 @@ const ProductList = () => {
   // sort/filter 변경 시 목록 재호출
   useEffect(() => {
     //찜 유지 안돼는 문제를 위한콘솔
-    console.log(
-      "⭐ memberId 변경 감지 → 상품 목록을 다시 불러옵니다:",
-      memberId
-    );
+    console.log(" memberId 변경 감지 → 상품 목록을 다시 불러옵니다:", memberId);
     setProducts([]);
     setOffset(null);
     fetchHomeProducts(null);
@@ -147,14 +144,15 @@ const ProductList = () => {
     maxPrice,
     area,
   ]);
-
-  // ⭐ 로그인 복구(memberId 변화) 시 → 강제 재조회
-  useEffect(() => {
-    console.log("🔄 memberId 변경 감지 → 전체 리스트 다시 조회:", memberId);
-    setProducts([]);
-    setOffset(null);
-    fetchHomeProducts(null);
-  }, [memberId]); // 🔥 이게 핵심!
+  /*주석처리: 이미 useEffect에서 memberId 감지 중복재조회 만들어져 있음 
+    같은 화면에서 로그인 상태가 바뀌는 UX 일 때만 필요함.*/
+  // //  로그인 복구(memberId 변화) 시 → 강제 재조회
+  // useEffect(() => {
+  //   console.log("memberId 변경 감지 → 전체 리스트 다시 조회:", memberId);
+  //   setProducts([]);
+  //   setOffset(null);
+  //   fetchHomeProducts(null);
+  // }, [memberId]); //  memberId 변경 시 재조회
 
   // sort 관련 함수
   const handleSort = (value) => {

@@ -1,29 +1,20 @@
 import { apiClient } from "@/common/client";
 
-const getProductListApi = async (query = {}, memberId = 0) => {
-  const params = {};
+const getProductListApi = async (query = {}) => {
+  //const params = new URLSearchParams();
+  const params = {}; //수정: URLSearchParams → 객체
 
   if (query.offset != null) params.offset = query.offset;
   if (query.sort) params.sort = query.sort;
-
-  if (query.keyword && query.keyword.trim()) {
-    params.keyword = query.keyword.trim();
-  }
-
+  if (query.keyword?.trim()) params.keyword = query.keyword.trim();
   if (query.categoryId != null) params.categoryId = query.categoryId;
-
   if (query.minPrice) params.minPrice = query.minPrice;
   if (query.maxPrice) params.maxPrice = query.maxPrice;
-
-  if (query.area && query.area.trim()) {
-    params.area = query.area.trim();
-  }
-  //새로고침해도 찜유지하기위해 추가
-  params.memberId = memberId;
+  if (query.area?.trim()) params.area = query.area.trim();
 
   const { data } = await apiClient("/api/products", {
     method: "GET",
-    params,
+    params, // 수정: apiClient params 사용
   });
 
   return data;
@@ -63,10 +54,27 @@ const productVisionApi = async (file) => {
 
 // 상품등록 전 AI 초안 API 요청
 const productAiDraftApi = async (payload) => {
-  const { data } = await apiClient("/api/products/aidraft", {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const res = await fetch(`${API_BASE}/api/products/aidraft`, {
     method: "POST",
-    body: payload,
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(payload),
+    credentials: "include",
   });
+
+  let data = null;
+  try {
+    data = await res.clone().json(); // 성공이든 실패든 응답 body를 미리 한 번 안전하게 읽어두기
+  } catch {}
+
+  if (!res.ok) {
+    const message = data?.message || "요청에 실패했습니다.";
+    throw new Error(message);
+  }
 
   return data; // { title, description }
 };
@@ -109,25 +117,25 @@ const updateProductApi = async (id, productData) => {
 };
 
 //상품상세
-// const getProductDetailApi = async (id) => {
-//   const { data } = await apiClient(`/api/products/${id}`, {
-//     method: "GET",
-//   });
-//   return data;
-// };
-const getProductDetailApi = async (id, memberId = 0) => {
-  //const query = memberId ? `?memberId=${memberId}` : "";
-  // ☆apiClient는 params로 보내야 정상 동작함
-  const params = { memberId }; // 수정됨: 서버가 로그인 사용자 기준으로 isWished 계산 가능
-
-  //실제 API 호출 URL /api/products/${id}${query}
+const getProductDetailApi = async (id) => {
   const { data } = await apiClient(`/api/products/${id}`, {
     method: "GET",
-    params, // 수정됨: apiClient가 자동으로 ?memberId=xxx 붙여줌
   });
-
   return data;
 };
+// const getProductDetailApi = async (id, memberId = 0) => {
+//   //const query = memberId ? `?memberId=${memberId}` : "";
+//   // apiClient는 params로 보내야 정상 동작함
+//   const params = { memberId }; // 수정됨: 서버가 로그인 사용자 기준으로 isWished 계산 가능
+
+//   //실제 API 호출 URL /api/products/${id}${query}
+//   const { data } = await apiClient(`/api/products/${id}`, {
+//     method: "GET",
+//     params, // 수정됨: apiClient가 자동으로 ?memberId=xxx 붙여줌
+//   });
+
+//   return data;
+// };
 
 //비슷한상품
 const getSimilarProductsApi = async (id) => {
