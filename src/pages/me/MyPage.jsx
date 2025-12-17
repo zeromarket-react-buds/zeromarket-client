@@ -175,7 +175,9 @@ export default function MyPage() {
           <li>
             <Link to="/me/chats">채팅 목록</Link>
           </li>
-          <li>차단 유저 목록</li>
+          <li>
+            <Link to="/me/blocklist">차단 유저 목록</Link>
+          </li>
         </ul>
       </section>
 
