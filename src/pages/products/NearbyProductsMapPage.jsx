@@ -1,5 +1,4 @@
 import MapSearch from "@/components/map/MapSearch";
-import { Crosshair } from "lucide-react";
 import { useRef, useCallback } from "react";
 import { getProductsByMapBoundaryApi } from "@/common/api/product.api";
 import { useAuth } from "@/hooks/AuthContext";
@@ -48,20 +47,6 @@ const NearbyProductsMapPage = () => {
           }}
           onSearchBoundaryChange={SearchBoundaryChange}
         />
-      </div>
-
-      <div
-        className="fixed left-0 right-0 bottom-0 z-50 p-4 pointer-events-none"
-        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
-      >
-        <div className="flex justify-end items-end mb-3 ">
-          <div
-            onClick={() => mapRef.current?.moveToMyLocation()}
-            className="map-control-btn pointer-events-auto"
-          >
-            <Crosshair variant="outline" size={30} />
-          </div>
-        </div>
       </div>
     </div>
   );

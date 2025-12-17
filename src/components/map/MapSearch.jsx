@@ -1,5 +1,8 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Crosshair } from "lucide-react";
+import { useMapToast } from "@/components/GlobalToast";
 
 /**
  * @description 검색 전용 지도 컴포넌트: 홈 화면, 상품 검색 페이지에서 사용됩니다.
@@ -30,7 +33,6 @@ const getMarkerContentHtml = (categoryName, productId, productTitle) => {
       <div class="marker-tooltip">
         ${productTitle}
       </div>
-      
       <div class="marker-emoji">
         ${emoji}
       </div>
@@ -41,71 +43,146 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const navigate = useNavigate();
-  const initialLoadRef = useRef(true);
   const productMarkersRef = useRef([]);
+  const circleRef = useRef(null);
+  const [radius, setRadius] = useState(800);
+  const lastProductsRef = useRef([]);
+  const { showLocationDeniedToast } = useMapToast();
 
-  //전역으로 클릭핸들러
+  const handleMoveToMyLocation = async () => {
+    if (!navigator.geolocation) {
+      // 브라우저 자체에서 위치기능 미제공시(Geolocation API 미탑재)
+      alert("이 브라우저에서는 위치 서비스를 지원하지 않습니다.");
+      return;
+    }
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+
+      if (result.state === "denied") {
+        showLocationDeniedToast();
+      } else {
+        moveToMyLocation();
+      }
+    } catch (error) {
+      //위치정보는 주는 브라우저지만, 권한확인기능(permissions API)미지원시
+      moveToMyLocation();
+    }
+  };
+
+  //원 업뎃 함수
+  const updateSearchCircle = (latlng, currentRadius) => {
+    if (!mapRef.current || !latlng) return;
+
+    const r = currentRadius || radius;
+
+    // 만약 기존 원이 지도에 표시되고 있다면 먼저 제거 (확실한 초기화)
+    if (circleRef.current) {
+      circleRef.current.setMap(null);
+    }
+
+    // if (circleRef.current) {
+    //   circleRef.current.setPosition(latlng);
+    //   circleRef.current.setRadius(r);
+    // } else {
+    circleRef.current = new kakao.maps.Circle({
+      center: latlng,
+      radius: r, //m단위 반지름(1.5km)
+      strokeWeight: 1,
+      strokeColor: "#1b6439",
+      strokeOpacity: 0.7,
+      strokeStyle: "solid",
+      fillColor: "#34d399",
+      fillOpacity: 0.15,
+    });
+    circleRef.current.setMap(mapRef.current);
+  };
+  // };
+
+  //마커표시로직(거리필터링포함)
+  const drawFilteredMarkers = (products, currentRadius) => {
+    if (!mapRef.current) return;
+
+    productMarkersRef.current.forEach((marker) => marker.setMap(null));
+    productMarkersRef.current = [];
+
+    const centerPos = mapRef.current.getCenter();
+    const r = currentRadius || radius;
+    products.forEach((product) => {
+      if (product.latitude && product.longitude) {
+        const productPos = new kakao.maps.LatLng(
+          product.latitude,
+          product.longitude
+        );
+        const line = new kakao.maps.Polyline({ path: [centerPos, productPos] });
+        const distance = line.getLength();
+
+        if (distance <= r) {
+          const customOverlay = new kakao.maps.CustomOverlay({
+            position: productPos,
+            content: getMarkerContentHtml(
+              product.category,
+              product.productId,
+              product.productTitle
+            ),
+            yAnchor: 1.3,
+            zIndex: 3,
+          });
+          customOverlay.setMap(mapRef.current);
+          productMarkersRef.current.push(customOverlay);
+        }
+      }
+    });
+  };
+
+  const handleRadiusChange = (newRadius) => {
+    setRadius(newRadius);
+    if (mapRef.current) {
+      updateSearchCircle(mapRef.current.getCenter(), newRadius);
+      drawFilteredMarkers(lastProductsRef.current, newRadius);
+    }
+  };
+  //전역 클릭 핸들러
   useEffect(() => {
     window.goToProductDetail = (productId) => {
       navigate(`/products/${productId}`);
     };
     return () => {
-      delete window.goToProductDetail; // 언마운트 시 삭제 <
+      delete window.goToProductDetail;
     };
   }, [navigate]);
 
   //부모 컴포넌트에서 호출할수있게 기능 노출
   useImperativeHandle(ref, () => ({
     displayProducts: (products) => {
+      lastProductsRef.current = products;
+      drawFilteredMarkers(products);
       // console.log("마커표시시작:", products);
-      if (!mapRef.current) return;
-
-      // 기존 마커(커스텀 오버레이) 제거
-      productMarkersRef.current.forEach((marker) => marker.setMap(null));
-      productMarkersRef.current = [];
-
-      products.forEach((product) => {
-        if (product.latitude && product.longitude) {
-          const position = new kakao.maps.LatLng(
-            product.latitude,
-            product.longitude
-          );
-
-          const customOverlay = new kakao.maps.CustomOverlay({
-            position: position,
-            content: getMarkerContentHtml(
-              product.category,
-              product.productId,
-              product.productTitle
-            ),
-            yAnchor: 1.3, // 마커 위치
-            zIndex: 3,
-            // clickable: true,
-          });
-
-          customOverlay.setMap(mapRef.current);
-          productMarkersRef.current.push(customOverlay);
-        } else {
-          console.warn(
-            `상품 ID ${product.productId} 에 좌표 정보가 없습니다.`,
-            product
-          );
-        }
-      });
+      // if (!mapRef.current) return;
     },
 
     moveToMyLocation: () => {
-      if (navigator.geolocation && mapRef.current) {
+      if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
-          const myLatLng = new kakao.maps.LatLng(
-            pos.coords.latitude,
-            pos.coords.longitude
-          );
-          mapRef.current.panTo(myLatLng);
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const latlng = new kakao.maps.LatLng(lat, lng);
+
+          mapRef.current?.panTo(latlng);
+          // mapRef.current?.setCenter(latlng);
+
+          // 내 위치로 이동할 때 원형 범위 업데이트
+          updateSearchCircle(latlng);
         });
       }
     },
   }));
+
+  useEffect(() => {
+    if (mapRef.current && center) {
+      const initialLatLng = new kakao.maps.LatLng(center.lat, center.lng);
+      updateSearchCircle(initialLatLng);
+    }
+  }, [center]);
 
   useEffect(() => {
     if (!window.kakao || !window.kakao.maps) return;
@@ -113,22 +190,26 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
     window.kakao.maps.load(() => {
       const map = new kakao.maps.Map(containerRef.current, {
         center: new kakao.maps.LatLng(center.lat, center.lng),
-        level: 4,
+        level: 5,
       });
-
       mapRef.current = map;
+
+      //지도 생성 직후 relayout 실행
+      map.relayout();
+
+      const startLatLng = new kakao.maps.LatLng(center.lat, center.lng);
+      updateSearchCircle(startLatLng);
 
       map.setDraggable(true);
       map.setZoomable(true);
 
       const updateBoundary = () => {
-        if (initialLoadRef.current) {
-          initialLoadRef.current = false;
-        }
         const bounds = map.getBounds();
         const sw = bounds.getSouthWest();
         const ne = bounds.getNorthEast();
         const centerPos = map.getCenter();
+
+        updateSearchCircle(centerPos, radius);
 
         onSearchBoundaryChange?.({
           centerLat: centerPos.getLat(),
@@ -137,6 +218,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
           swLng: sw.getLng(),
           neLat: ne.getLat(),
           neLng: ne.getLng(),
+          radius: radius,
         });
       };
 
@@ -150,8 +232,11 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
               pos.coords.longitude
             );
             map.setCenter(myLatLng);
+            updateSearchCircle(myLatLng);
+            updateBoundary();
           },
           (error) => {
+            updateBoundary();
             if (error.code === 1) {
               console.warn(
                 "사용자가 위치 정보 공유를 거부했습니다. 기본 위치로 지도를 표시합니다."
@@ -161,13 +246,46 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
             }
           }
         );
+      } else {
+        updateBoundary();
       }
 
       setTimeout(() => map.relayout(), 0);
     });
-  }, [center.lat, center.lng, onSearchBoundaryChange]);
+  }, [onSearchBoundaryChange]); // center.lat/lng 의존성없어야 무한루프 방지
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return (
+    <div className="relative w-full h-full">
+      <div className="absolute top-4 right-4 z-[10] flex flex-col gap-3 items-center">
+        <div className="flex flex-col gap-2  bg-white p-2 rounded-lg shadow-md border border-gray-200">
+          <p className="text-[14px] font-bold text-brand-darkgray text-center mb-1">
+            탐색 범위
+          </p>
+          {[300, 800, 1500].map((r) => (
+            <button
+              key={r}
+              onClick={() => handleRadiusChange(r)}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                radius === r
+                  ? "bg-brand-green text-white"
+                  : "bg-brand-lightgray text-brand-darkgray hover:bg-brand-mediumgray"
+              }`}
+            >
+              {r >= 1000 ? `${r / 1000}km` : `${r}m`}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleMoveToMyLocation}
+          className="map-control-btn pointer-events-auto"
+        >
+          <Crosshair size={24} className="text-brand-darkgray" />
+        </button>
+      </div>
+
+      <div ref={containerRef} className="w-full h-full" />
+    </div>
+  );
 });
 
 export default MapSearch;
