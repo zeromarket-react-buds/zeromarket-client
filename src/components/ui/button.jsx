@@ -16,7 +16,7 @@ const buttonVariants = cva(
         ivory:
           "bg-brand-ivory text-brand-green border border-brand-green hover:bg-[#F4E2CAFF]/80 cursor-pointer",
         gray: "bg-brand-mediumgray text-white hover:bg-brand-mediumgray/80 cursor-pointer",
-        red: "bg-brand-red text-white hover:bg-white/20 cursor-pointer",
+        red: "bg-brand-red text-white hover:bg-brand-red/60 cursor-pointer",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

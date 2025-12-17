@@ -76,6 +76,19 @@ export const useProfileToast = () => {
   };
 };
 
+export const useMapToast = () => {
+  const showLocationDeniedToast = () => {
+    toast.error("위치 정보 접근을 허용해주세요.", {
+      toastId: "location-denied",
+      position: "bottom-center",
+      autoClose: 3000,
+      hideProgressBar: true,
+      pauseOnHover: false,
+    });
+  };
+  return { showLocationDeniedToast };
+};
+
 export const GlobalToast = () => {
   return <ToastContainer />;
 };

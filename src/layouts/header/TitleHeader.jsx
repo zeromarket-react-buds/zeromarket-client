@@ -15,6 +15,7 @@ const TitleHeader = ({
   rightButtonText, // 기존 단일 버튼 유지
   rightButtonEvent, // 기존 단일 버튼 유지
   rightActions, // ⭐ HeaderContext에서 내려오는 멀티 버튼
+  isSticky = false,
   onBack,
 }) => {
   const navigate = useNavigate();
@@ -97,7 +98,9 @@ const TitleHeader = ({
     }
   };
   return (
-    <Container className="relative z-20">
+    <Container
+      className={isSticky ? `sticky top-0 z-100 bg-white` : `relative z-20`}
+    >
       <header
         className={`flex items-center justify-between mb-6 ${
           titleAlign === "left" ? "pr-2" : ""

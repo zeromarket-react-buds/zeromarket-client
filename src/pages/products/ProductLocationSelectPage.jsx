@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Crosshair } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useCallback, useMemo } from "react";
-import LocationNameSheet from "../../components/product/create/LocationNameSheet";
+import LocationNameSheet from "@/components/product/create/LocationNameSheet";
 
 const ProductLocationSelectPage = () => {
   const navigate = useNavigate();
@@ -119,12 +119,11 @@ const ProductLocationSelectPage = () => {
         style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
       >
         <div className="flex justify-end items-end mb-3 ">
-          <div className="bg-white rounded-full size-[60px] p-2 flex items-center justify-center shadow-xl cursor-pointer pointer-events-auto">
-            <Crosshair
-              variant="outline"
-              size={30}
-              onClick={() => mapRef.current?.moveToMyLocation()}
-            />
+          <div
+            onClick={() => mapRef.current?.moveToMyLocation()}
+            className="map-control-btn"
+          >
+            <Crosshair variant="outline" size={30} />
           </div>
         </div>
 
