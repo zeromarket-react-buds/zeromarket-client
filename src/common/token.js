@@ -63,3 +63,4 @@ export async function refreshAccessToken() {
 // export const oauthLoginApi = async (code) => {
 //   await fetch()
 // }
+export const getAccessToken = () => localStorage.getItem("accessToken");

@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
 import { chatMessagesApi } from "@/common/api/chat.api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useHeader } from "@/hooks/HeaderContext";
 import ChatInputBar from "@/components/chat/ChatInputBar";
@@ -8,6 +8,7 @@ import ChatProductInfoBar from "@/components/chat/ChatProductInfoBar";
 import ChatMessage from "@/components/chat/ChatMessage";
 import { useAuth } from "@/hooks/AuthContext";
 import dayjs from "dayjs";
+import { createChatClient } from "@/lib/chatStompClient";
 
 const ChatRoomPage = () => {
   const { chatRoomId } = useParams();
@@ -16,7 +17,7 @@ const ChatRoomPage = () => {
   const [yourInfo, setYourInfo] = useState({});
   const [chatMessages, setChatMessages] = useState([]);
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const { setHeader } = useHeader();
   const productProps = {
@@ -69,7 +70,7 @@ const ChatRoomPage = () => {
     }, {});
   };
 
-  const fetchChatMessages = async () => {
+  const fetchChatMessages = useCallback(async () => {
     const data = await chatMessagesApi(chatRoomId);
     setChatInfo(data);
     setHeader({
@@ -82,6 +83,76 @@ const ChatRoomPage = () => {
     });
     setChatMessages(data.chatMessages);
     settingChatParticipantInfo(data);
+  }, [chatRoomId, setHeader, user?.memberId]);
+
+  const clientRef = useRef(null);
+  const subRef = useRef(null);
+
+  const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
+
+  // 1) 연결 + 구독
+  useEffect(() => {
+    if (!chatRoomId || !user) return;
+
+    const client = createChatClient({
+      debug: true,
+      onConnect: () => {
+        setConnected(true);
+
+        // 기존 구독이 있으면 정리 후 재구독
+        if (subRef.current) subRef.current.unsubscribe();
+
+        subRef.current = client.subscribe(
+          `/sub/chat/room/${chatRoomId}`,
+          (frame) => {
+            const payload = JSON.parse(frame.body);
+            console.log("payload", payload);
+
+            const normalized = {
+              ...payload,
+              isMine: payload.memberId === user.memberId,
+            };
+
+            setChatMessages((prev) => [...prev, normalized]);
+          }
+        );
+      },
+      onDisconnect: () => setConnected(false),
+      onError: (frame) => console.error("STOMP ERROR:", frame.body),
+    });
+
+    clientRef.current = client;
+    client.activate();
+
+    return () => {
+      // cleanup
+      try {
+        subRef.current?.unsubscribe();
+      } catch {}
+      client.deactivate();
+    };
+  }, [chatRoomId, user]);
+
+  // 2) send 함수
+  const sendMessage = () => {
+    const client = clientRef.current;
+    if (!client || !connected) return;
+    if (!text.trim()) return;
+
+    // 서버가 받는 DTO에 맞춰 보내기
+    const body = {
+      chatRoomId,
+      content: text.trim(),
+    };
+
+    client.publish({
+      destination: "/pub/chat.send",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    setText("");
   };
 
   useEffect(() => {
@@ -121,7 +192,7 @@ const ChatRoomPage = () => {
 
             {messages.map((msg, i) => (
               <ChatMessage
-                key={msg.id ?? i}
+                key={msg.chatMessageId ?? i}
                 userInfo={msg.isMine ? myInfo : yourInfo}
                 message={msg}
               />
@@ -131,7 +202,12 @@ const ChatRoomPage = () => {
       </div>
       {/* 하단 메시지 입력바 */}
       <div className="mt-auto sticky bottom-0 bg-white border-t z-50 ">
-        <ChatInputBar />
+        <ChatInputBar
+          text={text}
+          setText={setText}
+          sendMessage={sendMessage}
+          connected={connected}
+        />
       </div>
     </Container>
   );
