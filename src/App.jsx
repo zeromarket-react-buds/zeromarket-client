@@ -40,6 +40,8 @@ import PurchasePanelPage from "@/pages/trade/PurchasePanelPage";
 import PurchasePage from "@/pages/trade/PurchasePage";
 import { ModalProvider } from "@/hooks/useModal";
 import PurchaseLayout from "@/pages/trade/PurchaseLayout";
+import AddressFormPage from "./pages/trade/AddressFormPage";
+import AddressListPage from "./pages/trade/AddressListPage";
 
 const router = createBrowserRouter([
   {
@@ -232,17 +234,25 @@ const router = createBrowserRouter([
           },
         ],
       },
-      // // 결제-1 (거래 방법 선택 페이지)
-      // {
-      //   path: "purchases/:productId",
-      //   element: <PurchasePanelPage />,
-
-      // },
-      // // 결제-2
-      // {
-      //   path: "purchases/:productId/payment",
-      //   element: <PurchasePage />,
-      // },
+      // 결제 - 배송지 관리/추가/편집
+      // todo: 헤더 변경
+      {
+        path: "addresses",
+        children: [
+          {
+            index: true,
+            element: <AddressListPage />,
+          },
+          {
+            path: "new",
+            element: <AddressFormPage />,
+          },
+          {
+            path: ":addressId/edit",
+            element: <AddressFormPage />,
+          },
+        ],
+      },
       // 리뷰
       {
         path: "trades/:tradeId/review",

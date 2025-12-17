@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { CheckCircle, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import Container from "@/components/Container";
+import { createOrderApi } from "@/common/api/order.api";
 
 // 하단 결제 버튼
-const BottomPayButton = ({ disabled, sellPrice }) => {
+const BottomPayButton = ({ disabled, sellPrice, handleSubmit }) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-center">
       <button
+        onClick={handleSubmit}
         disabled={disabled}
         className={`w-full max-w-[600px] py-3 rounded-lg font-semibold cursor-pointer
       ${
@@ -127,57 +129,20 @@ const PaymentSection = () => {
 };
 
 const DeliverySection = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="border rounded-lg p-4">
       <div className="text-sm font-semibold mb-2">배송지</div>
-      <button className="w-full border rounded-lg py-2 text-sm text-gray-500">
+      <button
+        onClick={() => navigate("/addresses")}
+        className="w-full border rounded-lg py-2 text-sm text-gray-500"
+      >
         + 배송지 추가
       </button>
     </div>
   );
 };
-
-// const TradeCard = ({ title, sub, active, onClick }) => {
-//   return (
-//     <div
-//       onClick={onClick}
-//       className={`border rounded-lg p-4 cursor-pointer
-//         ${active ? "border-green-700" : "border-gray-200"}
-//       `}
-//     >
-//       <div className="flex gap-3 items-center">
-//         <CheckCircle className={active ? "text-green-700" : "text-gray-300"} />
-//         <div>
-//           <div className="text-sm font-medium">{title}</div>
-//           {sub && (
-//             <div className="flex items-center gap-1 text-xs text-gray-500">
-//               <MapPin size={12} />
-//               {sub}
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const TradeTypeSection = ({ tradeType, setTradeType }) => {
-//   return (
-//     <div className="space-y-2">
-//       <TradeCard
-//         title="택배 거래"
-//         active={tradeType === "DELIVERY"}
-//         onClick={() => setTradeType("DELIVERY")}
-//       />
-//       <TradeCard
-//         title="만나서 직거래"
-//         sub="염창동"
-//         active={tradeType === "DIRECT"}
-//         onClick={() => setTradeType("DIRECT")}
-//       />
-//     </div>
-//   );
-// };
 
 const ProductSummary = ({
   imageUrl,
@@ -225,6 +190,7 @@ const PurchasePage = () => {
     }
 
     console.log(product);
+    console.log(tradeType);
   }, [tradeType, navigate]);
 
   /* 약관 로직 */
@@ -253,6 +219,27 @@ const PurchasePage = () => {
       all: allChecked,
       items: updated,
     });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const data = await createOrderApi({
+        productId: product.productId,
+        amountPaid: product.sellPrice,
+        tradeType: tradeType,
+        paymentMethod: "INTERNAL",
+
+        receiverName: "김아무개",
+        receiverPhone: "01012345678",
+        zipcode: "12345",
+        addrBase: "서울시 강남구 테헤란로",
+        addrDetail: "101동 1001호",
+      });
+
+      console.log("결제 성공: ", data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -290,7 +277,11 @@ const PurchasePage = () => {
         </div>
 
         {/* ✅ 약관 전체 동의해야 결제 가능 */}
-        <BottomPayButton disabled={!terms.all} sellPrice={product.sellPrice} />
+        <BottomPayButton
+          handleSubmit={handleSubmit}
+          disabled={!terms.all}
+          sellPrice={product.sellPrice}
+        />
       </div>
     </Container>
   );
