@@ -1,3 +1,19 @@
+// import { useState } from "react";
+
+//
+// export const useLikeToggle = () => {
+//   const [products, setProducts] = useState([]);
+
+//   const onToggleLike = (productId) => {
+//     setProducts((prev) =>
+//       prev.map((p) =>
+//         p.productId === productId ? { ...p, liked: !p.liked } : p
+//       )
+//     );
+//   };
+
+//   return { products, setProducts, onToggleLike };
+// };
 import { useState } from "react";
 import { toggleWishApi } from "@/common/api/wish.api";
 
