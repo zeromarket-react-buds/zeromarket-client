@@ -8,13 +8,27 @@ import { apiClient } from "@/common/client";
  * @returns {Promise<{
  *   profileImage? : String;
  *   nickname?: string;
- *   blockedUserCount?: BigInteger;
+ *   blockedUserCount?: number;
  *   blockedUserNickname?: string;
  * }>} 프로필 데이터
  */
 const getBlockListApi = async () => {
-  const { data } = await apiClient("/api/block/list");
+  const { data } = await apiClient(`/api/block/list`);
   return data;
 };
 
-export { getBlockListApi };
+/**
+ * 차단 유저 목록 페이지에서 클릭한 유저를 차단해제하는 API
+ *
+ * PATCH /api/block/{blockId}
+ * @param {number} blockId
+ */
+const updateUnblockApi = async (blockId) => {
+  const { data } = await apiClient(`/api/block/${blockId}`, {
+    method: "PATCH",
+  });
+
+  return data;
+};
+
+export { getBlockListApi, updateUnblockApi };
