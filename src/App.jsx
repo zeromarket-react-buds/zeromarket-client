@@ -7,6 +7,7 @@ import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
+import NearbyProductsMapPage from "@/pages/products/NearbyProductsMapPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductLocationSelectPage from "@/pages/products/ProductLocationSelectPage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
@@ -59,6 +60,23 @@ const router = createBrowserRouter([
       {
         path: "search",
         element: <SearchPage />,
+      },
+      {
+        path: "nearby",
+        element: <NearbyProductsMapPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: {
+                title: "주변에서 상품 찾기",
+                showBack: true,
+                hideRight: true,
+              },
+            },
+            footer: { component: null },
+          },
+        },
       },
       {
         path: "boards",

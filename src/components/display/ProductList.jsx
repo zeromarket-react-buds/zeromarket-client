@@ -2,10 +2,12 @@ import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
+import ProductSearchMapModal from "@/components/map/ProductSearchMapModal";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/AuthContext";
@@ -14,6 +16,7 @@ const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   const navigate = useNavigate();
 
   // ⭐ 로그인 사용자 정보
@@ -45,7 +48,7 @@ const ProductList = () => {
   // ⭐ 찜 토글 후 UI 즉시 반영 함수
   //* ProductId를 clickedProductId로 분간 쉽게 변경
   const handleToggleWish = async (clickedProductId) => {
-    console.log("❤️ handleToggleWish 호출됨", clickedProductId);
+    // console.log("❤️ handleToggleWish 호출됨", clickedProductId);
 
     // 백엔드 토글 API 수행 (true/false 반환)
     const newState = await onToggleLike(clickedProductId);
@@ -82,7 +85,7 @@ const ProductList = () => {
 
     try {
       //찜유지위해 memberId추가 콘솔확인
-      console.log("📌 [fetchHomeProducts] memberId 보내는 값 =", memberId);
+      // console.log("📌 [fetchHomeProducts] memberId 보내는 값 =", memberId);
 
       const query = {
         offset: nextOffset,
@@ -94,11 +97,11 @@ const ProductList = () => {
         area,
       };
       // 찜색유지 안돼는 문제콘솔 호출 직전 URL 모양 확인
-      console.log("📌 [fetchHomeProducts] query =", query);
+      // console.log("📌 [fetchHomeProducts] query =", query);
 
       //찜색유지 안돼는 문제콘솔. memberId전달
       const data = await getProductListApi(query, memberId);
-      console.log("📌 [fetchHomeProducts] API 응답 =", data);
+      // console.log("📌 [fetchHomeProducts] API 응답 =", data);
 
       const fetched = data.content;
       const offset = data.offset;
@@ -129,11 +132,11 @@ const ProductList = () => {
   };
   // sort/filter 변경 시 목록 재호출
   useEffect(() => {
-    //찜 유지 안돼는 문제를 위한콘솔
-    console.log(
-      "⭐ memberId 변경 감지 → 상품 목록을 다시 불러옵니다:",
-      memberId
-    );
+    // //찜 유지 안돼는 문제를 위한콘솔
+    // console.log(
+    //   "⭐ memberId 변경 감지 → 상품 목록을 다시 불러옵니다:",
+    //   memberId
+    // );
     setProducts([]);
     setOffset(null);
     fetchHomeProducts(null);
@@ -208,7 +211,7 @@ const ProductList = () => {
       </div>
 
       {/* sort */}
-      <div className="flex gap-2 px-2 text-sm -mt-3">
+      <div className="flex gap-2 px-2 text-sm -mt-3 items-center">
         <span
           onClick={() => handleSort("popularity")}
           className={`cursor-pointer ${
@@ -244,6 +247,13 @@ const ProductList = () => {
         >
           높은가격순
         </span>
+        <span
+          className="cursor-pointer ml-auto pr-1 hover:text-brand-green"
+          title="지도로 상품찾기"
+          onClick={() => navigate("/nearby")}
+        >
+          <MapPin size={27} />
+        </span>
       </div>
 
       {/*  필터 모달 */}
@@ -266,6 +276,12 @@ const ProductList = () => {
         area={area}
         setArea={setArea}
         onApply={handleFilterApply}
+      />
+
+      {/* 상품찾기 지도 모달 */}
+      <ProductSearchMapModal
+        isOpen={isMapOpen}
+        onClose={() => setIsMapOpen(false)}
       />
 
       {/* 상품 카드 목록 */}

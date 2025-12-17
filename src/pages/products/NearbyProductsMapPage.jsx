@@ -1,20 +1,51 @@
-import MapSelector from "@/components/map/MapSelector";
-import { Button } from "@/components/ui/button";
+import MapSearch from "@/components/map/MapSearch";
 import { Crosshair } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useCallback, useMemo } from "react";
-import LocationNameSheet from "@/components/product/create/LocationNameSheet";
+import { getProductsByMapBoundaryApi } from "@/common/api/product.api";
+import { useAuth } from "@/hooks/AuthContext";
 
-const ProductLocationSelectPage = () => {
+const NearbyProductsMapPage = () => {
   const navigate = useNavigate();
   const routerLocation = useLocation();
   const previousForm = routerLocation.state?.form;
   const mapRef = useRef(null);
+  const { user } = useAuth();
+  const memberId = user?.memberId || 0; //0말고 수정필요
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  //주소<>위도/경도 변환위한 Geocoder객체
+  const SearchBoundaryChange = useCallback(
+    async (boundary) => {
+      try {
+        const searchParams = {
+          swLat: boundary.swLat,
+          swLng: boundary.swLng,
+          neLat: boundary.neLat,
+          neLng: boundary.neLng,
+          size: 5,
+          // 페이지네이션/키워드/카테고리 필터링 추가
+        };
+
+        const result = await getProductsByMapBoundaryApi(
+          searchParams,
+          memberId
+        );
+
+        const fetchedProducts = result.content || [];
+        console.log("지도 영역 내 상품 데이터:", fetchedProducts);
+
+        if (mapRef.current) {
+          mapRef.current.displayProducts(fetchedProducts);
+        }
+      } catch (error) {
+        console.log("상품 목록 조회 실패", error);
+      }
+    },
+    [memberId]
+  );
+
   const geocoder = useMemo(() => {
     if (window.kakao?.maps?.services) {
       return new window.kakao.maps.services.Geocoder();
@@ -22,7 +53,6 @@ const ProductLocationSelectPage = () => {
     return null;
   }, []);
 
-  //지도 클릭시 좌표>주소 변환
   const handleMapSelect = useCallback(
     ({ lat, lng }) => {
       if (!geocoder) return;
@@ -74,36 +104,18 @@ const ProductLocationSelectPage = () => {
     [geocoder]
   );
 
-  const handleSelectComplete = () => {
-    setIsSheetOpen(true);
-  };
-
-  //장소명 확정>상품등록페이지로 전달
-  const handleSubmitLocation = () => {
-    navigate("/products", {
-      replace: true,
-      state: {
-        selectedLocation: {
-          ...selectedLocation,
-          locationName, //최종장소명으로 덮어씀
-        },
-        form: previousForm,
-        // form: routerLocation.state?.form ?? null,
-      },
-    });
-  };
-
   return (
     <div className="relative h-[100dvh]">
       <div className=" absolute inset-0">
-        <MapSelector
+        <MapSearch
           ref={mapRef}
           center={{
             lat: 37.5665, // 서울시청
             lng: 126.978,
           }}
-          onSelect={handleMapSelect}
-          selectedLocation={selectedLocation}
+          onSearchBoundaryChange={SearchBoundaryChange}
+          // onSelect={handleMapSelect}
+          // selectedLocation={selectedLocation}
         />
         {isSheetOpen && (
           <div
@@ -128,24 +140,16 @@ const ProductLocationSelectPage = () => {
           </div>
         </div>
 
-        <Button
+        {/* <Button
           variant="green"
           className=" w-full py-7 text-lg pointer-events-auto"
           disabled={!selectedLocation}
           onClick={handleSelectComplete}
         >
           선택 완료
-        </Button>
+        </Button> */}
       </div>
-
-      <LocationNameSheet
-        isOpen={isSheetOpen}
-        value={locationName}
-        onChange={setLocationName} //위치 이름 상태를 직접 업뎃
-        onClose={() => setIsSheetOpen(false)}
-        onSubmit={handleSubmitLocation}
-      />
     </div>
   );
 };
-export default ProductLocationSelectPage;
+export default NearbyProductsMapPage;
