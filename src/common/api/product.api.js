@@ -1,39 +1,29 @@
 import { apiClient } from "@/common/client";
 
 const getProductListApi = async (query = {}, memberId = 0) => {
-  const params = new URLSearchParams();
+  const params = {};
 
-  if (query.offset != null) {
-    params.set("offset", query.offset);
-  }
-  if (query.sort) {
-    params.set("sort", query.sort);
-  }
+  if (query.offset != null) params.offset = query.offset;
+  if (query.sort) params.sort = query.sort;
+
   if (query.keyword && query.keyword.trim()) {
-    params.set("keyword", query.keyword.trim());
+    params.keyword = query.keyword.trim();
   }
-  if (query.categoryId != null) {
-    params.set("categoryId", query.categoryId);
-  }
-  if (query.minPrice) {
-    params.set("minPrice", query.minPrice);
-  }
-  if (query.maxPrice) {
-    params.set("maxPrice", query.maxPrice);
-  }
+
+  if (query.categoryId != null) params.categoryId = query.categoryId;
+
+  if (query.minPrice) params.minPrice = query.minPrice;
+  if (query.maxPrice) params.maxPrice = query.maxPrice;
+
   if (query.area && query.area.trim()) {
-    params.set("area", query.area.trim());
+    params.area = query.area.trim();
   }
   //새로고침해도 찜유지하기위해 추가
-  params.set("memberId", memberId);
+  params.memberId = memberId;
 
-  const qs = params.toString();
-  const url = qs ? `/api/products?${qs}` : "/api/products";
-  //찜유지 안돼서 콘솔확인
-  console.log("📌 [getProductListApi] 최종 요청 URL =", url);
-
-  const { data } = await apiClient(url, {
+  const { data } = await apiClient("/api/products", {
     method: "GET",
+    params,
   });
 
   return data;
@@ -73,27 +63,10 @@ const productVisionApi = async (file) => {
 
 // 상품등록 전 AI 초안 API 요청
 const productAiDraftApi = async (payload) => {
-  const accessToken = localStorage.getItem("accessToken");
-
-  const res = await fetch(`${API_BASE}/api/products/aidraft`, {
+  const { data } = await apiClient("/api/products/aidraft", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    body: JSON.stringify(payload),
-    credentials: "include",
+    body: payload,
   });
-
-  let data = null;
-  try {
-    data = await res.clone().json(); // 성공이든 실패든 응답 body를 미리 한 번 안전하게 읽어두기
-  } catch {}
-
-  if (!res.ok) {
-    const message = data?.message || "요청에 실패했습니다.";
-    throw new Error(message);
-  }
 
   return data; // { title, description }
 };

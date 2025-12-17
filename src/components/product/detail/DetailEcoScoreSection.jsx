@@ -6,7 +6,7 @@ const DetailEcoScoreSection = ({ detail }) => {
         <span className="">환경점수</span>
         <span className="text-brand-green text-2xl font-extrabold flex gap-3">
           <span>+</span>
-          <span>50p</span>
+          <span>{detail.environmentScore}p</span>
         </span>
       </div>
       <div className=" my-2 text-sm text-brand-darkgray border-b pb-3">

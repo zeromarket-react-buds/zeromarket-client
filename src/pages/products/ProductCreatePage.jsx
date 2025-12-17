@@ -311,6 +311,8 @@ const ProductCreatePage = () => {
 
         aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
         aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
+
+        environmentScore: envScore ? envScore : null,
       };
 
       const response = await createProductApi(payload);
@@ -470,16 +472,7 @@ const ProductCreatePage = () => {
 
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection
-              caption={vision.caption}
-              tags={vision.tags}
-              score={envScore}
-              loading={visionLoading}
-              error={visionError}
-              draftLoading={aiDraftLoading}
-              draftDone={aiDraftDone}
-              draftError={aiDraftError}
-            />
+            <EcoScoreSection score={envScore} />
           </div>
         </div>
         {/* 하단 버튼 */}
