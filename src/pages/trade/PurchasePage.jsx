@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { CheckCircle, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import Container from "@/components/Container";
 
-const BottomPayButton = () => {
+// 하단 결제 버튼
+const BottomPayButton = ({ disabled, sellPrice }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
-      <button className="w-full bg-green-700 text-white py-3 rounded-lg font-semibold">
-        7,000원 결제
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-center">
+      <button
+        disabled={disabled}
+        className={`w-full max-w-[600px] py-3 rounded-lg font-semibold cursor-pointer
+      ${
+        disabled
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-green-700 text-white"
+      }
+    `}
+      >
+        {Number(sellPrice).toLocaleString()}원 결제
       </button>
     </div>
   );
@@ -126,59 +137,64 @@ const DeliverySection = () => {
   );
 };
 
-const TradeCard = ({ title, sub, active, onClick }) => {
-  return (
-    <div
-      onClick={onClick}
-      className={`border rounded-lg p-4 cursor-pointer
-        ${active ? "border-green-700" : "border-gray-200"}
-      `}
-    >
-      <div className="flex gap-3 items-center">
-        <CheckCircle className={active ? "text-green-700" : "text-gray-300"} />
-        <div>
-          <div className="text-sm font-medium">{title}</div>
-          {sub && (
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <MapPin size={12} />
-              {sub}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+// const TradeCard = ({ title, sub, active, onClick }) => {
+//   return (
+//     <div
+//       onClick={onClick}
+//       className={`border rounded-lg p-4 cursor-pointer
+//         ${active ? "border-green-700" : "border-gray-200"}
+//       `}
+//     >
+//       <div className="flex gap-3 items-center">
+//         <CheckCircle className={active ? "text-green-700" : "text-gray-300"} />
+//         <div>
+//           <div className="text-sm font-medium">{title}</div>
+//           {sub && (
+//             <div className="flex items-center gap-1 text-xs text-gray-500">
+//               <MapPin size={12} />
+//               {sub}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
-const TradeTypeSection = ({ tradeType, setTradeType }) => {
-  return (
-    <div className="space-y-2">
-      <TradeCard
-        title="택배 거래"
-        active={tradeType === "DELIVERY"}
-        onClick={() => setTradeType("DELIVERY")}
-      />
-      <TradeCard
-        title="만나서 직거래"
-        sub="염창동"
-        active={tradeType === "DIRECT"}
-        onClick={() => setTradeType("DIRECT")}
-      />
-    </div>
-  );
-};
+// const TradeTypeSection = ({ tradeType, setTradeType }) => {
+//   return (
+//     <div className="space-y-2">
+//       <TradeCard
+//         title="택배 거래"
+//         active={tradeType === "DELIVERY"}
+//         onClick={() => setTradeType("DELIVERY")}
+//       />
+//       <TradeCard
+//         title="만나서 직거래"
+//         sub="염창동"
+//         active={tradeType === "DIRECT"}
+//         onClick={() => setTradeType("DIRECT")}
+//       />
+//     </div>
+//   );
+// };
 
-const ProductSummary = () => {
+const ProductSummary = ({
+  imageUrl,
+  productStatus,
+  sellPrice,
+  productTitle,
+}) => {
   return (
     <div className="flex gap-3 items-center">
-      <img
-        src="https://via.placeholder.com/56"
-        alt=""
-        className="w-14 h-14 rounded"
-      />
+      <img src={imageUrl} alt="" className="w-14 h-14 rounded" />
       <div>
-        <div className="text-sm font-medium">몬스테라 화분 (미사용)</div>
-        <div className="text-xs text-gray-500">7,000원</div>
+        <div className="text-sm font-medium">
+          {productTitle} ({productStatus})
+        </div>
+        <div className="text-xs text-gray-500">
+          {Number(sellPrice).toLocaleString()}원
+        </div>
       </div>
     </div>
   );
@@ -186,9 +202,11 @@ const ProductSummary = () => {
 
 const PurchasePage = () => {
   const location = useLocation();
-  const { tradeType_link } = location.state || {};
+  const navigate = useNavigate();
+  const { product } = useOutletContext();
 
-  const [tradeType, setTradeType] = useState("DELIVERY"); // DELIVERY | DIRECT
+  const { tradeType } = location.state || {}; // 이전 페이지에서 전달된 거래 방식
+  // const [tradeType, setTradeType] = useState("DELIVERY"); // DELIVERY | DIRECT
   const [showTerms, setShowTerms] = useState(false);
 
   const [terms, setTerms] = useState({
@@ -200,9 +218,19 @@ const PurchasePage = () => {
     },
   });
 
+  /* 🔒 tradeType 없으면 접근 차단 */
+  useEffect(() => {
+    if (!tradeType) {
+      navigate(-1);
+    }
+
+    console.log(product);
+  }, [tradeType, navigate]);
+
   /* 약관 로직 */
   const toggleAllTerms = () => {
     const next = !terms.all;
+
     setTerms({
       all: next,
       items: {
@@ -228,29 +256,43 @@ const PurchasePage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto pb-28 bg-white">
-      <div className="p-4 space-y-4">
-        <ProductSummary />
+    <Container>
+      <div className="bg-white">
+        <div className="space-y-6">
+          {/* 🔎 거래 방식은 표시만 */}
+          <div className="text-sm font-medium">
+            거래 방식:{" "}
+            {tradeType === "DELIVERY" ? "택배 거래" : "만나서 직거래"}
+          </div>
 
-        <TradeTypeSection tradeType={tradeType} setTradeType={setTradeType} />
+          <ProductSummary
+            imageUrl={product.images[0].imageUrl}
+            sellPrice={product.sellPrice}
+            productStatus={product.productStatus.description}
+            productTitle={product.productTitle}
+          />
 
-        {tradeType === "DELIVERY" && <DeliverySection />}
+          {/* <TradeTypeSection tradeType={tradeType} setTradeType={setTradeType} /> */}
 
-        <PaymentSection />
+          {tradeType === "DELIVERY" && <DeliverySection />}
 
-        <PriceSummary />
+          <PaymentSection />
 
-        <TermsAgreement
-          terms={terms}
-          showTerms={showTerms}
-          onToggleAll={toggleAllTerms}
-          onToggleItem={toggleTerm}
-          onToggleDetail={() => setShowTerms((p) => !p)}
-        />
+          <PriceSummary />
+
+          <TermsAgreement
+            terms={terms}
+            showTerms={showTerms}
+            onToggleAll={toggleAllTerms}
+            onToggleItem={toggleTerm}
+            onToggleDetail={() => setShowTerms((p) => !p)}
+          />
+        </div>
+
+        {/* ✅ 약관 전체 동의해야 결제 가능 */}
+        <BottomPayButton disabled={!terms.all} sellPrice={product.sellPrice} />
       </div>
-
-      <BottomPayButton />
-    </div>
+    </Container>
   );
 };
 

@@ -36,9 +36,10 @@ import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
 import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
 import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
-import PurchasePanelPage from "./pages/trade/PurchasePanelPage";
-import PurchasePage from "./pages/trade/PurchasePage";
+import PurchasePanelPage from "@/pages/trade/PurchasePanelPage";
+import PurchasePage from "@/pages/trade/PurchasePage";
 import { ModalProvider } from "@/hooks/useModal";
+import PurchaseLayout from "@/pages/trade/PurchaseLayout";
 
 const router = createBrowserRouter([
   {
@@ -216,19 +217,35 @@ const router = createBrowserRouter([
         path: "oauth/kakao/callback",
         element: <KakaoCallback />,
       },
-      // 결제 (거래 방법 선택 페이지)
-      {
-        path: "purchases/:tradeId", // trades/:tradeId
-        element: <PurchasePanelPage />,
-      },
       // 결제
       {
-        path: "purchases/:tradeId/payment", // trades/:tradeId/payment
-        element: <PurchasePage />,
+        path: "purchase/:productId",
+        element: <PurchaseLayout />,
+        children: [
+          {
+            index: true,
+            element: <PurchasePanelPage />,
+          },
+          {
+            path: "payment",
+            element: <PurchasePage />,
+          },
+        ],
       },
+      // // 결제-1 (거래 방법 선택 페이지)
+      // {
+      //   path: "purchases/:productId",
+      //   element: <PurchasePanelPage />,
+
+      // },
+      // // 결제-2
+      // {
+      //   path: "purchases/:productId/payment",
+      //   element: <PurchasePage />,
+      // },
       // 리뷰
       {
-        path: "trades/:tradeId/review", // /trades/:tradeId/review (후기 작성 페이지)
+        path: "trades/:tradeId/review",
         element: <ReviewCreatePage />,
         handle: {
           layout: {

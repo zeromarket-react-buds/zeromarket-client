@@ -144,11 +144,7 @@ const ActionButtonBar = ({
 
   // 바로가기 버튼 클릭
   const handleTradeButtonClick = async () => {
-    // → POST /orders (productId 전달) → { orderId } 반환
-    // const { tradeId } = await createTradePendingApi(productId);
-
-    // → navigate(`/purchases/${orderId}/payment`)
-    navigate(`/purchases/${tradeId}/payment`);
+    navigate(`/purchase/${productId}`);
   };
 
   // // role을 AuthContext에서 받아오기

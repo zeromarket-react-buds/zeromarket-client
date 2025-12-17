@@ -39,7 +39,7 @@ function AuthProvider({ children }) {
       } catch (e) {
         setUser(null);
 
-        console.error("초기 인증 복구 실패", e);
+        console.log("초기 인증 복구 실패", e);
       } finally {
         setLoading(false);
       }

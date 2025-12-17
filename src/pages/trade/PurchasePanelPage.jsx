@@ -1,13 +1,18 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import {
+  Link,
+  useParams,
+  useOutletContext,
+  useNavigate,
+} from "react-router-dom";
 import { CheckCircle, MapPin, ChevronUp, ChevronDown } from "lucide-react";
 
-const PriceDetail = () => {
+const PriceDetail = (sellPrice) => {
   return (
     <div className="border-t px-4 py-3 space-y-2 text-sm">
       <div className="flex justify-between">
         <span className="text-gray-500">상품 금액</span>
-        <span className="font-medium">500원</span>
+        <span className="font-medium">{sellPrice}원</span>
       </div>
 
       <div className="flex justify-between">
@@ -17,7 +22,7 @@ const PriceDetail = () => {
 
       <div className="flex justify-between font-semibold text-green-700 pt-2">
         <span>예상 결제금액</span>
-        <span>500원</span>
+        <span>{sellPrice}원</span>
       </div>
     </div>
   );
@@ -59,29 +64,38 @@ const TradeOptionCard = ({
 };
 
 const PurchasePanelPage = () => {
+  const navigate = useNavigate();
+  const { product } = useOutletContext();
+
   const [tradeType, setTradeType] = useState("DELIVERY"); // DELIVERY | DIRECT
   const [showDetail, setShowDetail] = useState(false);
+
+  useEffect(() => {
+    console.log(product);
+  }, []);
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-xl border p-4 space-y-4">
       {/* 거래 방식 */}
-      <TradeOptionCard
-        title="택배 거래"
-        description="배송비 무료 상품입니다."
-        active={tradeType === "DELIVERY"}
-        icon={<CheckCircle />}
-        onClick={() => setTradeType("DELIVERY")}
-      />
-
-      <TradeOptionCard
-        title="만나서 직거래"
-        description="상품을 직접 받을 수 있어요"
-        sub="염창동"
-        active={tradeType === "DIRECT"}
-        icon={<MapPin />}
-        onClick={() => setTradeType("DIRECT")}
-      />
-
+      {product.delivery && (
+        <TradeOptionCard
+          title="택배 거래"
+          description="배송비 무료 상품입니다."
+          icon={<CheckCircle />}
+          active={tradeType === "DELIVERY"}
+          onClick={() => setTradeType("DELIVERY")}
+        />
+      )}
+      {product.direct && (
+        <TradeOptionCard
+          title="만나서 직거래"
+          description="상품을 직접 받을 수 있어요"
+          sub="염창동"
+          icon={<MapPin />}
+          active={tradeType === "DIRECT"}
+          onClick={() => setTradeType("DIRECT")}
+        />
+      )}
       {/* 가격 요약 */}
       <div className="border rounded-lg">
         <div className="flex items-center justify-between px-4 py-3">
@@ -95,24 +109,41 @@ const PurchasePanelPage = () => {
         </div>
 
         <div className="px-4 pb-3 flex justify-between text-sm font-semibold text-green-700">
-          <span>500원</span>
+          <span>{product.sellPrice}원</span>
         </div>
 
         {/* 상세 사이드바 */}
-        {showDetail && <PriceDetail />}
+        {showDetail && <PriceDetail sellPrice={product.sellPrice} />}
       </div>
-
       {/* 구매 버튼 */}
-      <Link
+      {/* <Link
         to="payment"
         state={{
           tradeType,
         }}
+        onClick={(e) => {
+          if (!tradeType) {
+            e.preventDefault(); // 이동 차단
+            alert("거래 방식을 선택해주세요.");
+          }
+        }}
+      > */}
+      <button
+        onClick={() => {
+          if (!tradeType) {
+            alert("거래 방식을 선택해주세요.");
+            return;
+          }
+
+          navigate("payment", {
+            state: { tradeType },
+          });
+        }}
+        className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-lg"
       >
-        <button className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-lg">
-          구매하기
-        </button>
-      </Link>
+        구매하기
+      </button>
+      {/* </Link> */}
     </div>
   );
 };

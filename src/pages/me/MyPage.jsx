@@ -92,20 +92,20 @@ export default function MyPage() {
   }, [location.pathname, loading]);
   //location.pathname,추가 찜 후 MyPage로 다시 올 때마다 갱신됨!
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
       return;
     }
-    logout();
+    await logout();
     alert("로그아웃되었습니다. 홈으로 이동합니다.");
     navigate("/");
   };
 
-  const handleWithdrawal = () => {
+  const handleWithdrawal = async () => {
     if (!window.confirm("회원탈퇴 하시겠습니까?")) {
       return;
     }
-    withdraw();
+    await withdraw();
     alert("회원탈퇴되었습니다. 홈으로 이동합니다.");
     navigate("/");
   };
