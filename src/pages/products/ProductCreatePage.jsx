@@ -311,6 +311,8 @@ const ProductCreatePage = () => {
 
         aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
         aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
+
+        environmentScore: envScore ? envScore : null,
       };
 
       const response = await createProductApi(payload);
