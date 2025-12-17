@@ -9,13 +9,12 @@ import { useNavigate } from "react-router-dom";
  * @param {Array<object>} products - 지도에 표시할 상품 배열 (추가)
  */
 
-//실제 마커로 쓰일 카테고리별 이모지 및 마커html 생성 (컴포넌트 외부로 분리하여 메모리 효율)
-const getMarkerContentHtml = (categoryName, productId) => {
+const getMarkerContentHtml = (categoryName, productId, productTitle) => {
   const emojiMap = {
-    "가구/인테리어": "🏠",
-    도서: "📚",
+    "가구/인테리어": "🛋️",
+    도서: "📖",
     "디지털/가전": "💻",
-    "생활/건강": "🌱",
+    "생활/건강": "🍵",
     식품: "🍎",
     "스포츠/레저": "⚽",
     "여가/생활편의": "🎬",
@@ -27,12 +26,15 @@ const getMarkerContentHtml = (categoryName, productId) => {
   };
   const emoji = emojiMap[categoryName] || emojiMap["ETC"];
   return `
-        <div 
-          onclick="goToProductDetail(${productId})" 
-          style="padding: 5px; border-radius: 50%; background-color: white; border: 2px solid #22c55e; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-size: 20px; cursor: pointer;"
-        >
-          ${emoji}
-        </div>`;
+    <div class="custom-marker-wrapper" onclick="goToProductDetail(${productId})">
+      <div class="marker-tooltip">
+        ${productTitle}
+      </div>
+      
+      <div class="marker-emoji">
+        ${emoji}
+      </div>
+    </div>`;
 };
 
 const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
@@ -42,7 +44,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   const initialLoadRef = useRef(true);
   const productMarkersRef = useRef([]);
 
-  //전역으로 클릭핸들러 등록
+  //전역으로 클릭핸들러
   useEffect(() => {
     window.goToProductDetail = (productId) => {
       navigate(`/products/${productId}`);
@@ -55,7 +57,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   //부모 컴포넌트에서 호출할수있게 기능 노출
   useImperativeHandle(ref, () => ({
     displayProducts: (products) => {
-      console.log("마커표시시작:", products);
+      // console.log("마커표시시작:", products);
       if (!mapRef.current) return;
 
       // 기존 마커(커스텀 오버레이) 제거
@@ -71,8 +73,12 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
 
           const customOverlay = new kakao.maps.CustomOverlay({
             position: position,
-            content: getMarkerContentHtml(product.category, product.productId),
-            yAnchor: 1.2, // 마커 위치
+            content: getMarkerContentHtml(
+              product.category,
+              product.productId,
+              product.productTitle
+            ),
+            yAnchor: 1.3, // 마커 위치
             zIndex: 3,
             // clickable: true,
           });
@@ -146,12 +152,12 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
             map.setCenter(myLatLng);
           },
           (error) => {
-            if (err.code === 1) {
+            if (error.code === 1) {
               console.warn(
                 "사용자가 위치 정보 공유를 거부했습니다. 기본 위치로 지도를 표시합니다."
               );
             } else {
-              console.error("위치 정보 획득 실패:", err.message);
+              console.error("위치 정보 획득 실패:", error.message);
             }
           }
         );
@@ -159,12 +165,6 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
 
       setTimeout(() => map.relayout(), 0);
     });
-
-    // return () => {
-    //   if (mapRef.current && window.kakao?.maps) {
-    //     // kakao.maps.event.removeListener(mapRef.current, 'idle', updateBoundary); // updateBoundary 함수를 밖으로 빼서 접근 가능하게 해야 함
-    //   }
-    // };
   }, [center.lat, center.lng, onSearchBoundaryChange]);
 
   return <div ref={containerRef} className="w-full h-full" />;

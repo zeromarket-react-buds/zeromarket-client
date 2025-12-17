@@ -119,12 +119,11 @@ const ProductLocationSelectPage = () => {
         style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
       >
         <div className="flex justify-end items-end mb-3 ">
-          <div className="bg-white rounded-full size-[60px] p-2 flex items-center justify-center shadow-xl cursor-pointer pointer-events-auto">
-            <Crosshair
-              variant="outline"
-              size={30}
-              onClick={() => mapRef.current?.moveToMyLocation()}
-            />
+          <div
+            onClick={() => mapRef.current?.moveToMyLocation()}
+            className="map-control-btn"
+          >
+            <Crosshair variant="outline" size={30} />
           </div>
         </div>
 

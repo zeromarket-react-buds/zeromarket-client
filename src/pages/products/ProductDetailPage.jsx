@@ -2,10 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
-import {
-  getProductDetailApi,
-  getSimilarProductsApi,
-} from "@/common/api/product.api";
+import { getProductDetailApi } from "@/common/api/product.api";
 import { createReportApi } from "@/common/api/report.api";
 
 import Container from "@/components/Container";
@@ -34,7 +31,6 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
-  const [similarProducts, setSimilarProducts] = useState([]);
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
@@ -92,32 +88,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  //비슷상품
-  const fetchSimilarProducts = async () => {
-    try {
-      const data = await getSimilarProductsApi(id);
-
-      if (!Array.isArray(data)) {
-        console.warn("비슷한 상품 API 응답이 배열이 아님:", data);
-        return;
-      }
-
-      const formatted = data.map((p) => ({
-        productId: p.productId,
-        productTitle: p.productTitle,
-        sellPrice: p.sellPrice,
-        thumbnailUrl: p.thumbnailUrl,
-        createdAt: p.createdAt,
-        salesStatus: p.salesStatus,
-        liked: false,
-      }));
-
-      setSimilarProducts(formatted);
-    } catch (err) {
-      console.error("비슷한 상품 불러오기 실패:", err);
-    }
-  };
-
   // 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
   const toggleWish = async () => {
     if (!detail) return; // 안전장치 추가
@@ -157,7 +127,7 @@ const ProductDetailPage = () => {
     const memberId = user ? user.memberId : null; // 로그인 여부 상관없이 처리
 
     fetchProductDetail(memberId);
-    fetchSimilarProducts();
+    // fetchSimilarProducts();
   }, [id, user]);
 
   useEffect(() => {
@@ -335,7 +305,7 @@ const ProductDetailPage = () => {
             <ProductTradeInfoSection detail={detail} />
 
             {/* 신고하기 버튼 */}
-            <div className="mb-4 mt-6 text-sm">
+            <div className="mb-5 mt-8 text-sm">
               <button
                 className="cursor-pointer"
                 onClick={handleOpenReportModal}
@@ -352,7 +322,7 @@ const ProductDetailPage = () => {
             />
             {/* 비슷한 상품 */}
             <SimilarProductsSection
-              products={similarProducts}
+              productId={detail.productId}
               onToggleLike={onToggleLikeDetail} //onToggleLike 에서 변경. 상세찜 함수 전달
             />
           </div>
