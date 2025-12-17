@@ -1,0 +1,20 @@
+import { apiClient } from "@/common/client";
+
+/**
+ * 차단 유저 목록 페이지에서 로그인한 멤버의 차단 유저 정보를 조회하는 API
+ *
+ * GET /api/block/list
+ *
+ * @returns {Promise<{
+ *   profileImage? : String;
+ *   nickname?: string;
+ *   blockedUserCount?: BigInteger;
+ *   blockedUserNickname?: string;
+ * }>} 프로필 데이터
+ */
+const getBlockListApi = async () => {
+  const { data } = await apiClient("/api/block/list");
+  return data;
+};
+
+export { getBlockListApi };
