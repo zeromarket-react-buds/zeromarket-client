@@ -77,8 +77,8 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                           e.stopPropagation();
                           handleHeartClick(p.productId);
                         }}
-                        fill={p.wished ? "red" : "none"}
-                        stroke={p.wished ? "red" : "currentColor"}
+                        fill={p.liked ? "red" : "none"}
+                        stroke={p.liked ? "red" : "currentColor"}
                       />
                     )}
                   </div>

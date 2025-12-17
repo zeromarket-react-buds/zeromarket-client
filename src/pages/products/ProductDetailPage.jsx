@@ -108,7 +108,7 @@ const ProductDetailPage = () => {
       // detail 상태 업데이트
       setDetail((prev) => ({
         ...prev,
-        wished: newState,
+        liked: newState,
         wishCount: newWishCount,
       }));
 
@@ -134,10 +134,10 @@ const ProductDetailPage = () => {
     if (detail) {
       console.log(" 상세상품 detail:", detail);
       console.log("salesStatus:", detail.salesStatus);
-      console.log(" wished:", detail.wished);
+      console.log(" liked:", detail.liked);
       console.log("wishCount:", detail.wishCount);
 
-      console.log("현재 detail.wished 값:", detail.wished);
+      console.log("현재 detail.liked 값:", detail.liked);
       console.log("현재 wishCount 값:", detail.wishCount);
     }
   }, [detail]);
@@ -328,10 +328,11 @@ const ProductDetailPage = () => {
           </div>
 
           {/* 로그인 여부와 상품 작성자 여부 따라 버튼 다르게 렌더링 */}
+          {/*ActionButtonBar 내부는 그대로 wished 써도 됨(prop 이름일 뿐, 실제 상태는 liked)*/}
           <div className="sticky bottom-0 bg-white border-t z-20">
             <ActionButtonBar
               role={isAuthenticated && isProductOwner ? "SELLER" : "BUYER"}
-              wished={detail.wished}
+              wished={detail.liked}
               onToggleWish={toggleWish}
               productId={detail.productId}
               isHidden={isProductHidden}
