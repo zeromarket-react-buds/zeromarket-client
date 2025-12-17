@@ -2,17 +2,28 @@ import { GreenCheckBox } from "@/components/ui/greencheckbox";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 const TradeMethodSelector = ({ value, onChange }) => {
   const delivery = value?.delivery ?? false;
   const direct = value?.direct ?? false;
+  const location = value?.location;
+  const navigate = useNavigate();
 
-  const handleChange = (type) => (checked) => {
-    const next = {
+  const handleToggle = (type) => (checked) => {
+    onChange({
+      delivery: type === "delivery" ? checked : delivery,
+      direct: type === "direct" ? checked : direct,
+    });
+  };
+
+  const removeLocation = (e) => {
+    e.stopPropagation();
+    onChange({
       delivery,
       direct,
-      [type]: checked,
-    };
-    onChange?.(next); //부모로변경사항전달
+      location: null,
+    });
   };
 
   return (
@@ -23,37 +34,53 @@ const TradeMethodSelector = ({ value, onChange }) => {
         <GreenCheckBox
           label="택배거래"
           checked={delivery}
-          onChange={handleChange("delivery")}
+          onChange={handleToggle("delivery")}
         />
         <p className="text-gray-400 text-sm mt-1 mb-5">배송비 포함(무료배송)</p>
         <GreenCheckBox
           label="직거래"
           checked={direct}
-          onChange={handleChange("direct")}
+          onChange={handleToggle("direct")}
         />
       </div>
 
       {/* 직거래 선택시 뜨는 장소 */}
       {direct && (
         <div className="flex gap-2 flex-wrap mt-2 ">
-          <Button className="bg-gray-200 text-black rounded-3xl">
+          {location && (
+            <div>
+              <Button className="bg-gray-200 text-black rounded-3xl">
+                <span>{location.locationName}</span>
+                <span onClick={removeLocation}>
+                  <X className="text-brand-darkgray" />
+                </span>
+              </Button>
+            </div>
+          )}
+
+          {/* <Button className="bg-gray-200 text-black rounded-3xl">
             <span>역삼2동</span>
             <span>
               <X className="text-brand-darkgray" />
             </span>
-          </Button>
-          <Button className="bg-gray-200 text-black rounded-3xl">
-            <span>방화제1동</span>
-            <span>
-              <X className="text-brand-darkgray" />
-            </span>
-          </Button>
-          <Button className="bg-white border-2 border-gray-200 text-black rounded-3xl">
-            <span>
-              <Plus className="text-brand-darkgray" />
-            </span>
-            <span>위치 설정</span>
-          </Button>
+          </Button> */}
+          {!location && (
+            <Button
+              className="bg-white border-2 border-gray-200 text-black rounded-3xl"
+              onClick={() =>
+                navigate("/products/location", {
+                  state: {
+                    form: value,
+                  },
+                })
+              }
+            >
+              <span>
+                <Plus className="text-brand-darkgray" />
+              </span>
+              <span>위치 설정</span>
+            </Button>
+          )}
         </div>
       )}
     </div>

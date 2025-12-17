@@ -1,6 +1,4 @@
-import { useState } from "react";
-
-const ProductDescriptionEditor = ({ value, onChange }) => {
+const ProductDescriptionEditor = ({ value, onChange, onOpenPhraseModal }) => {
   const maxLength = 2000;
 
   const handleChange = (e) => {
@@ -13,18 +11,20 @@ const ProductDescriptionEditor = ({ value, onChange }) => {
     onChange(text);
   };
 
-  const consoleCheck = () => {
-    console.log("자주 쓰는 문구 클릭");
-  };
+  // const consoleCheck = () => {
+  //   console.log("자주 쓰는 문구 클릭");
+  // };
 
   return (
     <div className="mt-6">
       {/* 상품 설명 */}
       <div className="flex justify-between mb-2">
         <span className="font-medium text-lg">상품 설명</span>
+
+        {/* 자주 쓰는 문구 버튼 */}
         <button
-          className="text-sm font-light border px-2 py-1 rounded-lg cursor-pointer"
-          onClick={consoleCheck}
+          className="text-sm font- border px-2 py-1 rounded-lg cursor-pointer"
+          onClick={onOpenPhraseModal}
         >
           자주 쓰는 문구
         </button>

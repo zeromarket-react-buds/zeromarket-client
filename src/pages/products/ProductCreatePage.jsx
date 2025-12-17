@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
 import AiWriteSection from "@/components/product/create/AiWriteSection";
 import CategorySelector from "@/components/product/create/CategorySelector";
-import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
 import EcoScoreSection from "@/components/product/create/EcoScoreSection";
 import TradeMethodSelector from "@/components/product/create/TradeMethodSelector";
 import ProductConditionSelector from "@/components/product/create/ProductConditionSelector";
@@ -17,6 +16,8 @@ import { createProductApi, productAiDraftApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
+import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
+import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
 
 // 입력 데이터 (DTO 매칭
 const INITIAL_FORM = {
@@ -29,7 +30,8 @@ const INITIAL_FORM = {
   productStatus: "USED", //초기값
   direct: false,
   delivery: false,
-  sellingArea: "서울 관악구",
+  sellingArea: "",
+  location: null,
 };
 
 const handleBeforeUnload = (e) => {
@@ -39,12 +41,20 @@ const handleBeforeUnload = (e) => {
 
 const ProductCreatePage = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const [form, setForm] = useState(INITIAL_FORM);
+  const routerLocation = useLocation();
+  const [form, setForm] = useState(() => {
+    return routerLocation.state?.form ?? INITIAL_FORM;
+    // if (routerLocation.state?.form) {
+    //   return routerLocation.state.form;
+    // }
+    // return INITIAL_FORM;
+  });
   const [images, setImages] = useState([]);
   const navigate = useNavigate();
   const { setHeader } = useHeader();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
+  // const [selectedLocation, setSelectedLocation] = useState(null); // ProductLocationDto 객체 전체를 저장
 
   // vision / 환경점수 관련
   const [vision, setVision] = useState({ caption: "", tags: [] });
@@ -63,6 +73,9 @@ const ProductCreatePage = () => {
 
   // 대표이미지 기준으로 자동입력 1회만 하도록 키 저장
   const autoFilledKeyRef = useRef("");
+
+  // 자주 쓰는 문구 모달
+  const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
 
   useEffect(() => {
     formRef.current = form;
@@ -160,6 +173,20 @@ const ProductCreatePage = () => {
   ]);
 
   useEffect(() => {
+    if (routerLocation.state?.selectedLocation) {
+      const previousForm = routerLocation.state.form;
+
+      setForm((prev) => ({
+        ...(previousForm || prev),
+
+        location: routerLocation.state.selectedLocation,
+        direct: true,
+      }));
+      navigate(routerLocation.pathname, { replace: true, state: undefined });
+    }
+  }, [routerLocation.state, navigate, routerLocation.pathname]);
+
+  useEffect(() => {
     if (!isAuthenticated && !authLoading) {
       alert("로그인 후 상품을 등록할 수 있습니다.");
       navigate("/login", { replace: true });
@@ -214,6 +241,30 @@ const ProductCreatePage = () => {
       return;
     }
 
+    if (form.direct && !form.location) {
+      alert("직거래 위치를 선택해주세요.");
+      return;
+    }
+
+    if (
+      form.direct &&
+      (!form.location ||
+        !form.location.legalDongCode ||
+        !form.location.latitude ||
+        !form.location.longitude)
+    ) {
+      console.log(
+        "직거래를 선택했다면, 정확한 거래 위치 정보를 모두 설정해야 합니다.",
+        form.location,
+        form.location.legalDongCode,
+        form.location.latitude,
+        form.location.longitude
+      );
+      alert(
+        "직거래를 선택했다면, 정확한 거래 위치 정보를 모두 설정해야 합니다."
+      );
+      return;
+    }
     setSubmitLoading(true);
     setError("");
     console.log("상품 등록 요청 시작");
@@ -243,18 +294,31 @@ const ProductCreatePage = () => {
         });
       }
 
-      const jsonData = {
+      const finalLegalDongCode = form.location?.legalDongCode ?? null;
+      console.log("최종 legalDongCode (10자리):", finalLegalDongCode);
+
+      const payload = {
+        // ...restForm, // location 필드는 제외
         ...form,
+        sellingArea:
+          form.direct && form.location ? form.location.locationName : null,
+        // legalDongCode: form.location?.legalDongCode ?? null,
+        legalDongCode: finalLegalDongCode,
+        latitude: form.location?.latitude ?? null,
+        longitude: form.location?.longitude ?? null,
+        location: form.location,
         images: uploadedImages,
 
-        // vision 결과를 product 테이블 컬럼으로 저장
         aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
         aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
       };
 
-      const response = await createProductApi(jsonData);
+      const response = await createProductApi(payload);
+
       window.removeEventListener("beforeunload", handleBeforeUnload); //새로고침 confirm감지 제거
-      if (response && response.productId) {
+
+      // if (response && response.productId) {
+      if (response?.productId) {
         console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
         alert(`상품 등록 완료! 상품ID: ${response.productId}`);
         navigate(`/products/${response.productId}`, { replace: true });
@@ -370,8 +434,15 @@ const ProductCreatePage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
             />
           </div>
+
+          {/*자주 쓰는 문구 모달 */}
+          <FrequentPhraseModal
+            open={isPhraseModalOpen}
+            onClose={() => setIsPhraseModalOpen(false)}
+          />
 
           {/* 상품 상태 */}
           <div>
@@ -384,8 +455,8 @@ const ProductCreatePage = () => {
           {/* 거래 방법*/}
           <div>
             <TradeMethodSelector
-              value={{ delivery: form.delivery, direct: form.direct }}
-              onChange={(v) => setForm((prev) => ({ ...prev, ...v }))}
+              value={form}
+              onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
             />
           </div>
 

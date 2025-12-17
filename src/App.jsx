@@ -8,6 +8,7 @@ import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
+import ProductLocationSelectPage from "@/pages/products/ProductLocationSelectPage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
 import ProductEditPage from "@/pages/products/ProductEditPage";
 import { GlobalToast } from "@/components/GlobalToast";
@@ -100,6 +101,23 @@ const router = createBrowserRouter([
                 footer: {
                   component: null,
                 },
+              },
+            },
+          },
+          {
+            path: "location",
+            element: <ProductLocationSelectPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "만날 장소 선택",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: null },
               },
             },
           },
