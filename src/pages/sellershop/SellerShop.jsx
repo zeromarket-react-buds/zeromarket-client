@@ -13,13 +13,14 @@ import { getMemberProfile } from "@/common/api/sellerShop.api";
 import { toggleSellerLikeApi } from "@/common/api/wish.api";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { useLikeToast } from "@/components/GlobalToast"; //찜토스트
+import { useAuth } from "@/hooks/AuthContext";
 
 const SellerShopPage = () => {
   const { sellerId } = useParams();
-
-  // const [isAuthenticated, setIsAuthenticated] = useState(true); // 로그인된 상태 (더미 데이터)
+  const { isAuthenticated, user } = useAuth();
+  const currentMemberId = user?.memberId;
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  // const [memberId, setMemberId] = useState(12345); // 더미 memberId (로그인된 사용자 ID)
+
   const navigate = useNavigate();
 
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast(); //찜토스트
@@ -218,12 +219,13 @@ const SellerShopPage = () => {
 
   //신고제출
   const handleSubmitReport = async ({ reasonId, reasonText }) => {
-    if (!detail) return;
+    // if (!detail) return;
 
     const payload = {
       reasonId,
       targetType: "MEMBER",
-      targetId: memberId,
+      targetId: Number(sellerId),
+      // targetId: memberId,
       reasonText: reasonText || null,
     };
 
