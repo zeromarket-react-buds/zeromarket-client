@@ -1,7 +1,8 @@
+import React, { memo, useMemo } from "react";
 import { UserRound } from "lucide-react";
 import dayjs from "dayjs";
 
-const ChatMessage = ({ userInfo, message }) => {
+const ChatMessage = memo(({ userInfo, message, yourLastReadMessageId }) => {
   // memberId
   // profileImage
   // nickName
@@ -19,6 +20,11 @@ const ChatMessage = ({ userInfo, message }) => {
     isMine,
   } = message;
 
+  const msgId = Number(message.messageId || 0);
+
+  // 내 메시지의 읽음 여부
+  const isReadByOther = message.isMine && yourLastReadMessageId >= msgId;
+
   return (
     <>
       {" "}
@@ -28,9 +34,15 @@ const ChatMessage = ({ userInfo, message }) => {
           <div className="text-sm text-gray-500 justify-end self-end mr-2">
             {dayjs(message.createdAt).format("A h:mm")}
           </div>
+
           <div className="rounded-2xl text-sm border-2 p-3 border-brand-green min-w-1/3 max-w-1/2 bg-brand-ivory">
             {message.content}
           </div>
+          {msgId > 0 && (
+            <div className="text-[10px] text-gray-500 text-right mt-1">
+              {isReadByOther ? "읽음" : "1"}
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex space-x-4">
@@ -47,6 +59,6 @@ const ChatMessage = ({ userInfo, message }) => {
       )}
     </>
   );
-};
+});
 
 export default ChatMessage;
