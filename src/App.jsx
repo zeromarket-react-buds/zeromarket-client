@@ -7,6 +7,7 @@ import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
 import Home from "./pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
+import NearbyProductsMapPage from "@/pages/products/NearbyProductsMapPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
 import ProductLocationSelectPage from "@/pages/products/ProductLocationSelectPage";
 import ProductDetailPage from "@/pages/products/ProductDetailPage";
@@ -39,6 +40,7 @@ import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
 import PurchasePanelPage from "./pages/trade/PurchasePanelPage";
 import PurchasePage from "./pages/trade/PurchasePage";
 import { ModalProvider } from "@/hooks/useModal";
+import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +61,23 @@ const router = createBrowserRouter([
       {
         path: "search",
         element: <SearchPage />,
+      },
+      {
+        path: "nearby",
+        element: <NearbyProductsMapPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: {
+                title: "주변에서 상품 찾기",
+                showBack: true,
+                hideRight: true,
+              },
+            },
+            footer: { component: null },
+          },
+        },
       },
       {
         path: "boards",
@@ -281,15 +300,36 @@ const router = createBrowserRouter([
               },
             },
           },
+
+          // 알림 설정
           {
-            path: "selling",
-            element: <MySalesPage />,
+            path: "notifications",
+            element: <MyNotificationsPage />,
             handle: {
               layout: {
                 header: {
                   component: "TitleHeader",
                   props: {
-                    title: "나의 판매내역",
+                    title: "알림 설정",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+
+          // 환경 점수 안내 페이지
+          {
+            path: "envgradeguide",
+            element: <EnvGradeGuidePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "환경점수",
                     hideRight: true,
                   },
                 },
@@ -299,24 +339,8 @@ const router = createBrowserRouter([
               },
             },
           },
-          {
-            path: "purchases",
-            element: <MyPurchasesPage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: {
-                    title: "나의 구매내역",
-                    hideRight: true,
-                  },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
+
+          // 프로필 설정
           {
             path: "profile",
             element: <MyProfileEditPage />,
@@ -355,23 +379,83 @@ const router = createBrowserRouter([
                 footer: { component: "DefaultFooter" },
               },
             },
-          }, //
+          },
 
-          // 알림 설정
+          // 판매 내역
           {
-            path: "notifications",
-            element: <MyNotificationsPage />,
+            path: "selling",
+            element: <MySalesPage />,
             handle: {
               layout: {
                 header: {
                   component: "TitleHeader",
                   props: {
-                    title: "알림 설정",
-                    showBack: true,
+                    title: "나의 판매내역",
                     hideRight: true,
                   },
                 },
-                footer: { component: "DefaultFooter" },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+
+          // 구매 내역
+          {
+            path: "purchases",
+            element: <MyPurchasesPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "나의 구매내역",
+                    hideRight: true,
+                  },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+
+          // 채팅 목록 페이지
+          {
+            path: "chats",
+            index: true,
+            element: <ChatListPage />,
+            // API: GET /api/chats
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: { title: "채팅 목록" },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
+              },
+            },
+          },
+
+          // 차단 유저 목록
+          {
+            path: "blocklist",
+            element: <BlockUserLIstPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "차단 유저 목록",
+                    hideRight: true,
+                  },
+                },
+                footer: {
+                  component: "DefaultFooter",
+                },
               },
             },
           },
@@ -394,6 +478,7 @@ const router = createBrowserRouter([
               },
             },
           },
+
           //셀러샵 찜목록 페이지
           {
             path: "wishlist/sellers",
@@ -412,24 +497,7 @@ const router = createBrowserRouter([
               },
             },
           },
-          //채팅 목록 페이지
-          {
-            path: "chats",
-            index: true,
-            element: <ChatListPage />,
-            // API: GET /api/chats
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: { title: "채팅 목록" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
+
           // /me/reviews/summary (후기 요약 페이지, 3건씩)
           {
             path: "reviews/summary",
@@ -455,25 +523,6 @@ const router = createBrowserRouter([
                 header: {
                   component: "TitleHeader",
                   props: { title: "후기" },
-                },
-                footer: {
-                  component: "DefaultFooter",
-                },
-              },
-            },
-          },
-          // 환경 점수 안내 페이지
-          {
-            path: "envgradeguide",
-            element: <EnvGradeGuidePage />,
-            handle: {
-              layout: {
-                header: {
-                  component: "TitleHeader",
-                  props: {
-                    title: "환경점수",
-                    hideRight: true,
-                  },
                 },
                 footer: {
                   component: "DefaultFooter",

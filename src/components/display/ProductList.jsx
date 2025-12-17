@@ -145,7 +145,7 @@ const ProductList = () => {
     area,
   ]);
   /*주석처리: 이미 useEffect에서 memberId 감지 중복재조회 만들어져 있음 
-    같은 화면에서 로그인 상태가 바뀌는 UX 일 때만 필요함.*/
+  //같은 화면에서 로그인 상태가 바뀌는 UX 일 때만 필요함.*/
   // //  로그인 복구(memberId 변화) 시 → 강제 재조회
   // useEffect(() => {
   //   console.log("memberId 변경 감지 → 전체 리스트 다시 조회:", memberId);

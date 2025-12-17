@@ -20,6 +20,28 @@ const getProductListApi = async (query = {}) => {
   return data;
 };
 
+//맵화면경계
+const getProductsByMapBoundaryApi = async (
+  boundaryQuery = {},
+  memberId = 0
+) => {
+  const params = {
+    memberId,
+
+    swLat: boundaryQuery.swLat,
+    swLng: boundaryQuery.swLng,
+    neLat: boundaryQuery.neLat,
+    neLng: boundaryQuery.neLng,
+  };
+
+  const { data } = await apiClient("/api/products", {
+    method: "GET",
+    params,
+  });
+
+  return data;
+};
+
 // 상품등록 전 Vision
 const API_BASE = "http://localhost:8080";
 
@@ -250,6 +272,7 @@ const toggleWishApi = async (productId) => {
 
 export {
   getProductListApi,
+  getProductsByMapBoundaryApi,
   productVisionApi,
   productAiDraftApi,
   createProductApi,
