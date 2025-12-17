@@ -109,25 +109,6 @@ const MapSelector = forwardRef(
           });
         });
 
-        // if (navigator.geolocation) {
-        //   navigator.geolocation.getCurrentPosition(
-        //     (pos) => {
-        //       const lat = pos.coords.latitude;
-        //       const lng = pos.coords.longitude;
-        //       const myLatLng = new kakao.maps.LatLng(lat, lng);
-        //       myLatLngRef.current = myLatLng;
-
-        //       map.setCenter(myLatLng);
-        //       selectMarker.setPosition(myLatLng);
-
-        //       onSelect?.({ lat, lng });
-        //     },
-        //     (error) => {
-        //       console.error("Geolocation failed:", error);
-        //     }
-        //   );
-        // }
-
         setTimeout(() => map.relayout(), 0);
       });
     }, [center, onSelect, selectedLocation]);
@@ -143,18 +124,6 @@ const MapSelector = forwardRef(
         }
       }
     }, [selectedLocation]);
-
-    // const moveToMyLocation = () => {
-    //   if (!mapRef.current || !myLatLngRef.current) return;
-
-    //   mapRef.current.setCenter(myLatLngRef.current);
-    //   selectMarkerRef.current.setPosition(myLatLngRef.current);
-
-    //   onSelect?.({
-    //     lat: myLatLngRef.current.getLat(),
-    //     lng: myLatLngRef.current.getLng(),
-    //   });
-    // };
 
     return <div ref={containerRef} className="w-full h-full" />;
   }

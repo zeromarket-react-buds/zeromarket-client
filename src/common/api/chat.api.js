@@ -25,6 +25,14 @@ const chatMessagesApi = async (chatRoomId) => {
   return data;
 };
 
+const markChatRoomAsReadApi = async (chatRoomId, lastReadMessageId) => {
+  const { data } = await apiClient(`/api/chats/rooms/${chatRoomId}/read`, {
+    method: "PATCH",
+    body: { lastReadMessageId },
+  });
+  return data;
+};
+
 // export async function updateTradeStatusApi({ tradeId, nextStatus }) {
 //   const { data } = await apiClient(`/api/trades/${tradeId}/status`, {
 //     method: "PATCH",
@@ -89,6 +97,7 @@ export {
   chatRoomsApi,
   chatRoomIdApi,
   chatMessagesApi,
+  markChatRoomAsReadApi,
   processTradePendingApi,
   processTradeCompleteApi,
 };

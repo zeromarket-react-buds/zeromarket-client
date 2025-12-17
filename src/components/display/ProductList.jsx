@@ -1,13 +1,12 @@
 import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
 import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "@/hooks/AuthContext";
 
 const ProductList = () => {
@@ -240,6 +239,13 @@ const ProductList = () => {
           }`}
         >
           높은가격순
+        </span>
+        <span
+          className="cursor-pointer ml-auto pr-1 hover:text-brand-green"
+          title="지도로 상품찾기"
+          onClick={() => navigate("/nearby")}
+        >
+          <MapPin size={27} />
         </span>
       </div>
 
