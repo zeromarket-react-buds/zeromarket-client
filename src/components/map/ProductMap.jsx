@@ -97,7 +97,12 @@ const ProductMap = forwardRef(
       });
     };
 
-    return <div ref={containerRef} className="w-full h-full" />;
+    return (
+      <div>
+        충돌 확인용 코드 추가!
+        <div ref={containerRef} className="w-full h-full" />
+      </div>
+    );
   }
 );
 
