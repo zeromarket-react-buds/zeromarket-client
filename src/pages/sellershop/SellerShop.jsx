@@ -3,8 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { UserRound, Heart } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { createReportApi } from "@/common/api/report.api";
-import ReportModal from "@/components/report/ReportModal";
 import { getProductsBySeller } from "@/common/api/sellerShop.api";
 import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
 import { SectionItem } from "../review/ReceivedReviewSummaryPage";
@@ -14,21 +12,15 @@ import { toggleSellerLikeApi } from "@/common/api/wish.api";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { useLikeToast } from "@/components/GlobalToast"; //찜토스트
 import { useAuth } from "@/hooks/AuthContext";
-import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/useModal";
-import BlockModal from "@/components/block/BlockModal";
-import {
-  getTargetIdIsBlockedApi,
-  createBlockApi,
-} from "@/common/api/block.api";
+import { getTargetIdIsBlockedApi } from "@/common/api/block.api";
+import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const SellerShopPage = () => {
   const { alert, confirm } = useModal();
   const { sellerId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const currentMemberId = user?.memberId;
-
-  const navigate = useNavigate();
 
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast(); //찜토스트
 
@@ -48,9 +40,7 @@ const SellerShopPage = () => {
 
   // 메뉴 & 모달 상태
   const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
-  const [reportModal, setReportModal] = useState(false); // 신고 모달
-  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false); // 차단 모달
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   // 후기
   const [reviewSummary, setReviewSummary] = useState({
@@ -70,11 +60,14 @@ const SellerShopPage = () => {
 
   // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
   useEffect(() => {
-    const handler = () => setMenuOpen(true);
-    window.addEventListener("seller-menu-open", handler);
+    const handler = (e) => {
+      setAnchorEl(e?.detail?.anchorEl ?? null); // 커스텀 이벤트로 보낼 때 detail 안에 데이터를 넣어 전달. 어디 기준으로 띄울지(앵커 요소)를 상태로 저장
+      setMenuOpen(true);
+    };
 
-    return () => window.removeEventListener("seller-menu-open", handler);
-  }, []);
+    window.addEventListener("seller-menu-open", handler); // 해당 이벤트를 구독
+    return () => window.removeEventListener("seller-menu-open", handler); // 컴포넌트가 사라질 때 구독 해제
+  }, []); // 페이지 이동 등으로 컴포넌트가 언마운트될 때 이벤트가 남아서 꼬이는 문제를 막음
 
   // 프로필 함수
   const fetchMemberProfile = useCallback(async () => {
@@ -232,81 +225,6 @@ const SellerShopPage = () => {
     }
   };
 
-  // 신고 모달 열기
-  const handleOpenReportModal = async () => {
-    if (!isAuthenticated) {
-      const goLogin = await confirm({
-        description:
-          "신고 기능은 로그인 후 이용 가능합니다.\n 로그인 화면으로 이동하시겠습니까?",
-      });
-      if (goLogin) {
-        navigate("/login");
-      }
-      return;
-    }
-    setIsReportModalOpen(true);
-    console.log("모달오픈");
-  };
-  const handleCloseReportModal = () => {
-    setIsReportModalOpen(false);
-  };
-
-  //신고제출
-  const handleSubmitReport = async ({ reasonId, reasonText }) => {
-    // if (!detail) return;
-
-    const payload = {
-      reasonId,
-      targetType: "MEMBER",
-      targetId: Number(sellerId),
-      // targetId: memberId,
-      reasonText: reasonText || null,
-    };
-
-    try {
-      const result = await createReportApi(payload);
-      alert(result?.message || "신고가 접수되었습니다.");
-      setIsReportModalOpen(false);
-    } catch (error) {
-      console.error("신고 제출 실패", error);
-      alert("신고 처리 중 문제가 발생했습니다.");
-    }
-  };
-
-  // 차단 모달 열기
-  const handleOpenBlockModal = async () => {
-    if (!isAuthenticated) {
-      const goLogin = await confirm({
-        description:
-          "차단 기능은 로그인 후 이용 가능합니다.\n 로그인 화면으로 이동하시겠습니까?",
-      });
-      if (goLogin) {
-        navigate("/login");
-      }
-      return;
-    }
-    setIsBlockModalOpen(true);
-  };
-
-  const handleCloseBlockModal = () => {
-    setIsBlockModalOpen(false);
-  };
-
-  // 차단 제출
-  const handleSubmitBlock = async ({ blockedUserId }) => {
-    try {
-      const result = await createBlockApi({
-        blockedUserId: Number(blockedUserId),
-      });
-
-      await fetchBlockedSellerState(); // 이걸로 즉시 반영
-      await alert({ description: result?.message });
-      setIsBlockModalOpen(false);
-    } catch (error) {
-      console.error("차단 실패", error);
-      await alert({ description: "차단 처리 중 문제가 발생했습니다." });
-    }
-  };
   return (
     <>
       <Container>
@@ -418,40 +336,17 @@ const SellerShopPage = () => {
             </div>
           </div>
         </div>
+
+        {/* 점 세 개 메뉴 */}
+        <MenuActionsContainer
+          menuOpen={menuOpen}
+          targetMemberId={sellerId}
+          setMenuOpen={setMenuOpen}
+          reportTargetType="MEMBER"
+          onAfterBlock={fetchBlockedSellerState}
+          anchorEl={anchorEl}
+        />
       </Container>
-
-      {/* ===== 점 세 개 메뉴 ===== */}
-      {menuOpen && (
-        <>
-          {/* 딤 배경 */}
-          <div
-            className="fixed inset-0 bg-black/40 z-50"
-            onClick={() => setMenuOpen(false)}
-          ></div>
-
-          {/* 메뉴 박스 */}
-          <div className="fixed top-20 right-4 bg-white rounded-xl shadow-xl border w-36 p-2 z-50">
-            <Button
-              className="w-full text-black p-2 hover:bg-gray-100"
-              // onClick={() => {
-              //   setMenuOpen(false);
-              //   // setReportModal(true);
-
-              // }}
-              onClick={handleOpenReportModal}
-            >
-              신고하기
-            </Button>
-
-            <Button
-              className="w-full text-black p-2 hover:bg-gray-100"
-              onClick={handleOpenBlockModal}
-            >
-              차단하기
-            </Button>
-          </div>
-        </>
-      )}
 
       {/* ====== 신고 모달 ===== */}
       {/* {reportModal && (
@@ -473,23 +368,6 @@ const SellerShopPage = () => {
           </div>
         </div>
       )} */}
-
-      {/* 신고하기 모달 */}
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onclose={handleCloseReportModal}
-        onSubmit={handleSubmitReport}
-        targetType="MEMBER"
-      />
-
-      {/* ==== 차단 모달 ==== */}
-      {isBlockModalOpen && (
-        <BlockModal
-          sellerId={sellerId}
-          onClose={handleCloseBlockModal}
-          onApply={handleSubmitBlock}
-        />
-      )}
     </>
   );
 };

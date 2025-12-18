@@ -9,6 +9,7 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import { useAuth } from "@/hooks/AuthContext";
 import dayjs from "dayjs";
 import { createChatClient } from "@/lib/chatStompClient";
+import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const ChatRoomPage = () => {
   const { chatRoomId } = useParams();
@@ -20,11 +21,26 @@ const ChatRoomPage = () => {
   const [yourLastReadMessageId, setYourLastReadMessageId] = useState(0);
   const { user, loading } = useAuth();
 
+  const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const { setHeader } = useHeader();
   const productProps = {
     ...(chatInfo ?? {}),
     thumbnailUrl: chatInfo?.productImage,
   };
+
+  // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
+  useEffect(() => {
+    const handler = (e) => {
+      setAnchorEl(e?.detail?.anchorEl ?? null); // 커스텀 이벤트로 보낼 때 detail 안에 데이터를 넣어 전달. 어디 기준으로 띄울지(앵커 요소)를 상태로 저장
+      setMenuOpen(true);
+    };
+
+    window.addEventListener("seller-menu-open", handler); // 해당 이벤트를 구독
+    return () => window.removeEventListener("seller-menu-open", handler); // 컴포넌트가 사라질 때 구독 해제
+    // 페이지 이동 등으로 컴포넌트가 언마운트될 때 이벤트가 남아서 꼬이는 문제를 막음
+  }, []);
 
   const settingChatParticipantInfo = (data) => {
     const amISeller = user.memberId === data.sellerId;
@@ -222,30 +238,27 @@ const ChatRoomPage = () => {
 
     fetchChatMessages();
   }, [chatRoomId, user, fetchChatMessages]);
-useEffect(() => {
-  if (!chatRoomId || !user) return;
-  if (!lastMessageId || lastMessageId <= 0) return;
+  useEffect(() => {
+    if (!chatRoomId || !user) return;
+    if (!lastMessageId || lastMessageId <= 0) return;
 
-  const tryRead = () => {
-    if (
-      document.visibilityState === "visible" &&
-      document.hasFocus()
-    ) {
-      markAsRead(lastMessageId);
-    }
-  };
+    const tryRead = () => {
+      if (document.visibilityState === "visible" && document.hasFocus()) {
+        markAsRead(lastMessageId);
+      }
+    };
 
-  document.addEventListener("visibilitychange", tryRead);
-  window.addEventListener("focus", tryRead);
+    document.addEventListener("visibilitychange", tryRead);
+    window.addEventListener("focus", tryRead);
 
-  // 최초 진입 시도
-  tryRead();
+    // 최초 진입 시도
+    tryRead();
 
-  return () => {
-    document.removeEventListener("visibilitychange", tryRead);
-    window.removeEventListener("focus", tryRead);
-  };
-}, [chatRoomId, user, lastMessageId, markAsRead]);
+    return () => {
+      document.removeEventListener("visibilitychange", tryRead);
+      window.removeEventListener("focus", tryRead);
+    };
+  }, [chatRoomId, user, lastMessageId, markAsRead]);
 
   const grouped = groupMessagesByDate(chatMessages);
 
@@ -324,6 +337,15 @@ useEffect(() => {
           connected={connected}
         />
       </div>
+
+      {/* 점 세 개 메뉴*/}
+      <MenuActionsContainer
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        targetMemberId={yourInfo?.memberId}
+        reportTargetType="MEMBER"
+        anchorEl={anchorEl}
+      />
     </Container>
   );
 };

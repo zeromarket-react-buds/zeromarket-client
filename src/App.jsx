@@ -190,7 +190,19 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "채팅방" },
+              props: {
+                title: "채팅방",
+                rightSlot: (
+                  <MoreVertical
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      // 채팅에서 커스텀 이벤트 발생
+                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
+                    }}
+                  />
+                ),
+              },
             },
             footer: {
               component: null,
