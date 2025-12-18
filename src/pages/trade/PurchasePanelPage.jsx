@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { CheckCircle, MapPin, ChevronUp, ChevronDown } from "lucide-react";
+import { usePurchase } from "@/hooks/PurchaseContext";
 
 const PriceDetail = (sellPrice) => {
   return (
@@ -67,12 +68,9 @@ const PurchasePanelPage = () => {
   const navigate = useNavigate();
   const { product } = useOutletContext();
 
-  const [tradeType, setTradeType] = useState("DELIVERY"); // DELIVERY | DIRECT
-  const [showDetail, setShowDetail] = useState(false);
+  const { tradeType, setTradeType } = usePurchase();
 
-  useEffect(() => {
-    console.log(product);
-  }, []);
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-xl border p-4 space-y-4">
@@ -134,10 +132,10 @@ const PurchasePanelPage = () => {
             alert("거래 방식을 선택해주세요.");
             return;
           }
-
-          navigate("payment", {
-            state: { tradeType },
-          });
+          navigate("payment");
+          // navigate("payment", {
+          //   state: { tradeType },
+          // });
         }}
         className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-lg"
       >

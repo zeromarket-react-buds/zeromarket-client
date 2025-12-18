@@ -40,10 +40,11 @@ import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
 import PurchasePanelPage from "@/pages/trade/PurchasePanelPage";
 import PurchasePage from "@/pages/trade/PurchasePage";
 import { ModalProvider } from "@/hooks/useModal";
-import PurchaseLayout from "@/pages/trade/PurchaseLayout";
+import { PurchaseProvider } from "./hooks/PurchaseContext";
 import AddressFormPage from "./pages/trade/AddressFormPage";
 import AddressListPage from "./pages/trade/AddressListPage";
 import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
+import PurchaseLayout from "./pages/trade/PurchaseLayout";
 
 const router = createBrowserRouter([
   {
@@ -243,32 +244,15 @@ const router = createBrowserRouter([
         path: "purchase/:productId",
         element: <PurchaseLayout />,
         children: [
+          { index: true, element: <PurchasePanelPage /> },
+          { path: "payment", element: <PurchasePage /> },
           {
-            index: true,
-            element: <PurchasePanelPage />,
-          },
-          {
-            path: "payment",
-            element: <PurchasePage />,
-          },
-        ],
-      },
-      // 결제 - 배송지 관리/추가/편집
-      // todo: 헤더 변경
-      {
-        path: "addresses",
-        children: [
-          {
-            index: true,
-            element: <AddressListPage />,
-          },
-          {
-            path: "new",
-            element: <AddressFormPage />,
-          },
-          {
-            path: ":addressId/edit",
-            element: <AddressFormPage />,
+            path: "addresses",
+            children: [
+              { index: true, element: <AddressListPage /> },
+              { path: "new", element: <AddressFormPage /> },
+              { path: ":addressId/edit", element: <AddressFormPage /> },
+            ],
           },
         ],
       },
@@ -642,8 +626,10 @@ const App = function () {
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
       <AuthProvider>
         <ModalProvider>
-          <GlobalToast />
-          <RouterProvider router={router} />
+          <PurchaseProvider>
+            <GlobalToast />
+            <RouterProvider router={router} />
+          </PurchaseProvider>
         </ModalProvider>
       </AuthProvider>
     </Suspense>

@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import { CheckCircle, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import Container from "@/components/Container";
 import { createOrderApi } from "@/common/api/order.api";
+import { getAddressDetail } from "@/common/api/address.api";
+import { usePurchase } from "@/hooks/PurchaseContext";
 
 // 하단 결제 버튼
 const BottomPayButton = ({ disabled, sellPrice, handleSubmit }) => {
@@ -128,18 +135,33 @@ const PaymentSection = () => {
   );
 };
 
-const DeliverySection = () => {
+const DeliverySection = ({ address, handleNavigate }) => {
   const navigate = useNavigate();
+
+  const hasAddress = Boolean(address?.addressId);
 
   return (
     <div className="border rounded-lg p-4">
       <div className="text-sm font-semibold mb-2">배송지</div>
-      <button
-        onClick={() => navigate("/addresses")}
-        className="w-full border rounded-lg py-2 text-sm text-gray-500"
-      >
-        + 배송지 추가
-      </button>
+
+      {hasAddress ? (
+        <div onClick={handleNavigate} className="cursor-pointer">
+          <div className="flex items-center gap-2">
+            <MapPin size={16} />
+            <span className="font-medium">{address.receiverName}</span>
+          </div>
+          <div className="text-xs text-gray-600 mt-1">
+            {address.zipcode} {address.addrBase} {address.addrDetail}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={handleNavigate}
+          className="w-full border rounded-lg py-2 text-sm text-gray-500 cursor-pointer"
+        >
+          + 배송지 선택
+        </button>
+      )}
     </div>
   );
 };
@@ -166,11 +188,19 @@ const ProductSummary = ({
 };
 
 const PurchasePage = () => {
-  const location = useLocation();
+  // const location = useLocation();
   const navigate = useNavigate();
+
   const { product } = useOutletContext();
 
-  const { tradeType } = location.state || {}; // 이전 페이지에서 전달된 거래 방식
+  // const { tradeType } = useParams();
+
+  const { tradeType, addressId } = usePurchase();
+
+  // const [tradeType, setTradeType] = useState(null);
+  // const [addressId, setAddressId] = useState(null);
+  const [address, setAddress] = useState({});
+  // const { tradeType } = location.state || {}; // 이전 페이지에서 전달된 거래 방식
   // const [tradeType, setTradeType] = useState("DELIVERY"); // DELIVERY | DIRECT
   const [showTerms, setShowTerms] = useState(false);
 
@@ -183,15 +213,38 @@ const PurchasePage = () => {
     },
   });
 
-  /* 🔒 tradeType 없으면 접근 차단 */
   useEffect(() => {
+    // console.log(location.state);
+
+    console.log("tradeType: ", tradeType); // null
+    console.log("addressId: ", addressId); // null
+
+    /* 🔒 tradeType 없으면 접근 차단 */
     if (!tradeType) {
-      navigate(-1);
+      navigate(`/products/${product.productId}`);
     }
 
-    console.log(product);
-    console.log(tradeType);
-  }, [tradeType, navigate]);
+    // if (location.state?.tradeType) {
+    //   setTradeType(location.state.tradeType);
+    // }
+    // if (location.state?.addressId) {
+    //   setAddressId(location.state.addressId);
+    // }
+  }, []);
+
+  // addressId 변경 시 배송지 조회
+  useEffect(() => {
+    if (!addressId) return;
+
+    console.log("addressId 변경: ", addressId);
+
+    const fetchAddressDetail = async () => {
+      const data = await getAddressDetail(addressId);
+      console.log(data);
+      setAddress(data);
+    };
+    fetchAddressDetail();
+  }, [addressId]);
 
   /* 약관 로직 */
   const toggleAllTerms = () => {
@@ -221,19 +274,33 @@ const PurchasePage = () => {
     });
   };
 
+  // 주소 조회 페이지 이동
+  const handleNavigate = () => {
+    navigate(`/purchase/${product.productId}/addresses?tradeType=${tradeType}`);
+  };
+
   const handleSubmit = async () => {
+    if (tradeType === "DELIVERY" && !address) {
+      alert("배송지를 선택해주세요.");
+      return;
+    }
+
+    if (tradeType === "DIRECT") {
+      // todo: 배송지 로직 전부 무시
+    }
+
     try {
       const data = await createOrderApi({
         productId: product.productId,
         amountPaid: product.sellPrice,
-        tradeType: tradeType,
+        tradeType,
         paymentMethod: "INTERNAL",
 
-        receiverName: "김아무개",
-        receiverPhone: "01012345678",
-        zipcode: "12345",
-        addrBase: "서울시 강남구 테헤란로",
-        addrDetail: "101동 1001호",
+        receiverName: address.receiverName,
+        receiverPhone: address.receiverPhone,
+        zipcode: address.zipcode,
+        addrBase: address.addrBase,
+        addrDetail: address.addrDetail,
       });
 
       console.log("결제 성공: ", data);
@@ -261,7 +328,12 @@ const PurchasePage = () => {
 
           {/* <TradeTypeSection tradeType={tradeType} setTradeType={setTradeType} /> */}
 
-          {tradeType === "DELIVERY" && <DeliverySection />}
+          {tradeType === "DELIVERY" && (
+            <DeliverySection
+              address={address}
+              handleNavigate={handleNavigate}
+            />
+          )}
 
           <PaymentSection />
 

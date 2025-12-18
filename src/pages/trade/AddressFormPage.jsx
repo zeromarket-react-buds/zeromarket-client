@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  getAddressDetail,
+} from "@/common/api/address.api";
 
 const Input = ({ label, value, onChange }) => {
   return (
@@ -12,9 +18,11 @@ const Input = ({ label, value, onChange }) => {
   );
 };
 
-const AddressFormPage = ({ mode }) => {
+const AddressFormPage = () => {
   const navigate = useNavigate();
   const { addressId } = useParams();
+
+  const mode = addressId ? "edit" : "create";
 
   // 우편번호 포함 권장
   const [form, setForm] = useState({
@@ -29,15 +37,19 @@ const AddressFormPage = ({ mode }) => {
 
   /* 수정 모드일 때만 기존 데이터 로드 */
   useEffect(() => {
+    console.log("mode: ", mode);
+
     if (mode === "edit") {
       // GET /api/addresses/:addressId
-      setForm({
-        name: "집",
-        receiver: "김아무개",
-        phone: "010-0000-0000",
-        address: "서울시 ...",
-        detailAddress: "101동 101호",
-        isDefault: true,
+      getAddressDetail(addressId).then((data) => {
+        setForm({
+          receiver: data.receiverName,
+          phone: data.receiverPhone,
+          zipcode: data.zipcode,
+          address: data.addrBase,
+          detailAddress: data.addrDetail,
+          isDefault: data.isDefault,
+        });
       });
     }
   }, [mode, addressId]);
@@ -67,17 +79,27 @@ const AddressFormPage = ({ mode }) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const payload = {
+      receiverName: form.receiver,
+      receiverPhone: form.phone,
+      zipcode: form.zipcode,
+      addrBase: form.address,
+      addrDetail: form.detailAddress,
+      isDefault: form.isDefault,
+    };
+
     if (mode === "create") {
-      // POST /api/addresses
+      await createAddress(payload);
     } else {
-      // PUT /api/addresses/:addressId
+      await updateAddress(addressId, payload);
     }
+
     navigate("/addresses");
   };
 
-  const handleDelete = () => {
-    // DELETE /api/addresses/:addressId
+  const handleDelete = async () => {
+    await deleteAddress(addressId);
     navigate("/addresses");
   };
 
