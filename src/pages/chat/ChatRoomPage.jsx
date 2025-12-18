@@ -222,26 +222,30 @@ const ChatRoomPage = () => {
 
     fetchChatMessages();
   }, [chatRoomId, user, fetchChatMessages]);
-  useEffect(() => {
-    if (!chatRoomId || !user) return;
-    if (!lastMessageId || lastMessageId <= 0) return;
+useEffect(() => {
+  if (!chatRoomId || !user) return;
+  if (!lastMessageId || lastMessageId <= 0) return;
 
-    const tryMarkRead = () => {
-      if (document.visibilityState !== "visible") return;
+  const tryRead = () => {
+    if (
+      document.visibilityState === "visible" &&
+      document.hasFocus()
+    ) {
       markAsRead(lastMessageId);
-    };
+    }
+  };
 
-    // 1) 지금 보이면 바로 실행
-    tryMarkRead();
+  document.addEventListener("visibilitychange", tryRead);
+  window.addEventListener("focus", tryRead);
 
-    // 2) 나중에 visible 되는 순간에도 실행
-    const onVisibilityChange = () => tryMarkRead();
-    window.addEventListener("visibilitychange", onVisibilityChange);
+  // 최초 진입 시도
+  tryRead();
 
-    return () => {
-      window.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [chatRoomId, user, lastMessageId, markAsRead]);
+  return () => {
+    document.removeEventListener("visibilitychange", tryRead);
+    window.removeEventListener("focus", tryRead);
+  };
+}, [chatRoomId, user, lastMessageId, markAsRead]);
 
   const grouped = groupMessagesByDate(chatMessages);
 
