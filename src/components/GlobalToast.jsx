@@ -60,7 +60,7 @@ export const useTradeToast = () => {
   };
 };
 
-// 거래 토스트 함수
+// 프로필 토스트 함수
 export const useProfileToast = () => {
   const showProfileUpdatedToast = () => {
     toast.success("프로필 수정이 완료되었습니다", {
@@ -73,6 +73,22 @@ export const useProfileToast = () => {
 
   return {
     showProfileUpdatedToast,
+  };
+};
+
+// 프로필 토스트 함수
+export const useBlockToast = () => {
+  const showUnblockToast = () => {
+    toast.success("해당 유저를 차단 해제했습니다", {
+      position: "bottom-center",
+      autoClose: 3000,
+      hideProgressBar: true,
+      pauseOnHover: false,
+    });
+  };
+
+  return {
+    showUnblockToast,
   };
 };
 
