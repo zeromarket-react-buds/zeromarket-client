@@ -3,37 +3,34 @@ import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LongProductCard from "@/components/order/LongProductCard";
+import LongProductCard from "@/components/trade/LongProductCard";
 import {
-  tradeFlowLabels,
   getTradeStatusKey,
-} from "@/components/order/tradeFlow";
+  tradeFlowLabels,
+} from "@/components/trade/tradeFlow";
 import {
   getTradeListApi,
   updateTradeStatusApi,
   softDeleteTradeApi,
 } from "@/common/api/trade.api";
-import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
-import TradeReviewButton from "@/components/order/TradeReviewButton";
-import TradeFilterModal from "@/components/order/TradeFilterModal";
+import TradeReviewButton from "@/components/trade/TradeReviewButton";
+import TradeActionStatusButton from "@/components/trade/TradeActionStatusButton";
+import TradeFilterModal from "@/components/trade/TradeFilterModal";
 import {
   getStatusLabel,
   getPeriodLabel,
-} from "@/components/order/filterOptions";
+} from "@/components/trade/filterOptions";
 import { Badge } from "@/components/ui/badge";
 import { useTradeToast } from "@/components/GlobalToast";
 import { useModal } from "@/hooks/useModal";
 import { useAuth } from "@/hooks/AuthContext";
 
-const MySalesPage = () => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+const MyPurchasesPage = () => {
   const { alert, confirm } = useModal();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const {
-    showCompletedUpdatedToast,
-    showCanceledUpdatedToast,
-    showSoftDeletedToast,
-  } = useTradeToast();
+  const { showCanceledUpdatedToast, showSoftDeletedToast } = useTradeToast();
+
   const [keyword, setKeyword] = useState("");
   const [tradeList, setTradeList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -56,26 +53,18 @@ const MySalesPage = () => {
     try {
       const query = {
         keyword: (overrideQuery?.keyword ?? keyword).trim(),
-        role: "SALES",
+        role: "PURCHASES",
         status: overrideQuery?.status ?? filterStatus,
         fromDate: overrideQuery?.fromDate ?? filterFromDate,
         toDate: overrideQuery?.toDate ?? filterToDate,
       };
 
       const data = await getTradeListApi(query);
-      console.log("거래 목록 응답:", data);
+      console.log("거래 목록 응답 :", data);
 
       const fetched = Array.isArray(data) ? data : data?.content ?? [];
 
-      // 숨기기 상품은 항상 포함, 그 외에는 trade 정보가 있는 애들만 노출
-      const filtered = fetched.filter((t) => {
-        if (t.isHidden) return true;
-        return (
-          t.tradeId != null && t.tradeStatus != null && t.tradeType != null
-        );
-      });
-
-      setTradeList(filtered);
+      setTradeList(fetched);
     } catch (err) {
       console.error("상품 목록 불러오기 실패:", err);
     } finally {
@@ -86,7 +75,7 @@ const MySalesPage = () => {
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
       (async () => {
-        await alert({ description: "판매내역은 로그인 후 접근이 가능합니다." });
+        await alert({ description: "구매내역은 로그인 후 접근이 가능합니다." });
         navigate("/login", { replace: true });
       })();
     }
@@ -101,28 +90,6 @@ const MySalesPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchTradeList();
-  };
-
-  const handleUpdateCompleteTrade = async (tradeId) => {
-    const ok = await confirm({
-      description: "거래 완료로 변경하시겠습니까?",
-      confirmText: "변경",
-    });
-
-    if (!ok) return;
-
-    try {
-      await updateTradeStatusApi({
-        tradeId,
-        nextStatus: "COMPLETED",
-      });
-
-      // 상태 변경 성공 후 목록 다시 불러오기
-      await fetchTradeList();
-      showCompletedUpdatedToast();
-    } catch (err) {
-      console.error("거래 완료로 변경 실패:", err);
-    }
   };
 
   const handleUpdateCancelTrade = async (tradeId) => {
@@ -160,7 +127,7 @@ const MySalesPage = () => {
     try {
       await softDeleteTradeApi({
         tradeId,
-        deletedBy: "SELLER",
+        deletedBy: "BUYER",
       });
 
       await fetchTradeList();
@@ -220,6 +187,7 @@ const MySalesPage = () => {
             <Search className="h-4 w-4" />
           </Button>
         </form>
+
         <Button
           type="button"
           className="flex flex-row items-center gap-2 py-6 text-black font-normal"
@@ -247,17 +215,19 @@ const MySalesPage = () => {
             <span>전체</span>
           )}
         </Button>
+
         {/* 필터 모달 */}
         {isFilterOpen && (
           <TradeFilterModal
             onClose={() => setIsFilterOpen(false)}
             onApply={handleFilterApply}
-            mode="sales"
+            mode="purchases"
             initialStatuses={filterStatus}
             initialFromDate={filterFromDate}
             initialToDate={filterToDate}
           />
         )}
+
         <div className="flex flex-col gap-4">
           {tradeList.map((trade) => {
             const {
@@ -290,9 +260,14 @@ const MySalesPage = () => {
             const isCanceled = statusDesc === "취소";
             const isHidden = productIsHidden === true;
             const hideActions = isCanceled || isHidden;
+            const isCompleted = tradeStatusKey === "COMPLETED";
+
+            // 숨기기 뱃지 별도로 계산 (구매내역에서는 완료나 취소 상태일 땐 숨기기 뱃지 표시 X)
+            const isHiddenBadge =
+              productIsHidden === true && !isCanceled && !isCompleted;
 
             return (
-              <div key={tradeId ?? productId}>
+              <div key={tradeId}>
                 <div className="flex flex-row justify-between p-2 items-center">
                   <span>{createdAt?.split("T")[0]?.replaceAll("-", ".")}</span>
                   <Button
@@ -320,7 +295,7 @@ const MySalesPage = () => {
                     isDelivery={isDelivery}
                     tradeStatus={statusDesc}
                     thumbnailUrl={thumbnailUrl}
-                    isHidden={isHidden}
+                    isHidden={isHiddenBadge}
                   />
 
                   {!hideActions && hasTrade && (
@@ -328,10 +303,7 @@ const MySalesPage = () => {
                       trade={trade}
                       flowType={flowType}
                       tradeStatusKey={tradeStatusKey}
-                      mode="sales"
-                      onComplete={() => {
-                        handleUpdateCompleteTrade(tradeId);
-                      }}
+                      mode="purchases"
                       onCancel={() => {
                         handleUpdateCancelTrade(tradeId);
                       }}
@@ -339,7 +311,7 @@ const MySalesPage = () => {
                   )}
 
                   {/* 거래완료 상태 + 후기 버튼 */}
-                  {hasTrade && !isHidden && tradeStatusKey === "COMPLETED" && (
+                  {hasTrade && tradeStatusKey === "COMPLETED" && (
                     <TradeReviewButton
                       tradeId={tradeId}
                       reviewStatus={reviewStatus}
@@ -355,4 +327,4 @@ const MySalesPage = () => {
   );
 };
 
-export default MySalesPage;
+export default MyPurchasesPage;

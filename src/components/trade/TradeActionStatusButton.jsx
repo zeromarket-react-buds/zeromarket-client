@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import TradeStatusBar from "@/components/order/TradeStatusBar";
+import TradeStatusBar from "@/components/trade/TradeStatusBar";
 
 const TradeActionStatusButton = ({
   flowType,

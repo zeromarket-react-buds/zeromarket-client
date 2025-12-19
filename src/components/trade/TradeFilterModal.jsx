@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import SelectedFiltersSection from "@/components/order/SelectedFilterSection";
-import PeriodFilterSection from "@/components/order/PeriodFilterSection";
-import StatusFilterSection from "@/components/order/StatusFilterSection";
+import SelectedFiltersSection from "@/components/trade/SelectedFilterSection";
+import PeriodFilterSection from "@/components/trade/PeriodFilterSection";
+import StatusFilterSection from "@/components/trade/StatusFilterSection";
 
 const statusOptions = [
   { label: "예약중", value: "PENDING" },

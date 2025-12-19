@@ -2,12 +2,12 @@ import {
   getTradeDetailApi,
   updateTradeStatusApi,
 } from "@/common/api/trade.api";
-import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
-import TradeReviewButton from "@/components/order/TradeReviewButton";
+import TradeActionStatusButton from "@/components/trade/TradeActionStatusButton";
+import TradeReviewButton from "@/components/trade/TradeReviewButton";
 import {
   tradeFlowLabels,
   getTradeStatusKey,
-} from "@/components/order/tradeFlow";
+} from "@/components/trade/tradeFlow";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";

@@ -1,4 +1,4 @@
-import LongProductCard from "@/components/order/LongProductCard";
+import LongProductCard from "@/components/trade/LongProductCard";
 import ChangeStatusButtons from "@/components/chat/ChangeStatusButtons";
 import React from "react";
 
