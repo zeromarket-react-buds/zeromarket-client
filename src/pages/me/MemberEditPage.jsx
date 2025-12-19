@@ -6,8 +6,14 @@ import PhoneEditModal from "@/components/profile/PhoneEditModal";
 import EmailEditModal from "@/components/profile/EmailEditModal";
 import formatPhone from "@/utils/formatPhone";
 import Container from "@/components/Container";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
 
 const MemberEditPage = () => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { alert } = useModal();
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [profileImg, setProfileImg] = useState("");
   const [phone, setPhone] = useState("");
@@ -42,6 +48,17 @@ const MemberEditPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({
+          description: "회원정보 수정 페이지는 로그인 후 접근이 가능합니다.",
+        });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {

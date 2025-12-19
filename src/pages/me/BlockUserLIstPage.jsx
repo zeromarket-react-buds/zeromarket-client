@@ -6,9 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "@/hooks/useModal";
 import { useBlockToast } from "@/components/GlobalToast";
+import { useAuth } from "@/hooks/AuthContext";
 
 const BlockUserLIstPage = () => {
-  const { confirm } = useModal();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { alert, confirm } = useModal();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -37,6 +39,17 @@ const BlockUserLIstPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({
+          description: "차단 유저 목록 페이지는 로그인 후 접근이 가능합니다.",
+        });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   useEffect(() => {
     fetchBlockList();

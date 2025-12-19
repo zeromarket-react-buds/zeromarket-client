@@ -23,9 +23,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useTradeToast } from "@/components/GlobalToast";
 import { useModal } from "@/hooks/useModal";
+import { useAuth } from "@/hooks/AuthContext";
 
 const MySalesPage = () => {
-  const { confirm } = useModal();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { alert, confirm } = useModal();
   const navigate = useNavigate();
   const {
     showCompletedUpdatedToast,
@@ -80,6 +82,15 @@ const MySalesPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({ description: "판매내역은 로그인 후 접근이 가능합니다." });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {

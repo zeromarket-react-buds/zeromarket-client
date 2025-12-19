@@ -12,12 +12,14 @@ import {
 // fetch 쓰면 토큰이 안 붙어서 count가 변하지 않음 → apiClient 사용해야 함
 import { getMyPageProfileApi } from "@/common/api/me.api";
 import { apiClient } from "@/common/client";
+import { useModal } from "@/hooks/useModal";
 
 export default function MyPage() {
   // 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
-  const { user, loading, logout, withdraw } = useAuth();
+  const { alert } = useModal();
+  const { user, loading, logout, withdraw, isAuthenticated } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
@@ -37,6 +39,17 @@ export default function MyPage() {
       console.error("마이페이지 불러오기 실패:", err);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      (async () => {
+        await alert({
+          description: "마이페이지는 로그인 후 접근이 가능합니다.",
+        });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [loading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {

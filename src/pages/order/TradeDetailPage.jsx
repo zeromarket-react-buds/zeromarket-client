@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTradeToast } from "@/components/GlobalToast";
 import formatPhone from "@/utils/formatPhone";
 import { useModal } from "@/hooks/useModal";
+import { useAuth } from "@/hooks/AuthContext";
 
 // 공통 날짜 포맷 함수
 const formatDate = (isoString) => {
@@ -29,7 +30,8 @@ const getHeaderDate = (trade) => {
 };
 
 const TradeDetailPage = () => {
-  const { confirm } = useModal();
+  const { alert, confirm } = useModal();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { showCompletedUpdatedToast, showCanceledUpdatedToast } =
     useTradeToast();
@@ -51,6 +53,15 @@ const TradeDetailPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({ description: "거래내역은 로그인 후 접근이 가능합니다." });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   useEffect(() => {
     fetchTradeProduct();
