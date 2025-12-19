@@ -1,4 +1,4 @@
-import { UserRound, Heart, Pen } from "lucide-react";
+import { UserRound, Heart, Pen, Settings } from "lucide-react";
 import Container from "@/components/Container";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -13,6 +13,8 @@ import {
 import { getMyPageProfileApi } from "@/common/api/me.api";
 import { apiClient } from "@/common/client";
 import { useModal } from "@/hooks/useModal";
+import { requestNotificationPermission } from "@/lib/browserNotification";
+import { useHeader } from "@/hooks/HeaderContext";
 
 export default function MyPage() {
   // 찜 개수 상태 추가
@@ -23,6 +25,7 @@ export default function MyPage() {
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
+  const { setHeader } = useHeader();
 
   // 추가됨: 현재 페이지 정보를 가져옴
   const location = useLocation();
@@ -123,6 +126,16 @@ export default function MyPage() {
     alert("회원탈퇴되었습니다. 홈으로 이동합니다.");
     navigate("/");
   };
+
+  // 페이지 진입 시 헤더 설정
+  useEffect(() => {
+    setHeader({
+      showBellWithRightSlot: true,
+      rightSlot: [
+        <Settings onClick={() => navigate("/me/settings")}></Settings>,
+      ],
+    });
+  }, [setHeader]);
 
   return (
     <Container>

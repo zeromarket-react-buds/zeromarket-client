@@ -7,10 +7,12 @@ import iconCart from "@/assets/ico_cart.svg";
 import iconSearch from "@/assets/ico_search.svg";
 import { useAuth } from "@/hooks/AuthContext";
 import { Bell, UserRound } from "lucide-react";
+import BellWithBadge from "@/components/BellWithBadge";
+import { useNotification } from "@/hooks/NotificationContext";
 
 const DefaultHeader = () => {
   const { user, isAuthenticated } = useAuth();
-  console.log("user", user);
+  const { unreadCount } = useNotification();
 
   return (
     <Container>
@@ -35,7 +37,7 @@ const DefaultHeader = () => {
             </div>
           ) : (
             <div className="flex flex-row items-center gap-5">
-              <Bell className="w-9 h-9" />
+              <BellWithBadge size="L" unreadCount={unreadCount} />
               <Link to="/me" className="">
                 {user?.profileImage ? (
                   <img

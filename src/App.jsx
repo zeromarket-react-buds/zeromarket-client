@@ -23,7 +23,7 @@ import SellerShopPage from "@/pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창 //확인필요
 import MyPageLayout from "@/layouts/MyPageLayout";
 import TradeDetailPage from "@/pages/trade/TradeDetailPage";
-import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
+import SettingPage from "@/pages/me/SettingPage";
 import MyWishListPage from "@/pages/me/MyWishListPage";
 import ChatListPage from "@/pages/chat/ChatListPage";
 import ChatRoomPage from "@/pages/chat/ChatRoomPage";
@@ -45,6 +45,7 @@ import AddressFormPage from "@/pages/order/AddressFormPage";
 import AddressListPage from "@/pages/order/AddressListPage";
 import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
+import { NotificationProvider } from "@/hooks/NotificationContext";
 
 const router = createBrowserRouter([
   {
@@ -326,8 +327,8 @@ const router = createBrowserRouter([
 
           // 알림 설정
           {
-            path: "notifications",
-            element: <MyNotificationsPage />,
+            path: "settings",
+            element: <SettingPage />,
             handle: {
               layout: {
                 header: {
@@ -335,7 +336,6 @@ const router = createBrowserRouter([
                   props: {
                     title: "알림 설정",
                     showBack: true,
-                    hideRight: true,
                   },
                 },
                 footer: { component: "DefaultFooter" },
@@ -637,12 +637,14 @@ const App = function () {
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
       <AuthProvider>
-        <ModalProvider>
-          <PurchaseProvider>
-            <GlobalToast />
-            <RouterProvider router={router} />
-          </PurchaseProvider>
-        </ModalProvider>
+        <NotificationProvider>
+          <ModalProvider>
+            <PurchaseProvider>
+              <GlobalToast />
+              <RouterProvider router={router} />
+            </PurchaseProvider>
+          </ModalProvider>
+        </NotificationProvider>
       </AuthProvider>
     </Suspense>
   );

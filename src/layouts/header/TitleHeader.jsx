@@ -1,8 +1,10 @@
 // src/layouts/header/TitleHeader.jsx
 import React from "react";
 import { ChevronLeft, Bell, Home } from "lucide-react";
+import BellWithBadge from "@/components/BellWithBadge";
 import Container from "@/components/Container";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "@/hooks/NotificationContext";
 
 const TitleHeader = ({
   title,
@@ -17,7 +19,10 @@ const TitleHeader = ({
   rightActions, // ⭐ HeaderContext에서 내려오는 멀티 버튼
   isSticky = false,
   onBack,
+  showBellWithRightSlot = false,
 }) => {
+  const { unreadCount } = useNotification();
+
   const navigate = useNavigate();
   // 멀티 액션이 존재하는지
   const hasRightActions =
@@ -100,7 +105,20 @@ const TitleHeader = ({
     return (
       <div className="inline-flex items-center">
         <button type="button" onClick={openMenuWithAnchor}>
-          {rightSlot ? rightSlot : <Bell size={24} />}
+          {rightSlot ? (
+            <div className="flex items-center gap-2">
+              {showBellWithRightSlot && (
+                <>
+                  <BellWithBadge unreadCount={unreadCount} />
+                </>
+              )}
+              {rightSlot}
+            </div>
+          ) : (
+            <>
+              <BellWithBadge unreadCount={unreadCount} />
+            </>
+          )}
         </button>
       </div>
     );
