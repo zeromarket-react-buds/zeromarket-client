@@ -5,7 +5,7 @@ import { useState } from "react";
 import Boards from "@/pages/Boards";
 import Board from "@/pages/Board";
 import BoardEdit from "@/pages/BoardEdit";
-import Home from "./pages/Home";
+import Home from "@/pages/Home";
 import SearchPage from "@/pages/search/SearchPage";
 import NearbyProductsMapPage from "@/pages/products/NearbyProductsMapPage";
 import ProductCreatePage from "@/pages/products/ProductCreatePage";
@@ -17,16 +17,16 @@ import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import MyPage from "@/pages/me/MyPage";
 import { AuthProvider } from "@/hooks/AuthContext";
-import MySalesPage from "@/pages/order/MySalesPage";
-import MyPurchasesPage from "@/pages/order/MyPurchasesPage";
-import SellerShopPage from "./pages/sellershop/SellerShop";
+import MySalesPage from "@/pages/trade/MySalesPage";
+import MyPurchasesPage from "@/pages/trade/MyPurchasesPage";
+import SellerShopPage from "@/pages/sellershop/SellerShop";
 import { MoreVertical } from "lucide-react"; //SellerShop 상단 선택창 //확인필요
 import MyPageLayout from "@/layouts/MyPageLayout";
-import TradeDetailPage from "@/pages/order/TradeDetailPage";
-import MyNotificationsPage from "@/pages/me/MyNotificationsPage";
-import MyWishListPage from "./pages/me/MyWishListPage";
-import ChatListPage from "./pages/chat/ChatListPage";
-import ChatRoomPage from "./pages/chat/ChatRoomPage";
+import TradeDetailPage from "@/pages/trade/TradeDetailPage";
+import SettingPage from "@/pages/me/SettingPage";
+import MyWishListPage from "@/pages/me/MyWishListPage";
+import ChatListPage from "@/pages/chat/ChatListPage";
+import ChatRoomPage from "@/pages/chat/ChatRoomPage";
 import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
@@ -36,16 +36,18 @@ import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
 import MyProfileEditPage from "@/pages/me/MyProfileEditPage";
-import MyWishSellerListPage from "./pages/me/MyWishSellerListPage";
-import PurchasePanelPage from "@/pages/trade/PurchasePanelPage";
-import PurchasePage from "@/pages/trade/PurchasePage";
+import MyWishSellerListPage from "@/pages/me/MyWishSellerListPage";
+import PurchasePanelPage from "@/pages/order/PurchasePanelPage";
+import PurchasePage from "@/pages/order/PurchasePage";
 import { ModalProvider } from "@/hooks/useModal";
-import { PurchaseProvider } from "./hooks/PurchaseContext";
-import AddressFormPage from "./pages/trade/AddressFormPage";
-import AddressListPage from "./pages/trade/AddressListPage";
+import { PurchaseProvider } from "@/hooks/PurchaseContext";
+import AddressFormPage from "@/pages/order/AddressFormPage";
+import AddressListPage from "@/pages/order/AddressListPage";
 import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "./pages/trade/PurchaseLayout";
 import OrderCompletePage from "./pages/trade/OrderCompletePage";
+import PurchaseLayout from "@/pages/order/PurchaseLayout";
+import { NotificationProvider } from "@/hooks/NotificationContext";
 
 const router = createBrowserRouter([
   {
@@ -191,7 +193,19 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "채팅방" },
+              props: {
+                title: "채팅방",
+                rightSlot: (
+                  <MoreVertical
+                    size={24}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      // 채팅에서 커스텀 이벤트 발생
+                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
+                    }}
+                  />
+                ),
+              },
             },
             footer: {
               component: null,
@@ -363,8 +377,8 @@ const router = createBrowserRouter([
 
           // 알림 설정
           {
-            path: "notifications",
-            element: <MyNotificationsPage />,
+            path: "settings",
+            element: <SettingPage />,
             handle: {
               layout: {
                 header: {
@@ -372,7 +386,6 @@ const router = createBrowserRouter([
                   props: {
                     title: "알림 설정",
                     showBack: true,
-                    hideRight: true,
                   },
                 },
                 footer: { component: "DefaultFooter" },
@@ -674,12 +687,14 @@ const App = function () {
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
       <AuthProvider>
-        <ModalProvider>
-          <PurchaseProvider>
-            <GlobalToast />
-            <RouterProvider router={router} />
-          </PurchaseProvider>
-        </ModalProvider>
+        <NotificationProvider>
+          <ModalProvider>
+            <PurchaseProvider>
+              <GlobalToast />
+              <RouterProvider router={router} />
+            </PurchaseProvider>
+          </ModalProvider>
+        </NotificationProvider>
       </AuthProvider>
     </Suspense>
   );

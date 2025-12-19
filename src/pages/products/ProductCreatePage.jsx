@@ -31,6 +31,7 @@ const INITIAL_FORM = {
   direct: false,
   delivery: false,
   sellingArea: "",
+  environmentScore: null,
   location: null,
 };
 
@@ -312,7 +313,7 @@ const ProductCreatePage = () => {
         aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
         aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
 
-        environmentScore: envScore ? envScore : null,
+        environmentScore: form.environmentScore ?? null,
       };
 
       const response = await createProductApi(payload);
@@ -348,6 +349,17 @@ const ProductCreatePage = () => {
   const handleVisionResult = useCallback((v) => {
     setVision(v);
     setEnvScore(v.environmentScore);
+    setForm((prev) => ({
+      ...prev,
+      environmentScore: v.environmentScore,
+    }));
+
+    setVisionError("");
+    setVisionLoading(false);
+    setAiDraftLoading(false);
+    setAiDraftError("");
+    setAiDraftDone(false);
+    autoFilledKeyRef.current = "";
   }, []);
 
   // Vision 관련 상태 초기화(이미지 제거/변경 시 사용)
@@ -472,7 +484,7 @@ const ProductCreatePage = () => {
 
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection score={envScore} />
+            <EcoScoreSection score={form.environmentScore} />
           </div>
         </div>
         {/* 하단 버튼 */}

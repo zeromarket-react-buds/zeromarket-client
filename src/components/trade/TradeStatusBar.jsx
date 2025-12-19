@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { tradeFlows } from "@/components/order/tradeFlow";
+import { tradeFlows } from "@/components/trade/tradeFlow";
 
 const TradeStatusBar = ({ flowType, status, className = "" }) => {
   const steps = tradeFlows[flowType] || [];

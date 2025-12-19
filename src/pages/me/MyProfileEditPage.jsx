@@ -12,6 +12,7 @@ import ProfileImageSection from "@/components/profile/ProfileImageSection";
 import NicknameSection from "@/components/profile/NicknameSection";
 import IntroSection from "@/components/profile/IntroSection";
 import { useModal } from "@/hooks/useModal";
+import { useAuth } from "@/hooks/AuthContext";
 
 // 한글 2, 그 외 1로 계산하는 길이
 const getWeightedLength = (str) => {
@@ -29,6 +30,7 @@ const getWeightedLength = (str) => {
 };
 
 const MyProfileEditPage = () => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { alert, confirm } = useModal();
   const navigate = useNavigate();
   const { showProfileUpdatedToast } = useProfileToast();
@@ -89,6 +91,17 @@ const MyProfileEditPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({
+          description: "프로필 수정 페이지는 로그인 후 접근이 가능합니다.",
+        });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {

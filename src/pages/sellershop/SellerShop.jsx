@@ -3,8 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { UserRound, Heart } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { createReportApi } from "@/common/api/report.api";
-import ReportModal from "@/components/report/ReportModal";
 import { getProductsBySeller } from "@/common/api/sellerShop.api";
 import { getReceivedReviewSummaryApi } from "@/common/api/review.api";
 import { SectionItem } from "../review/ReceivedReviewSummaryPage";
@@ -14,14 +12,15 @@ import { toggleSellerLikeApi } from "@/common/api/wish.api";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { useLikeToast } from "@/components/GlobalToast"; //찜토스트
 import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
+import { getTargetIdIsBlockedApi } from "@/common/api/block.api";
+import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const SellerShopPage = () => {
+  const { alert } = useModal();
   const { sellerId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const currentMemberId = user?.memberId;
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-
-  const navigate = useNavigate();
 
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast(); //찜토스트
 
@@ -36,10 +35,12 @@ const SellerShopPage = () => {
   const [loading, setLoading] = useState(false);
   const loadMoreRef = useRef(null);
 
+  // 차단한 사람인지 체크
+  const [isSellerBlocked, setIsSellerBlocked] = useState(false);
+
   // 메뉴 & 모달 상태
   const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
-  const [reportModal, setReportModal] = useState(false); // 신고 모달
-  const [blockModal, setBlockModal] = useState(false); // 차단 모달
+  const [anchorEl, setAnchorEl] = useState(null);
 
   // 후기
   const [reviewSummary, setReviewSummary] = useState({
@@ -55,15 +56,19 @@ const SellerShopPage = () => {
     nickname: "",
     profileImage: "",
     trustScore: null,
+    environmentScoreTotal: null,
   });
 
   // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
   useEffect(() => {
-    const handler = () => setMenuOpen(true);
-    window.addEventListener("seller-menu-open", handler);
+    const handler = (e) => {
+      setAnchorEl(e?.detail?.anchorEl ?? null); // 커스텀 이벤트로 보낼 때 detail 안에 데이터를 넣어 전달. 어디 기준으로 띄울지(앵커 요소)를 상태로 저장
+      setMenuOpen(true);
+    };
 
-    return () => window.removeEventListener("seller-menu-open", handler);
-  }, []);
+    window.addEventListener("seller-menu-open", handler); // 해당 이벤트를 구독
+    return () => window.removeEventListener("seller-menu-open", handler); // 컴포넌트가 사라질 때 구독 해제
+  }, []); // 페이지 이동 등으로 컴포넌트가 언마운트될 때 이벤트가 남아서 꼬이는 문제를 막음
 
   // 프로필 함수
   const fetchMemberProfile = useCallback(async () => {
@@ -120,6 +125,26 @@ const SellerShopPage = () => {
     }
   }, [sellerId, cursor, hasNext, loading]); // cursor, hasNext, loading
 
+  // 차단한 사람인지 체크
+  const fetchBlockedSellerState = useCallback(async () => {
+    try {
+      if (!isAuthenticated || !sellerId) {
+        setIsSellerBlocked(false);
+        return;
+      }
+
+      const data = await getTargetIdIsBlockedApi(Number(sellerId));
+
+      // 백 응답 키: blocked (DTO상 isBlocked이지만 Lombok @getter가 blocked로 내려줌)
+      const isBlocked = data?.blocked ?? false;
+
+      setIsSellerBlocked(Boolean(isBlocked));
+    } catch (err) {
+      console.error("차단 상태 조회 실패:", err);
+      setIsSellerBlocked(false);
+    }
+  }, [isAuthenticated, sellerId]);
+
   // 초기 fetch
   useEffect(() => {
     setProducts([]);
@@ -133,7 +158,8 @@ const SellerShopPage = () => {
     fetchProductsBySeller();
     fetchReviewsSummary();
     fetchMemberProfile();
-  }, [sellerId]);
+    fetchBlockedSellerState(); // 차단한 상태
+  }, [sellerId, fetchBlockedSellerState]);
   // 무한 스크롤이면서 첫 로딩도 호출해야 하므로, -> 더 안전하게 동작(??)
 
   // IntersectionObserver (첫 호출 완료 후 활성화)
@@ -200,45 +226,6 @@ const SellerShopPage = () => {
     }
   };
 
-  const handleOpenReportModal = () => {
-    if (!isAuthenticated) {
-      const goLogin = window.confirm(
-        "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?"
-      );
-      if (goLogin) {
-        navigate("/login");
-      }
-      return;
-    }
-    setIsReportModalOpen(true);
-    console.log("모달오픈");
-  };
-  const handleCloseReportModal = () => {
-    setIsReportModalOpen(false);
-  };
-
-  //신고제출
-  const handleSubmitReport = async ({ reasonId, reasonText }) => {
-    // if (!detail) return;
-
-    const payload = {
-      reasonId,
-      targetType: "MEMBER",
-      targetId: Number(sellerId),
-      // targetId: memberId,
-      reasonText: reasonText || null,
-    };
-
-    try {
-      const result = await createReportApi(payload);
-      alert(result?.message || "신고가 접수되었습니다.");
-      setIsReportModalOpen(false);
-    } catch (error) {
-      console.error("신고 제출 실패", error);
-      alert("신고 처리 중 문제가 발생했습니다.");
-    }
-  };
-
   return (
     <>
       <Container>
@@ -269,18 +256,29 @@ const SellerShopPage = () => {
             </button>
           </div>
 
+          {/* 차단한 셀러샵인 경우 알려주는 부분 */}
+          {isSellerBlocked && (
+            <div className="-mt-2 mb-4 pl-2 text-brand-red font-semibold">
+              회원님께서 차단한 셀러샵입니다
+            </div>
+          )}
+
           {/* ---------- 점수 ---------- */}
           <div className="border rounded-2xl p-4 mb-5">
             <div className="flex justify-between mb-2">
               <span>신뢰점수</span>
-              <span className="text-brand-green text-xl">
+              <span className="text-brand-green font-bold text-xl">
                 {profile.trustScore}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>환경점수</span>
-              <span className="text-brand-green font-bold text-xl">0.000</span>
+              <span className="text-brand-green font-bold text-xl">
+                {profile.environmentScoreTotal
+                  ? profile.environmentScoreTotal
+                  : 0}
+              </span>
             </div>
           </div>
 
@@ -343,43 +341,17 @@ const SellerShopPage = () => {
             </div>
           </div>
         </div>
+
+        {/* 점 세 개 메뉴 */}
+        <MenuActionsContainer
+          menuOpen={menuOpen}
+          targetMemberId={sellerId}
+          setMenuOpen={setMenuOpen}
+          reportTargetType="MEMBER"
+          onAfterBlock={fetchBlockedSellerState}
+          anchorEl={anchorEl}
+        />
       </Container>
-
-      {/* ===== 점 세 개 메뉴 ===== */}
-      {menuOpen && (
-        <>
-          {/* 딤 배경 */}
-          <div
-            className="fixed inset-0 bg-black/40"
-            onClick={() => setMenuOpen(false)}
-          ></div>
-
-          {/* 메뉴 박스 */}
-          <div className="fixed top-20 right-4 bg-white rounded-xl shadow-xl border w-36 p-2">
-            <button
-              className="w-full text-left p-2 hover:bg-gray-100"
-              // onClick={() => {
-              //   setMenuOpen(false);
-              //   // setReportModal(true);
-
-              // }}
-              onClick={handleOpenReportModal}
-            >
-              신고하기
-            </button>
-
-            <button
-              className="w-full text-left p-2 hover:bg-gray-100"
-              onClick={() => {
-                setMenuOpen(false);
-                setBlockModal(true);
-              }}
-            >
-              차단하기
-            </button>
-          </div>
-        </>
-      )}
 
       {/* ====== 신고 모달 ===== */}
       {/* {reportModal && (
@@ -401,35 +373,6 @@ const SellerShopPage = () => {
           </div>
         </div>
       )} */}
-
-      {/* 신고하기 모달 */}
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onclose={handleCloseReportModal}
-        onSubmit={handleSubmitReport}
-        targetType="MEMBER"
-      />
-
-      {/* ==== 차단 모달 ==== */}
-      {blockModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white w-72 p-6 rounded-lg shadow-xl text-center">
-            <h2 className="font-semibold mb-4">차단하시겠습니까?</h2>
-            <button
-              className="bg-red-500 text-white py-2 rounded-lg w-full mb-2"
-              onClick={() => setBlockModal(false)}
-            >
-              차단하기
-            </button>
-            <button
-              className="bg-gray-200 py-2 rounded-lg w-full"
-              onClick={() => setBlockModal(false)}
-            >
-              취소
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 };

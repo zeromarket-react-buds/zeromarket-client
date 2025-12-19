@@ -1,4 +1,4 @@
-import { UserRound, Heart, Pen } from "lucide-react";
+import { UserRound, Heart, Pen, Settings } from "lucide-react";
 import Container from "@/components/Container";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -12,15 +12,21 @@ import {
 // fetch 쓰면 토큰이 안 붙어서 count가 변하지 않음 → apiClient 사용해야 함
 import { getMyPageProfileApi } from "@/common/api/me.api";
 import { apiClient } from "@/common/client";
+import { useModal } from "@/hooks/useModal";
+import { requestNotificationPermission } from "@/lib/browserNotification";
+import { useHeader } from "@/hooks/HeaderContext";
 
 export default function MyPage() {
   // 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
-  const { user, loading, logout, withdraw } = useAuth();
+  const { alert } = useModal();
+  const { user, loading, logout, withdraw, isAuthenticated } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
+  const [envScore, setEnvScore] = useState(0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
+  const { setHeader } = useHeader();
 
   // 추가됨: 현재 페이지 정보를 가져옴
   const location = useLocation();
@@ -31,12 +37,25 @@ export default function MyPage() {
       console.log("마이페이지 응답:", data);
 
       const img = data.profileImage || "";
+      const envScoreTotal = data.environmentScoreTotal || "0";
 
       setProfileImg(img);
+      setEnvScore(envScoreTotal);
     } catch (err) {
       console.error("마이페이지 불러오기 실패:", err);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      (async () => {
+        await alert({
+          description: "마이페이지는 로그인 후 접근이 가능합니다.",
+        });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [loading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {
@@ -111,6 +130,16 @@ export default function MyPage() {
     navigate("/");
   };
 
+  // 페이지 진입 시 헤더 설정
+  useEffect(() => {
+    setHeader({
+      showBellWithRightSlot: true,
+      rightSlot: [
+        <Settings onClick={() => navigate("/me/settings")}></Settings>,
+      ],
+    });
+  }, [setHeader]);
+
   return (
     <Container>
       {/* 프로필 */}
@@ -140,7 +169,7 @@ export default function MyPage() {
         <div className="flex justify-between text-[16px]">
           <span>환경점수</span>
           <span className="text-brand-green font-bold text-lg text-[20px]">
-            4,000
+            {envScore}
           </span>
         </div>
       </section>

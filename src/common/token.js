@@ -1,4 +1,5 @@
 import { ApiError } from "./error";
+import { createChatClient } from "@/lib/chatStompClient";
 
 let isRefreshing = false;
 let refreshPromise = null;
@@ -8,6 +9,8 @@ const API_BASE = "http://localhost:8080";
 
 export function handleLogout() {
   localStorage.clear();
+  const stomp = createChatClient();
+  stomp.deactivate(); // 싱글턴 완전 정리
 }
 
 export async function refreshAccessToken() {

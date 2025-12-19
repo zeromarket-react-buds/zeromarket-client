@@ -9,6 +9,9 @@ import ChatMessage from "@/components/chat/ChatMessage";
 import { useAuth } from "@/hooks/AuthContext";
 import dayjs from "dayjs";
 import { createChatClient } from "@/lib/chatStompClient";
+import MenuActionsContainer from "@/components/MenuActionsContainer";
+import { useNotification } from "@/hooks/NotificationContext";
+import { notificationApi } from "@/common/api/notification.api";
 
 const ChatRoomPage = () => {
   const { chatRoomId } = useParams();
@@ -20,11 +23,28 @@ const ChatRoomPage = () => {
   const [yourLastReadMessageId, setYourLastReadMessageId] = useState(0);
   const { user, loading } = useAuth();
 
+  const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const { setHeader } = useHeader();
+  const { refreshUnreadCount } = useNotification();
+
   const productProps = {
     ...(chatInfo ?? {}),
     thumbnailUrl: chatInfo?.productImage,
   };
+
+  // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
+  useEffect(() => {
+    const handler = (e) => {
+      setAnchorEl(e?.detail?.anchorEl ?? null); // 커스텀 이벤트로 보낼 때 detail 안에 데이터를 넣어 전달. 어디 기준으로 띄울지(앵커 요소)를 상태로 저장
+      setMenuOpen(true);
+    };
+
+    window.addEventListener("seller-menu-open", handler); // 해당 이벤트를 구독
+    return () => window.removeEventListener("seller-menu-open", handler); // 컴포넌트가 사라질 때 구독 해제
+    // 페이지 이동 등으로 컴포넌트가 언마운트될 때 이벤트가 남아서 꼬이는 문제를 막음
+  }, []);
 
   const settingChatParticipantInfo = (data) => {
     const amISeller = user.memberId === data.sellerId;
@@ -130,90 +150,98 @@ const ChatRoomPage = () => {
     [chatRoomId, user]
   );
 
-  // 1) STOMP 연결 + 구독
+  // 1) STOMP 연결 + 구독 (싱글턴)
   useEffect(() => {
     if (!chatRoomId || !user) return;
+    const stomp = createChatClient({ debug: true }); // 싱글턴 API
+    setConnected(true); // (선택) connected 상태는 아래 onStatusChange로 더 정확히 할 수도 있음
 
-    const client = createChatClient({
-      debug: true,
-      onConnect: () => {
-        setConnected(true);
+    // 기존 구독 정리
+    try {
+      subRef.current?.();
+    } catch {}
+    try {
+      readSubRef.current?.();
+    } catch {}
 
-        // 기존 구독 정리
-        try {
-          subRef.current?.unsubscribe();
-        } catch {}
-        try {
-          readSubRef.current?.unsubscribe();
-        } catch {}
+    // 메시지 구독
+    subRef.current = stomp.subscribe(
+      `/sub/chat/room/${chatRoomId}`,
+      (payload) => {
+        // payload는 이미 JSON parse 된 객체(또는 raw 문자열)
+        if (!payload) return;
 
-        // 메시지 구독
-        subRef.current = client.subscribe(
-          `/sub/chat/room/${chatRoomId}`,
-          (frame) => {
-            const payload = JSON.parse(frame.body);
+        const normalized = {
+          ...payload,
+          isMine: payload.memberId === user.memberId,
+        };
 
-            const normalized = {
-              ...payload,
-              isMine: payload.memberId === user.memberId,
-            };
+        setChatMessages((prev) => [...prev, normalized]);
+      }
+    );
 
-            setChatMessages((prev) => [...prev, normalized]);
-          }
+    // 읽음 이벤트 구독
+    readSubRef.current = stomp.subscribe(
+      `/sub/chat/room/${chatRoomId}/read`,
+      (evt) => {
+        if (!evt) return;
+        if (evt.readerId === user.memberId) return;
+
+        setYourLastReadMessageId((prev) =>
+          Math.max(prev, Number(evt.lastReadMessageId || 0))
         );
+      }
+    );
 
-        // 읽음 이벤트 구독 (서버에서 /sub/chat/rooms/{id}/read 로 브로드캐스트하던거)
-        readSubRef.current = client.subscribe(
-          `/sub/chat/room/${chatRoomId}/read`,
-          (frame) => {
-            const evt = JSON.parse(frame.body);
-            // evt: { chatRoomId, readerId, lastReadMessageId }
-            // 내가 보낸 read 이벤트는 굳이 반영 안 해도 됨
-            if (evt.readerId === user.memberId) return;
-
-            setYourLastReadMessageId((prev) =>
-              Math.max(prev, Number(evt.lastReadMessageId || 0))
-            );
-          }
-        );
-      },
-      onDisconnect: () => setConnected(false),
-      onError: (frame) => console.error("STOMP ERROR:", frame.body),
+    // 연결 상태를 정확히 반영하고 싶으면
+    const off = stomp.onStatusChange((status) => {
+      if (status === "connected") setConnected(true);
+      if (status === "disconnected" || status === "deactivated")
+        setConnected(false);
+      if (status === "stomp-error") console.error("STOMP ERROR");
     });
 
-    clientRef.current = client;
-    client.activate();
+    // activate는 subscribe 내부에서도 호출되지만, 명시해도 OK
+    stomp.activate();
 
     return () => {
+      // 채팅방 나갈 때는 "구독만" 해제 (연결은 유지)
       try {
-        subRef.current?.unsubscribe();
+        subRef.current?.();
       } catch {}
       try {
-        readSubRef.current?.unsubscribe();
+        readSubRef.current?.();
       } catch {}
+      subRef.current = null;
+      readSubRef.current = null;
+
       try {
-        client.deactivate();
+        off?.();
       } catch {}
+      // stomp.deactivate()는 하지 않음 (앱 전체에서 1개 공유해야 하니까)
     };
-  }, [chatRoomId, user, markAsRead]);
+  }, [chatRoomId, user?.memberId]);
 
   // 2) send 함수
   const sendMessage = () => {
-    const client = clientRef.current;
-    if (!client || !connected) return;
     if (!text.trim()) return;
 
-    // 서버가 받는 DTO에 맞춰 보내기
-    const body = {
+    const stomp = createChatClient(); // 싱글턴 API
+
+    const payload = {
       chatRoomId,
       content: text.trim(),
     };
 
-    client.publish({
-      destination: "/pub/chat.send",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    // destination만 넘기면 내부에서 JSON.stringify 처리함
+    const ok = stomp.publish("/pub/chat.send", payload);
+
+    if (!ok) {
+      // 연결이 아직 안 됐거나 끊긴 상태
+      console.warn("STOMP not connected yet. message not sent.");
+      return;
+    }
+
     setText("");
   };
 
@@ -222,32 +250,42 @@ const ChatRoomPage = () => {
 
     fetchChatMessages();
   }, [chatRoomId, user, fetchChatMessages]);
-useEffect(() => {
-  if (!chatRoomId || !user) return;
-  if (!lastMessageId || lastMessageId <= 0) return;
+  useEffect(() => {
+    if (!chatRoomId || !user) return;
+    if (!lastMessageId || lastMessageId <= 0) return;
 
-  const tryRead = () => {
-    if (
-      document.visibilityState === "visible" &&
-      document.hasFocus()
-    ) {
-      markAsRead(lastMessageId);
-    }
-  };
+    const tryRead = () => {
+      if (document.visibilityState === "visible" && document.hasFocus()) {
+        markAsRead(lastMessageId);
+      }
+    };
 
-  document.addEventListener("visibilitychange", tryRead);
-  window.addEventListener("focus", tryRead);
+    document.addEventListener("visibilitychange", tryRead);
+    window.addEventListener("focus", tryRead);
 
-  // 최초 진입 시도
-  tryRead();
+    // 최초 진입 시도
+    tryRead();
 
-  return () => {
-    document.removeEventListener("visibilitychange", tryRead);
-    window.removeEventListener("focus", tryRead);
-  };
-}, [chatRoomId, user, lastMessageId, markAsRead]);
+    return () => {
+      document.removeEventListener("visibilitychange", tryRead);
+      window.removeEventListener("focus", tryRead);
+    };
+  }, [chatRoomId, user, lastMessageId, markAsRead]);
 
   const grouped = groupMessagesByDate(chatMessages);
+
+  useEffect(() => {
+    if (!chatRoomId) return;
+
+    (async () => {
+      try {
+        await notificationApi.markChatRoomAsRead(chatRoomId);
+        await refreshUnreadCount();
+      } catch (e) {
+        console.error("markChatRoomAsRead failed", e);
+      }
+    })();
+  }, [chatRoomId, refreshUnreadCount]);
 
   const listRef = useRef(null);
   const bottomRef = useRef(null);
@@ -324,6 +362,15 @@ useEffect(() => {
           connected={connected}
         />
       </div>
+
+      {/* 점 세 개 메뉴*/}
+      <MenuActionsContainer
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        targetMemberId={yourInfo?.memberId}
+        reportTargetType="MEMBER"
+        anchorEl={anchorEl}
+      />
     </Container>
   );
 };

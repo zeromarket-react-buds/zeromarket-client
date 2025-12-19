@@ -1,8 +1,10 @@
 // src/layouts/header/TitleHeader.jsx
 import React from "react";
 import { ChevronLeft, Bell, Home } from "lucide-react";
+import BellWithBadge from "@/components/BellWithBadge";
 import Container from "@/components/Container";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "@/hooks/NotificationContext";
 
 const TitleHeader = ({
   title,
@@ -17,11 +19,26 @@ const TitleHeader = ({
   rightActions, // ⭐ HeaderContext에서 내려오는 멀티 버튼
   isSticky = false,
   onBack,
+  showBellWithRightSlot = false,
 }) => {
+  const { unreadCount } = useNotification();
+
   const navigate = useNavigate();
   // 멀티 액션이 존재하는지
   const hasRightActions =
     !hideRight && Array.isArray(rightActions) && rightActions.length > 0;
+
+  // 우측 슬롯을 눌렀을 때, 위치 포함한 이벤트
+  // TitleHeader.jsx
+  const openMenuWithAnchor = (e) => {
+    const anchorEl = e.currentTarget;
+
+    window.dispatchEvent(
+      new CustomEvent("seller-menu-open", {
+        detail: { anchorEl }, // anchorEl은 실제 DOM 노드. 언제든 현재 위치를 다시 계산 가능
+      })
+    );
+  };
 
   // 오른쪽 UI 렌더링
   const renderRight = () => {
@@ -85,7 +102,26 @@ const TitleHeader = ({
     }
 
     // 기본 우측 아이콘 또는 슬롯
-    return <button>{rightSlot ? rightSlot : <Bell size={24} />}</button>;
+    return (
+      <div className="inline-flex items-center">
+        <button type="button" onClick={openMenuWithAnchor}>
+          {rightSlot ? (
+            <div className="flex items-center gap-2">
+              {showBellWithRightSlot && (
+                <>
+                  <BellWithBadge unreadCount={unreadCount} />
+                </>
+              )}
+              {rightSlot}
+            </div>
+          ) : (
+            <>
+              <BellWithBadge unreadCount={unreadCount} />
+            </>
+          )}
+        </button>
+      </div>
+    );
   };
 
   // 공통 뒤로가기 처리
@@ -97,9 +133,10 @@ const TitleHeader = ({
       window.history.back();
     }
   };
+
   return (
     <Container
-      className={isSticky ? `sticky top-0 z-100 bg-white` : `relative z-20`}
+      className={isSticky ? `sticky top-0 z-40 bg-white` : `relative z-20`}
     >
       <header
         className={`flex items-center justify-between mb-6 ${

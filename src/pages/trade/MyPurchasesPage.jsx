@@ -3,29 +3,31 @@ import { Input } from "@/components/ui/input";
 import { Filter, Search, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LongProductCard from "@/components/order/LongProductCard";
+import LongProductCard from "@/components/trade/LongProductCard";
 import {
   getTradeStatusKey,
   tradeFlowLabels,
-} from "@/components/order/tradeFlow";
+} from "@/components/trade/tradeFlow";
 import {
   getTradeListApi,
   updateTradeStatusApi,
   softDeleteTradeApi,
 } from "@/common/api/trade.api";
-import TradeReviewButton from "@/components/order/TradeReviewButton";
-import TradeActionStatusButton from "@/components/order/TradeActionStatusButton";
-import TradeFilterModal from "@/components/order/TradeFilterModal";
+import TradeReviewButton from "@/components/trade/TradeReviewButton";
+import TradeActionStatusButton from "@/components/trade/TradeActionStatusButton";
+import TradeFilterModal from "@/components/trade/TradeFilterModal";
 import {
   getStatusLabel,
   getPeriodLabel,
-} from "@/components/order/filterOptions";
+} from "@/components/trade/filterOptions";
 import { Badge } from "@/components/ui/badge";
 import { useTradeToast } from "@/components/GlobalToast";
 import { useModal } from "@/hooks/useModal";
+import { useAuth } from "@/hooks/AuthContext";
 
 const MyPurchasesPage = () => {
-  const { confirm } = useModal();
+  const { alert, confirm } = useModal();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { showCanceledUpdatedToast, showSoftDeletedToast } = useTradeToast();
 
@@ -69,6 +71,15 @@ const MyPurchasesPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      (async () => {
+        await alert({ description: "구매내역은 로그인 후 접근이 가능합니다." });
+        navigate("/login", { replace: true });
+      })();
+    }
+  }, [authLoading, isAuthenticated, navigate, alert]);
 
   // 처음 들어왔을 때 한번 호출
   useEffect(() => {
