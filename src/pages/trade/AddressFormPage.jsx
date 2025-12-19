@@ -6,6 +6,7 @@ import {
   deleteAddress,
   getAddressDetail,
 } from "@/common/api/address.api";
+import Container from "@/components/Container";
 
 const Input = ({ label, value, onChange }) => {
   return (
@@ -43,6 +44,7 @@ const AddressFormPage = () => {
       // GET /api/addresses/:addressId
       getAddressDetail(addressId).then((data) => {
         setForm({
+          name: data.name,
           receiver: data.receiverName,
           phone: data.receiverPhone,
           zipcode: data.zipcode,
@@ -81,6 +83,7 @@ const AddressFormPage = () => {
 
   const handleSubmit = async () => {
     const payload = {
+      name: form.name,
       receiverName: form.receiver,
       receiverPhone: form.phone,
       zipcode: form.zipcode,
@@ -89,22 +92,29 @@ const AddressFormPage = () => {
       isDefault: form.isDefault,
     };
 
-    if (mode === "create") {
-      await createAddress(payload);
-    } else {
-      await updateAddress(addressId, payload);
+    try {
+      if (mode === "create") {
+        await createAddress(payload);
+      } else {
+        await updateAddress(addressId, payload);
+      }
+    } catch (err) {
+      // 배송지 등록 5개 초과 대응
+      console.error(err);
     }
 
-    navigate("/addresses");
+    navigate(-1);
+    // navigate("/addresses");
   };
 
   const handleDelete = async () => {
     await deleteAddress(addressId);
-    navigate("/addresses");
+    navigate(-1);
+    // navigate("/addresses");
   };
 
   return (
-    <div className="max-w-md mx-auto pb-24">
+    <Container>
       <header className="p-4 font-semibold">
         {mode === "create" ? "배송지 추가" : "배송지 편집"}
       </header>
@@ -169,7 +179,7 @@ const AddressFormPage = () => {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-2 justify-center">
         {mode === "edit" && (
           <button
             onClick={handleDelete}
@@ -187,7 +197,7 @@ const AddressFormPage = () => {
           {mode === "create" ? "완료" : "편집"}
         </button>
       </div>
-    </div>
+    </Container>
   );
 };
 

@@ -8,7 +8,7 @@ import {
 import { CheckCircle, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import Container from "@/components/Container";
 import { createOrderApi } from "@/common/api/order.api";
-import { getAddressDetail } from "@/common/api/address.api";
+import { getAddressDetail, getDefaultAddress } from "@/common/api/address.api";
 import { usePurchase } from "@/hooks/PurchaseContext";
 
 // 하단 결제 버튼
@@ -136,8 +136,6 @@ const PaymentSection = () => {
 };
 
 const DeliverySection = ({ address, handleNavigate }) => {
-  const navigate = useNavigate();
-
   const hasAddress = Boolean(address?.addressId);
 
   return (
@@ -195,7 +193,7 @@ const PurchasePage = () => {
 
   // const { tradeType } = useParams();
 
-  const { tradeType, addressId } = usePurchase();
+  const { tradeType, addressId, setAddressId } = usePurchase();
 
   // const [tradeType, setTradeType] = useState(null);
   // const [addressId, setAddressId] = useState(null);
@@ -214,22 +212,33 @@ const PurchasePage = () => {
   });
 
   useEffect(() => {
-    // console.log(location.state);
-
-    console.log("tradeType: ", tradeType); // null
-    console.log("addressId: ", addressId); // null
-
     /* 🔒 tradeType 없으면 접근 차단 */
     if (!tradeType) {
       navigate(`/products/${product.productId}`);
     }
+  }, []);
 
-    // if (location.state?.tradeType) {
-    //   setTradeType(location.state.tradeType);
-    // }
-    // if (location.state?.addressId) {
-    //   setAddressId(location.state.addressId);
-    // }
+  // 대표 배송지 초기 로딩
+  useEffect(() => {
+    if (tradeType !== "DELIVERY") return;
+
+    const fetchAddress = async () => {
+      // 1️⃣ Context에 addressId가 있으면 그걸 우선
+      if (addressId) {
+        const data = await getAddressDetail(addressId);
+        setAddress(data);
+        return;
+      }
+
+      // 2️⃣ 없으면 대표 배송지 조회
+      const defaultAddr = await getDefaultAddress();
+      if (defaultAddr) {
+        setAddress(defaultAddr);
+        setAddressId(defaultAddr.addressId);
+      }
+    };
+
+    fetchAddress();
   }, []);
 
   // addressId 변경 시 배송지 조회
@@ -304,6 +313,8 @@ const PurchasePage = () => {
       });
 
       console.log("결제 성공: ", data);
+
+      navigate(`/orders/${res.orderId}/complete`);
     } catch (err) {
       console.error(err);
     }

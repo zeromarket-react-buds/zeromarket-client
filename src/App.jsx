@@ -45,6 +45,7 @@ import AddressFormPage from "./pages/trade/AddressFormPage";
 import AddressListPage from "./pages/trade/AddressListPage";
 import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "./pages/trade/PurchaseLayout";
+import OrderCompletePage from "./pages/trade/OrderCompletePage";
 
 const router = createBrowserRouter([
   {
@@ -241,6 +242,10 @@ const router = createBrowserRouter([
       },
       // 결제
       {
+        path: "orders/:orderId/complete",
+        element: <OrderCompletePage />,
+      },
+      {
         path: "purchase/:productId",
         element: <PurchaseLayout />,
         children: [
@@ -249,9 +254,53 @@ const router = createBrowserRouter([
           {
             path: "addresses",
             children: [
-              { index: true, element: <AddressListPage /> },
-              { path: "new", element: <AddressFormPage /> },
-              { path: ":addressId/edit", element: <AddressFormPage /> },
+              {
+                index: true,
+                element: <AddressListPage />,
+                handle: {
+                  layout: {
+                    header: {
+                      component: "TitleHeader",
+                      props: {
+                        title: "배송지 관리",
+                      },
+                    },
+                    footer: {
+                      component: "DefaultFooter",
+                    },
+                  },
+                },
+              },
+              {
+                path: "new",
+                element: <AddressFormPage />,
+                handle: {
+                  layout: {
+                    header: {
+                      component: "TitleHeader",
+                      props: { title: "배송지 추가" },
+                    },
+                    footer: {
+                      component: "DefaultFooter",
+                    },
+                  },
+                },
+              },
+              {
+                path: ":addressId/edit",
+                element: <AddressFormPage />,
+                handle: {
+                  layout: {
+                    header: {
+                      component: "TitleHeader",
+                      props: { title: "배송지 편집" },
+                    },
+                    footer: {
+                      component: "DefaultFooter",
+                    },
+                  },
+                },
+              },
             ],
           },
         ],

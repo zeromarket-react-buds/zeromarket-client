@@ -11,18 +11,23 @@ export const getMyAddresses = async () => {
   return data;
 };
 
-export const updateAddress = (addressId, payload) =>
-  apiClient(`/api/addresses/${addressId}`, {
+export const updateAddress = async (addressId, payload) =>
+  await apiClient(`/api/addresses/${addressId}`, {
     method: "PUT",
     body: payload,
   });
 
-export const deleteAddress = (addressId) =>
-  apiClient(`/api/addresses/${addressId}`, {
+export const deleteAddress = async (addressId) =>
+  await apiClient(`/api/addresses/${addressId}`, {
     method: "DELETE",
   });
 
 export const getAddressDetail = async (addressId) => {
+  const { data } = await apiClient(`/api/addresses/${addressId}`);
+  return data;
+};
+
+export const getDefaultAddress = async (addressId) => {
   const { data } = await apiClient(`/api/addresses/${addressId}`);
   return data;
 };

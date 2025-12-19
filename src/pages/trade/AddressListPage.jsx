@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getMyAddresses } from "@/common/api/address.api";
 import { usePurchase } from "@/hooks/PurchaseContext";
+import { useHeader } from "@/hooks/HeaderContext";
+import Container from "@/components/Container";
+
+const MAX = 5;
 
 const AddressCard = ({ address, selected, onClick }) => {
   return (
@@ -38,29 +42,54 @@ const AddressListPage = () => {
   const navigate = useNavigate();
 
   const { productId } = useParams();
-
-  const { setAddressId } = usePurchase();
+  const { setAddressId } = usePurchase(); // purchaseContext addressId 상태
+  const { setHeader, resetHeader } = useHeader();
 
   const [addresses, setAddresses] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null); // UI용 selectedId 상태
+
+  const disabledAdd = addresses.length >= MAX;
 
   const handleUpdate = (addressId) => {
-    // console.log(addressId);
     setSelectedId(addressId);
     setAddressId(addressId);
   };
 
+  // 헤더 편집 버튼 이벤트 부착
+  useEffect(() => {
+    setHeader({
+      rightActions: [
+        {
+          key: "edit-address",
+          label: "편집",
+          onClick: () => {
+            if (!selectedId) {
+              alert("편집할 배송지를 선택해주세요.");
+              return;
+            }
+            navigate(`${selectedId}/edit`);
+          },
+        },
+      ],
+    });
+
+    // 페이지 이탈 시 헤더 초기화
+    return () => {
+      resetHeader();
+    };
+  }, [selectedId, navigate, setHeader, resetHeader]);
+
   useEffect(() => {
     getMyAddresses().then((data) => {
       setAddresses(data);
-
+      console.log(data);
       const defaultAddress = data.find((a) => a.isDefault);
       if (defaultAddress) handleUpdate(defaultAddress.addressId);
     });
   }, []);
 
   return (
-    <div className="max-w-md mx-auto pb-28">
+    <Container>
       <header className="p-4 font-semibold">배송지 관리</header>
 
       {/* 안내 문구 */}
@@ -77,8 +106,18 @@ const AddressListPage = () => {
       {/* 배송지 추가 */}
       <div className="px-4 mb-4">
         <button
-          onClick={() => navigate("/addresses/new")}
-          className="w-full border rounded-lg py-3 text-sm"
+          onClick={() => {
+            if (disabledAdd) {
+              alert("배송지는 최대 5개까지 등록할 수 있습니다.");
+              return;
+            }
+
+            navigate(`new`);
+          }}
+          className={`w-full border rounded-lg py-3 text-sm ${
+            disabledAdd ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""
+          }`}
+          disabled={disabledAdd}
         >
           + 배송지 추가
         </button>
@@ -97,21 +136,20 @@ const AddressListPage = () => {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex justify-center">
         <button
-          className="w-full bg-green-700 text-white py-3 rounded-lg"
+          className="w-full bg-green-700 text-white py-3 rounded-lg max-w-[600px]"
           disabled={!selectedId}
           onClick={() => {
             // 선택된 주소를 이전 화면(주문 등)에 전달
-            navigate(`/purchase/${productId}/payment`, {
-              state: { addressId: selectedId },
-            });
+            handleUpdate(selectedId);
+            navigate(`/purchase/${productId}/payment`);
           }}
         >
           선택
         </button>
       </div>
-    </div>
+    </Container>
   );
 };
 
