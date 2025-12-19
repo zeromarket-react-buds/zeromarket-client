@@ -44,9 +44,8 @@ import { PurchaseProvider } from "@/hooks/PurchaseContext";
 import AddressFormPage from "@/pages/order/AddressFormPage";
 import AddressListPage from "@/pages/order/AddressListPage";
 import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
-import PurchaseLayout from "./pages/trade/PurchaseLayout";
-import OrderCompletePage from "./pages/trade/OrderCompletePage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
+import OrderCompletePage from "./pages/trade/OrderCompletePage";
 import { NotificationProvider } from "@/hooks/NotificationContext";
 
 const router = createBrowserRouter([
