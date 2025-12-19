@@ -1,6 +1,11 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import {
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { Crosshair } from "lucide-react";
 import { useMapToast } from "@/components/GlobalToast";
 
@@ -46,8 +51,13 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   const productMarkersRef = useRef([]);
   const circleRef = useRef(null);
   const [radius, setRadius] = useState(800);
+  const radiusRef = useRef(radius);
   const lastProductsRef = useRef([]);
   const { showLocationDeniedToast } = useMapToast();
+
+  useEffect(() => {
+    radiusRef.current = radius;
+  }, [radius]);
 
   const handleMoveToMyLocation = async () => {
     if (!navigator.geolocation) {
@@ -209,7 +219,8 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
         const ne = bounds.getNorthEast();
         const centerPos = map.getCenter();
 
-        updateSearchCircle(centerPos, radius);
+        updateSearchCircle(centerPos, radiusRef.current);
+        // updateSearchCircle(centerPos, radius); //state 대신 ref 값 사용 > 함수 재생성X이어도 항상 최신값
 
         onSearchBoundaryChange?.({
           centerLat: centerPos.getLat(),
@@ -218,7 +229,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
           swLng: sw.getLng(),
           neLat: ne.getLat(),
           neLng: ne.getLng(),
-          radius: radius,
+          radius: radiusRef.current,
         });
       };
 
@@ -232,7 +243,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
               pos.coords.longitude
             );
             map.setCenter(myLatLng);
-            updateSearchCircle(myLatLng);
+            updateSearchCircle(myLatLng, radiusRef.current);
             updateBoundary();
           },
           (error) => {
