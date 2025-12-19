@@ -22,6 +22,7 @@ export default function MyPage() {
   const { user, loading, logout, withdraw, isAuthenticated } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
+  const [envScore, setEnvScore] = useState(0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
 
   // 추가됨: 현재 페이지 정보를 가져옴
@@ -33,8 +34,10 @@ export default function MyPage() {
       console.log("마이페이지 응답:", data);
 
       const img = data.profileImage || "";
+      const envScoreTotal = data.environmentScoreTotal || "0";
 
       setProfileImg(img);
+      setEnvScore(envScoreTotal);
     } catch (err) {
       console.error("마이페이지 불러오기 실패:", err);
     }
@@ -153,7 +156,7 @@ export default function MyPage() {
         <div className="flex justify-between text-[16px]">
           <span>환경점수</span>
           <span className="text-brand-green font-bold text-lg text-[20px]">
-            4,000
+            {envScore}
           </span>
         </div>
       </section>

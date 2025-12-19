@@ -17,7 +17,7 @@ import { getTargetIdIsBlockedApi } from "@/common/api/block.api";
 import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const SellerShopPage = () => {
-  const { alert, confirm } = useModal();
+  const { alert } = useModal();
   const { sellerId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const currentMemberId = user?.memberId;
@@ -56,6 +56,7 @@ const SellerShopPage = () => {
     nickname: "",
     profileImage: "",
     trustScore: null,
+    environmentScoreTotal: null,
   });
 
   // 헤더의 rightSlot(점 3개 버튼)이 클릭되면 발생하는 이벤트 수신
@@ -266,14 +267,18 @@ const SellerShopPage = () => {
           <div className="border rounded-2xl p-4 mb-5">
             <div className="flex justify-between mb-2">
               <span>신뢰점수</span>
-              <span className="text-brand-green text-xl">
+              <span className="text-brand-green font-bold text-xl">
                 {profile.trustScore}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span>환경점수</span>
-              <span className="text-brand-green font-bold text-xl">0.000</span>
+              <span className="text-brand-green font-bold text-xl">
+                {profile.environmentScoreTotal
+                  ? profile.environmentScoreTotal
+                  : 0}
+              </span>
             </div>
           </div>
 
