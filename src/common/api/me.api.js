@@ -7,6 +7,7 @@ import { apiClient } from "@/common/client";
  *
  * @returns {Promise<{
  *   profileImage?: string;
+ *   environmentScoreTotal?: number;
  * }>} 프로필 데이터
  */
 const getMyPageProfileApi = async () => {
