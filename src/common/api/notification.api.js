@@ -34,4 +34,11 @@ export const notificationApi = {
     );
     return data;
   },
+
+  getNotifications: async () => {
+    const { data } = await apiClient("/api/notifications", {
+      method: "GET",
+    });
+    return data;
+  },
 };

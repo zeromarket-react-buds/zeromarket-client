@@ -147,8 +147,7 @@ export function NotificationProvider({ children }) {
           title: "새 채팅 메시지 💬",
           body: payload.body || "새 메시지가 도착했습니다.",
           onClick: () => {
-            if (payload.refId)
-              window.location.href = `/chat/rooms/${payload.refId}`;
+            if (payload.refId) window.location.href = `/chats/${payload.refId}`;
           },
         });
         return;

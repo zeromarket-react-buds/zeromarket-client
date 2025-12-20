@@ -46,6 +46,7 @@ import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
 import OrderCompletePage from "@/pages/order/OrderCompletePage";
 import { NotificationProvider } from "@/hooks/NotificationContext";
+import NotificationsPage from "./pages/me/NotificationsPages";
 
 const router = createBrowserRouter([
   {
@@ -391,6 +392,24 @@ const router = createBrowserRouter([
             },
           },
 
+          // 알림 목록
+          {
+            path: "notifications",
+            element: <NotificationsPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "알림 목록",
+                    showBack: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+
           // 환경 점수 안내 페이지
           {
             path: "envgradeguide",
@@ -687,10 +706,8 @@ const App = function () {
       <AuthProvider>
         <NotificationProvider>
           <ModalProvider>
-            <PurchaseProvider>
-              <GlobalToast />
-              <RouterProvider router={router} />
-            </PurchaseProvider>
+            <GlobalToast />
+            <RouterProvider router={router} />
           </ModalProvider>
         </NotificationProvider>
       </AuthProvider>

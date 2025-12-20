@@ -1,13 +1,18 @@
 import { Bell } from "lucide-react";
 import clsx from "clsx";
+import { useNavigate } from "react-router-dom";
 
 const BellWithBadge = ({ unreadCount, size = "M" }) => {
   const isLarge = size === "L";
+  const navigate = useNavigate();
 
   return (
     <div className="relative inline-block sle">
       {/* 1. 벨 아이콘 */}
-      <Bell size={isLarge ? 28 : 24} />
+      <Bell
+        size={isLarge ? 28 : 24}
+        onClick={() => navigate("/me/notifications")}
+      />
 
       {/* 2. 읽지 않은 알림 배지 */}
       {unreadCount >= 0 && (
