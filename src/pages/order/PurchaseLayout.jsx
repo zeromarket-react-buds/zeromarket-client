@@ -2,14 +2,8 @@ import { Outlet, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProductDetailApi } from "@/common/api/product.api";
 
-/**
- * PurchaseLayout
- * - 구매 흐름 전용 layout
- * - product 단 1회 조회
- * - 하위 페이지에서 useOutletContext()로 사용
- */
 export default function PurchaseLayout() {
-  const { productId } = useParams();
+  const { productId } = useParams(); // purchase/:productId
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -17,24 +11,19 @@ export default function PurchaseLayout() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // canceled(또는 abort 플래그)는 “이 요청이 더 이상 유효하지 않음”을 나타냅니다.
     let cancelled = false;
 
     const fetchProduct = async () => {
       try {
         setLoading(true);
-
         const data = await getProductDetailApi(productId);
-
-        // console.log(data);
-
         if (!cancelled) {
           setProduct(data);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err.message);
-
-          console.log(err);
         }
       } finally {
         if (!cancelled) {
@@ -50,12 +39,10 @@ export default function PurchaseLayout() {
     };
   }, [productId]);
 
-  /* ---------- 상태별 처리 ---------- */
-
   if (loading) {
     return (
       <div className="max-w-md mx-auto p-4">
-        <p className="text-sm text-gray-500">상품 정보를 불러오는 중…</p>
+        <p className="text-sm text-gray-500">상품 정보를 불러오는 중...</p>
       </div>
     );
   }
@@ -63,7 +50,7 @@ export default function PurchaseLayout() {
   if (error || !product) {
     return (
       <div className="max-w-md mx-auto p-4 space-y-4">
-        <p className="text-sm text-red-500">상품 정보를 불러올 수 없습니다.</p>
+        <p className="text-sm text-red-500">상품 정보를 불러오지 못했어요.</p>
         <button className="text-sm underline" onClick={() => navigate(-1)}>
           이전 페이지로
         </button>
@@ -71,7 +58,6 @@ export default function PurchaseLayout() {
     );
   }
 
-  /* ---------- 정상 ---------- */
   return (
     <Outlet
       context={{

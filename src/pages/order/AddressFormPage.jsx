@@ -8,16 +8,14 @@ import {
 } from "@/common/api/address.api";
 import Container from "@/components/Container";
 
-const Input = ({ label, value, onChange }) => {
-  return (
-    <input
-      placeholder={label}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full border rounded-lg px-3 py-2 text-sm"
-    />
-  );
-};
+const Input = ({ label, value, onChange }) => (
+  <input
+    placeholder={label}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-full border rounded-lg px-3 py-2 text-sm"
+  />
+);
 
 const AddressFormPage = () => {
   const navigate = useNavigate();
@@ -25,7 +23,6 @@ const AddressFormPage = () => {
 
   const mode = addressId ? "edit" : "create";
 
-  // 우편번호 포함 권장
   const [form, setForm] = useState({
     name: "",
     receiver: "",
@@ -36,34 +33,27 @@ const AddressFormPage = () => {
     isDefault: false,
   });
 
-  /* 수정 모드일 때만 기존 데이터 로드 */
   useEffect(() => {
-    console.log("mode: ", mode);
-
     if (mode === "edit") {
-      // GET /api/addresses/:addressId
       getAddressDetail(addressId).then((data) => {
         setForm({
-          name: data.name,
-          receiver: data.receiverName,
-          phone: data.receiverPhone,
-          zipcode: data.zipcode,
-          address: data.addrBase,
-          detailAddress: data.addrDetail,
-          isDefault: data.isDefault,
+          name: data.name || "",
+          receiver: data.receiverName || "",
+          phone: data.receiverPhone || "",
+          zipcode: data.zipcode || "",
+          address: data.addrBase || "",
+          detailAddress: data.addrDetail || "",
+          isDefault: Boolean(data.isDefault),
         });
       });
     }
   }, [mode, addressId]);
 
-  // 카카오 주소 검색 함수
   const openAddressSearch = () => {
     new window.daum.Postcode({
       oncomplete: function (data) {
-        // 기본 주소
         let fullAddress = data.address;
 
-        // 건물명 처리 (아파트 등)
         if (data.buildingName && data.apartment === "Y") {
           fullAddress += ` (${data.buildingName})`;
         }
@@ -71,7 +61,7 @@ const AddressFormPage = () => {
         setForm((prev) => ({
           ...prev,
           address: fullAddress,
-          zipcode: data.zonecode, // 우편번호
+          zipcode: data.zonecode,
         }));
       },
     }).open();
@@ -99,27 +89,24 @@ const AddressFormPage = () => {
         await updateAddress(addressId, payload);
       }
     } catch (err) {
-      // 배송지 등록 5개 초과 대응
       console.error(err);
     }
 
     navigate(-1);
-    // navigate("/addresses");
   };
 
   const handleDelete = async () => {
     await deleteAddress(addressId);
     navigate(-1);
-    // navigate("/addresses");
   };
 
   return (
     <Container>
       <header className="p-4 font-semibold">
-        {mode === "create" ? "배송지 추가" : "배송지 편집"}
+        {mode === "create" ? "배송지 추가" : "배송지 수정"}
       </header>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 pb-24">
         <Input
           label="배송지명"
           value={form.name}
@@ -131,12 +118,11 @@ const AddressFormPage = () => {
           onChange={(v) => handleChange("receiver", v)}
         />
         <Input
-          label="휴대폰 번호"
+          label="연락처"
           value={form.phone}
           onChange={(v) => handleChange("phone", v)}
         />
 
-        {/* 우편번호 + 주소 검색 */}
         <div className="flex gap-2">
           <input
             value={form.zipcode}
@@ -153,7 +139,6 @@ const AddressFormPage = () => {
           </button>
         </div>
 
-        {/* 기본 주소 */}
         <input
           value={form.address}
           readOnly
@@ -161,7 +146,6 @@ const AddressFormPage = () => {
           className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
         />
 
-        {/* 상세 주소 */}
         <Input
           label="상세 주소"
           value={form.detailAddress}
@@ -174,27 +158,21 @@ const AddressFormPage = () => {
             checked={form.isDefault}
             onChange={(e) => handleChange("isDefault", e.target.checked)}
           />
-          대표 배송지로 설정
+          기본 배송지로 설정
         </label>
       </div>
 
-      {/* 하단 버튼 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-2 justify-center">
         {mode === "edit" && (
-          <button
-            onClick={handleDelete}
-            className="w-1/2 border py-3 rounded-lg"
-          >
+          <button onClick={handleDelete} className="w-1/2 border py-3 rounded-lg">
             삭제
           </button>
         )}
         <button
           onClick={handleSubmit}
-          className={`${
-            mode === "edit" ? "w-1/2" : "w-full"
-          } bg-green-700 text-white py-3 rounded-lg`}
+          className={`${mode === "edit" ? "w-1/2" : "w-full"} bg-green-700 text-white py-3 rounded-lg`}
         >
-          {mode === "create" ? "완료" : "편집"}
+          {mode === "create" ? "등록" : "수정"}
         </button>
       </div>
     </Container>

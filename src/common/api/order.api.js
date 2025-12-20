@@ -13,6 +13,16 @@ export const createOrderApi = async (payload) => {
 };
 
 /**
+ * 결제 완료된 주문 내역 조회
+ * @param {*} orderId
+ * @returns
+ */
+export const getOrderCompleteApi = async (orderId) => {
+  const { data } = await apiClient(`/api/orders/${orderId}/complete`);
+  return data;
+};
+
+/**
  * 배송 준비 상태로 변경
  * PAID → DELIVERY_READY
  */

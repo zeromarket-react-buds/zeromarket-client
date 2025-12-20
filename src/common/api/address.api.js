@@ -27,7 +27,7 @@ export const getAddressDetail = async (addressId) => {
   return data;
 };
 
-export const getDefaultAddress = async (addressId) => {
-  const { data } = await apiClient(`/api/addresses/${addressId}`);
+export const getDefaultAddress = async () => {
+  const { data } = await apiClient(`/api/addresses/default`);
   return data;
 };
