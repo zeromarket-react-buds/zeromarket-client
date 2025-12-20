@@ -1,5 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import {
   updateProductApi,
@@ -32,7 +32,8 @@ const INITIAL_FORM = {
   productStatus: "USED", //초기값
   direct: false,
   delivery: false,
-  sellingArea: "서울 관악구",
+  sellingArea: "",
+  location: null,
 };
 
 //안전성위해 외부분리,한번만 생성
@@ -43,14 +44,20 @@ const handleBeforeUnload = (e) => {
 
 const ProductEditPage = () => {
   const [form, setForm] = useState(INITIAL_FORM);
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const formRef = useRef(form);
   const [images, setImages] = useState([]);
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const routerLocation = useLocation();
   const { id } = useParams();
   const [pageLoading, setPageLoading] = useState(true); //읽기로딩
   const [submitLoading, setSubmitLoading] = useState(false); //등록로딩
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
+
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
 
   //인증상태확인
   useEffect(() => {
@@ -82,8 +89,11 @@ const ProductEditPage = () => {
           return;
         }
 
+        const hasSelectedLocation = !!routerLocation.state?.selectedLocation;
+
         //백에서 가져온 초기데이터로 폼채우기
-        setForm({
+        setForm((prev) => ({
+          ...prev, // 현재 상태 유지 (지도를 다녀왔다면 이미 selectedLocation이 반영되어 있을 수 있음)
           productTitle: data.productTitle,
           categoryDepth1: data.level1Id,
           categoryDepth2: data.level2Id,
@@ -94,7 +104,18 @@ const ProductEditPage = () => {
           direct: data.direct,
           delivery: data.delivery,
           sellingArea: data.sellingArea,
-        });
+          location: hasSelectedLocation
+            ? prev.location
+            : data.locationDto
+            ? { ...data.locationDto, locationName: data.sellingArea }
+            : null,
+          // location: data.locationDto
+          //   ? {
+          //       ...data.locationDto,
+          //       locationName: data.sellingArea,
+          //     }
+          //   : null,
+        }));
 
         setImages(
           data.images.map((img) => ({
@@ -115,6 +136,22 @@ const ProductEditPage = () => {
     };
     fetchDetail();
   }, [id, user, isAuthenticated, authLoading]);
+
+  useEffect(() => {
+    if (routerLocation.state?.selectedLocation) {
+      const newLocation = routerLocation.state.selectedLocation;
+
+      setForm((prev) => ({
+        ...prev,
+        location: newLocation,
+        sellingArea: newLocation.locationName,
+        // location: routerLocation.state.selectedLocation,
+        direct: true,
+      }));
+      // state 초기화하여 뒤로가기 시 중복 방지
+      // navigate(routerLocation.pathname, { replace: true, state: undefined });
+    }
+  }, [routerLocation.state]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -143,8 +180,6 @@ const ProductEditPage = () => {
 
   //상품 수정
   const handleSubmit = useCallback(async () => {
-    console.log("상품 수정 요청 시작");
-
     if (!form.productTitle.trim()) {
       alert("상품명을 입력해주세요.");
       return;
@@ -167,6 +202,8 @@ const ProductEditPage = () => {
 
     setSubmitLoading(true);
     setError("");
+    console.log("상품 수정 요청 시작");
+
     try {
       //대표이미지 자동설정 로직
       let adjustedImages = [...images];
@@ -189,26 +226,96 @@ const ProductEditPage = () => {
 
         //새로 업로드 필요 이미지
         if (img.file) {
-          url = await uploadToSupabase(img.file);
+          // try {
+          //   url = await uploadToSupabase(img.file);
+          // } catch (uploadError) {
+          //   console.error("이미지 업로드 실패:", uploadError);
+          //   alert("이미지 업로드 중 오류가 발생했습니다.");
+          //   setSubmitLoading(false); // 로딩 해제
+          //   return; // 진행 중단
+          // }
+          // 새 파일이 있을 때만 업로드를 시도해서 url을 갱신
+          const uploadedUrl = await uploadToSupabase(img.file);
+          if (uploadedUrl) {
+            url = uploadedUrl;
+          }
         }
-
-        finalImages.push({
-          imageId: img.imageId ?? null,
-          imageUrl: url,
-          sortOrder: order++,
-          isMain: img.isMain,
-        });
+        if (!url) {
+          console.error("이미지 URL을 찾을 수 없습니다:", img);
+          continue; // 혹은 에러 alert
+        }
+        if (url) {
+          finalImages.push({
+            imageId: img.imageId ?? null,
+            imageUrl: url,
+            sortOrder: order++,
+            isMain: img.isMain,
+          });
+        }
       }
 
       //수정내용 서버로 보내는 patch전용 json 데이터
-      const body = {
-        ...form,
+      // const body = {
+      //   ...form,
+      //   images: finalImages,
+      // };
+
+      const payload = {
+        productTitle: form.productTitle,
+        categoryDepth1: form.categoryDepth1,
+        categoryDepth2: form.categoryDepth2,
+        categoryDepth3: form.categoryDepth3,
+        sellPrice: Number(form.sellPrice),
+        productDescription: form.productDescription,
+        productStatus: form.productStatus,
+        direct: form.direct,
+        delivery: form.delivery,
+        sellingArea:
+          form.direct && form.location
+            ? form.location.locationName
+            : form.sellingArea,
+
+        // 백엔드 product_location 테이블 업데이트용 객체
+        location:
+          form.direct && form.location
+            ? {
+                locationName: form.location.locationName,
+                legalDongCode: form.location.legalDongCode,
+                latitude: Number(form.location.latitude),
+                longitude: Number(form.location.longitude),
+                roadAddress: form.location.roadAddress,
+                jibunAddress: form.location.jibunAddress,
+                buildingName: form.location.buildingName,
+                zipCode: form.location.zipCode,
+              }
+            : null,
+        // ...form,
+        // sellingArea: form.location?.locationName || form.sellingArea,
+        // location: form.location
+        //   ? {
+        //       locationName: form.location.locationName,
+        //       legalDongCode: form.location.legalDongCode,
+        //       latitude: form.location.latitude,
+        //       longitude: form.location.longitude,
+        //       roadAddress: form.location.roadAddress,
+        //       jibunAddress: form.location.jibunAddress,
+        //       buildingName: form.location.buildingName,
+        //       zipCode: form.location.zipCode,
+        //     }
+        //   : null,
+        // legalDongCode: form.location?.legalDongCode || null,
+        // latitude: form.location?.latitude || null,
+        // longitude: form.location?.longitude || null,
+        // location: form.location,
         images: finalImages,
+        // environmentScore: form.environmentScore ,
       };
 
-      const response = await updateProductApi(id, body);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (response && response.ok) {
+      // delete payload.location;
+
+      const response = await updateProductApi(id, payload);
+      if (response && (response.ok || response.status === 200)) {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
         alert(`상품 수정 완료! 상품ID: ${id}`);
         navigate(`/products/${id}`, { replace: true });
       } else {
@@ -279,15 +386,6 @@ const ProductEditPage = () => {
                 depth3: form.categoryDepth3,
               }}
               onChange={(depth1, depth2, depth3) =>
-                // setForm((prev) => ({
-                //   ...prev,
-                //   categoryDepth1:
-                //     depth1 != null && depth1 !== "" ? Number(depth1) : null,
-                //   categoryDepth2:
-                //     depth2 != null && depth2 !== "" ? Number(depth2) : null,
-                //   categoryDepth3:
-                //     depth3 != null && depth3 !== "" ? Number(depth3) : null,
-                // }))
                 setForm((prev) => ({
                   //truthy,falsy 체크
                   ...prev,
@@ -325,12 +423,19 @@ const ProductEditPage = () => {
 
           {/* 거래 방법*/}
           <div>
-            <TradeMethodSelector
+            {/* <TradeMethodSelector
               value={{ delivery: form.delivery, direct: form.direct }}
               // onChange={({ delivery, direct }) =>
               //   setForm((prev) => ({ ...prev, delivery, direct }))
               // }
               onChange={(v) => setForm((prev) => ({ ...prev, ...v }))}
+            /> */}
+            <TradeMethodSelector
+              value={form}
+              images={images}
+              isEdit={true}
+              productId={id}
+              onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
             />
           </div>
 

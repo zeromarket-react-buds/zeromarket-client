@@ -1,6 +1,7 @@
 import supabase from "./supabaseClient";
 
 export async function uploadToSupabase(file) {
+  if (!file) return null; // 파일이 없으면 에러 대신 null 반환
   const safeName = `${Date.now()}-${file.name.replace(/[^\w\-\.]/g, "_")}`;
   const filePath = `products/${safeName}`;
   // const fileName = `${Date.now()}-${file.name}`;

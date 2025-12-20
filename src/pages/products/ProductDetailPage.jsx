@@ -300,8 +300,8 @@ const ProductDetailPage = () => {
             />
             {/* 환경점수 - 2,3차 */}
             <DetailEcoScoreSection detail={detail} />
-            {/* 거래 정보 + 맵 */}
 
+            {/* 거래 정보 + 맵 */}
             <ProductTradeInfoSection detail={detail} />
 
             {/* 신고하기 버튼 */}

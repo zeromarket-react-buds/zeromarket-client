@@ -23,13 +23,18 @@ const ProductTradeInfoSection = ({ detail }) => {
             <span className="font-semibold">거래위치</span>
             <span>{detail.sellingArea}</span>
           </div>
-          <div className="bg-gray-200 w-full h-90 border text-gray-600">
+          <div className="bg-gray-200 w-full h-90 border rounded-xl overflow-hidden text-gray-600">
             <MapViewer
+              category={detail.category}
               center={{
                 lat: centerLat,
                 lng: centerLng,
               }}
-              selectedLocation={{ lat: centerLat, lng: centerLng }}
+              selectedLocation={{
+                lat: centerLat,
+                lng: centerLng,
+                locationName: detail.sellingArea,
+              }}
             />
           </div>
         </div>

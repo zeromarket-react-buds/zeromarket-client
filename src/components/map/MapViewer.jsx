@@ -1,16 +1,30 @@
 import { useEffect, useRef, forwardRef } from "react";
+import { getCategoryEmoji } from "./map.constant";
 
-const MapViewer = forwardRef(({ center, selectedLocation }, ref) => {
+const getMarkerContentHtml = (categoryName, productTitle) => {
+  const emoji = getCategoryEmoji(categoryName);
+  return `
+    <div class="custom-marker-wrapper pointer-events-none">
+      <div class="marker-tooltip !block"> ${productTitle}
+      </div>
+      <div class="marker-emoji">
+        ${emoji}
+      </div>
+    </div>`;
+};
+
+const MapViewer = forwardRef(({ center, selectedLocation, category }, ref) => {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const overlayRef = useRef(null);
 
   const initializeMap = (lat, lng) => {
     if (!window.kakao || !window.kakao.maps) return;
 
     window.kakao.maps.load(() => {
-      const position = new kakao.maps.LatLng(lat, lng); //지도 인스턴스가 없는 경우 최초 1회 실행
-
+      const position = new kakao.maps.LatLng(lat, lng);
+      //지도 인스턴스가 없는 경우 최초 1회 실행
       if (!mapRef.current) {
         const map = new kakao.maps.Map(containerRef.current, {
           center: position,
@@ -18,15 +32,27 @@ const MapViewer = forwardRef(({ center, selectedLocation }, ref) => {
         });
         mapRef.current = map;
 
-        const viewerMarker = new kakao.maps.Marker({
+        const CustomOverlay = new kakao.maps.CustomOverlay({
           position: position,
-          map: map,
+          content: getMarkerContentHtml(
+            category,
+            selectedLocation.locationName || "직거래 장소"
+          ),
+          yAnchor: 1.3,
         });
-        markerRef.current = viewerMarker;
+
+        CustomOverlay.setMap(map);
+        overlayRef.current = CustomOverlay;
       } else {
         mapRef.current.setCenter(position);
-        if (markerRef.current) {
-          markerRef.current.setPosition(position);
+        if (overlayRef.current) {
+          overlayRef.current.setPosition(position);
+          overlayRef.current.setContent(
+            getMarkerContentHtml(
+              category,
+              selectedLocation.locationName || "직거래 장소"
+            )
+          );
         }
       }
 
@@ -35,8 +61,12 @@ const MapViewer = forwardRef(({ center, selectedLocation }, ref) => {
   };
 
   useEffect(() => {
-    const finalLat = selectedLocation.lat || center.lat;
-    const finalLng = selectedLocation.lng || center.lng;
+    const finalLat =
+      selectedLocation?.lat || selectedLocation?.latitude || center?.lat;
+    const finalLng =
+      selectedLocation?.lng || selectedLocation?.longitude || center?.lng;
+
+    if (!finalLat || !finalLng) return;
 
     // 1- SDK 로드 상태 확인 및 대기
     if (!window.kakao || !window.kakao.maps) {
@@ -52,7 +82,7 @@ const MapViewer = forwardRef(({ center, selectedLocation }, ref) => {
 
     // 2- SDK가 이미 로드된 경우 또는 대기 후 실행
     initializeMap(finalLat, finalLng);
-  }, [center, selectedLocation]); // center와 selectedLocation 변경 시 항상 실행
+  }, [center, selectedLocation, category]); // 의존성 변경 시 항상 실행
 
   return <div ref={containerRef} className="w-full h-full" />;
 });

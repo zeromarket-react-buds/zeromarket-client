@@ -4,11 +4,30 @@ import { X, Plus } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 
-const TradeMethodSelector = ({ value, images, onChange }) => {
+const TradeMethodSelector = ({
+  value,
+  images,
+  onChange,
+  isEdit,
+  productId,
+}) => {
   const delivery = value?.delivery ?? false;
   const direct = value?.direct ?? false;
   const location = value?.location;
+  const locationName = location?.locationName || value?.sellingArea;
+
   const navigate = useNavigate();
+
+  const handleLocationClick = () => {
+    const returnUrl = isEdit ? `/products/edit/${productId}` : "/products";
+    navigate("/products/location", {
+      state: {
+        form: value,
+        images: images,
+        from: returnUrl,
+      },
+    });
+  };
 
   const handleToggle = (type) => (checked) => {
     onChange({
@@ -18,11 +37,13 @@ const TradeMethodSelector = ({ value, images, onChange }) => {
   };
 
   const removeLocation = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     onChange({
       delivery,
       direct,
       location: null,
+      sellingArea: "",
     });
   };
 
@@ -47,15 +68,42 @@ const TradeMethodSelector = ({ value, images, onChange }) => {
       {/* 직거래 선택시 뜨는 장소 */}
       {direct && (
         <div className="flex gap-2 flex-wrap mt-2 ">
-          {location && (
+          {locationName ? (
             <div>
-              <Button className="bg-gray-200 text-black rounded-3xl">
-                <span>{location.locationName}</span>
-                <span onClick={removeLocation}>
-                  <X className="text-brand-darkgray" />
+              <Button
+                className="bg-gray-200 text-black rounded-3xl"
+                onClick={handleLocationClick}
+              >
+                <span>{locationName}</span>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation(); // 부모 버튼의 클릭 이벤트를 막음
+                    removeLocation(e);
+                  }}
+                  className="p-1 hover:bg-gray-300 rounded-full cursor-pointer transition-colors"
+                >
+                  <X className="w-4 h-4 text-brand-darkgray" />
                 </span>
               </Button>
             </div>
+          ) : (
+            <Button
+              className="bg-white border-2 border-gray-200 text-black rounded-3xl"
+              onClick={handleLocationClick}
+              // onClick={() =>
+              //   navigate("/products/location", {
+              //     state: {
+              //       form: value,
+              //       images: images,
+              //     },
+              //   })
+              // }
+            >
+              <span>
+                <Plus className="text-brand-darkgray" />
+              </span>
+              <span>위치 설정</span>
+            </Button>
           )}
 
           {/* <Button className="bg-gray-200 text-black rounded-3xl">
@@ -64,24 +112,25 @@ const TradeMethodSelector = ({ value, images, onChange }) => {
               <X className="text-brand-darkgray" />
             </span>
           </Button> */}
-          {!location && (
+          {/* {!location && (
             <Button
               className="bg-white border-2 border-gray-200 text-black rounded-3xl"
-              onClick={() =>
-                navigate("/products/location", {
-                  state: {
-                    form: value,
-                    images: images,
-                  },
-                })
-              }
+              onClick={handleLocationClick}
+              // onClick={() =>
+              //   navigate("/products/location", {
+              //     state: {
+              //       form: value,
+              //       images: images,
+              //     },
+              //   })
+              // }
             >
               <span>
                 <Plus className="text-brand-darkgray" />
               </span>
               <span>위치 설정</span>
             </Button>
-          )}
+          )} */}
         </div>
       )}
     </div>

@@ -9,11 +9,16 @@ const ProductLocationSelectPage = () => {
   const navigate = useNavigate();
   const routerLocation = useLocation();
   const mapRef = useRef(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [locationName, setLocationName] = useState("");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const previousForm = routerLocation.state?.form;
   const previousImages = routerLocation.state?.images;
+  const returnPath = routerLocation.state?.from || "/products";
+  const [selectedLocation, setSelectedLocation] = useState(
+    previousForm?.location || null
+  );
+  const [locationName, setLocationName] = useState(
+    previousForm?.location?.locationName || ""
+  );
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   //주소<>위도/경도 변환위한 Geocoder객체
   const geocoder = useMemo(() => {
@@ -81,12 +86,12 @@ const ProductLocationSelectPage = () => {
 
   //장소명 확정>상품등록페이지로 전달
   const handleSubmitLocation = () => {
-    navigate("/products", {
+    navigate(returnPath, {
       replace: true,
       state: {
         selectedLocation: {
           ...selectedLocation,
-          locationName, //최종장소명으로 덮어씀
+          locationName: locationName, //수정한 최종장소명
         },
         form: previousForm,
         images: previousImages,
