@@ -46,7 +46,7 @@ import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
 import OrderCompletePage from "@/pages/order/OrderCompletePage";
 import { NotificationProvider } from "@/hooks/NotificationContext";
-import NotificationsPage from "./pages/me/NotificationsPages";
+import NotificationsPage from "@/pages/me/NotificationsPages";
 
 const router = createBrowserRouter([
   {
