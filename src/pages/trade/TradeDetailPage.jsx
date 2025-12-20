@@ -1,3 +1,9 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { ChevronRight } from "lucide-react";
+
 import {
   getTradeDetailApi,
   updateTradeStatusApi,
@@ -5,13 +11,10 @@ import {
 import TradeActionStatusButton from "@/components/trade/TradeActionStatusButton";
 import TradeReviewButton from "@/components/trade/TradeReviewButton";
 import {
-  tradeFlowLabels,
-  getTradeStatusKey,
+  buildTradeViewState,
+  getStatusLabelByKey,
 } from "@/components/trade/tradeFlow";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+
 import { useTradeToast } from "@/components/GlobalToast";
 import formatPhone from "@/utils/formatPhone";
 import { useModal } from "@/hooks/useModal";
@@ -25,6 +28,7 @@ const formatDate = (isoString) => {
 
 // 헤더용 날짜: 취소/완료/업데이트/생성 순으로 우선순위 세우는 함수
 const getHeaderDate = (trade) => {
+  if (!trade) return "";
   const { canceledAt, completedAt, updatedAt, createdAt } = trade;
   return formatDate(canceledAt ?? completedAt ?? updatedAt ?? createdAt);
 };
@@ -36,6 +40,7 @@ const TradeDetailPage = () => {
   const { showCompletedUpdatedToast, showCanceledUpdatedToast } =
     useTradeToast();
   const { tradeId } = useParams();
+
   const [tradeProduct, setTradeProduct] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +50,6 @@ const TradeDetailPage = () => {
 
     try {
       const data = await getTradeDetailApi(tradeId);
-      console.log("거래 상세 응답:", data);
       setTradeProduct(data);
     } catch (e) {
       setTradeProduct(null);
@@ -67,6 +71,32 @@ const TradeDetailPage = () => {
     fetchTradeProduct();
   }, [tradeId]);
 
+  // useMemo: 렌더 때마다 매번 재계산하지 않고 tradeProduct가 바뀔 때만 다시 계산. tradeProduct가 null이어도 훅은 항상 호출되게 처리
+  const view = useMemo(() => {
+    if (!tradeProduct) {
+      // 방어 로직이 필요한 이유:
+      // tradeProduct는 API/비동기 로딩 결과라서 초기 렌더에서는 null/undefined일 수 있음
+      // 그 상태에서 buildTradeViewState(tradeProduct)를 호출하면 내부에서 tradeProduct.로 된 거 접근할때 런타임 에러가 날 수 있음
+      // 구조 분해 할당을 항상 동일한 키로 안전하게 하기 위해 기본 형태를 반환함
+      return {
+        flowType: null,
+        displayStatusKey: null,
+        tradeStatusKey: null,
+        orderStatusKey: null,
+        isCanceled: false,
+        isCompleted: false,
+      };
+    }
+    return buildTradeViewState(tradeProduct);
+  }, [tradeProduct]);
+
+  const { flowType, displayStatusKey, isCanceled, isCompleted } = view;
+
+  const displayStatusLabel = useMemo(() => {
+    if (!flowType || !displayStatusKey) return "";
+    return getStatusLabelByKey(flowType, displayStatusKey) ?? "";
+  }, [flowType, displayStatusKey]);
+
   if (loading && !tradeProduct) {
     return (
       <div className="p-4">
@@ -83,7 +113,6 @@ const TradeDetailPage = () => {
     memberId,
     sellerId,
     tradeType,
-    tradeStatus,
     isHidden,
     productId,
     thumbnailUrl,
@@ -94,27 +123,19 @@ const TradeDetailPage = () => {
     phone,
     createdAt,
     canceledBy,
+    reviewStatus,
   } = tradeProduct;
 
   // 이 거래에서의 내 역할 판별
   const isSeller = memberId != null && sellerId === memberId;
   // role 기준으로 mode 결정
   const mode = isSeller ? "sales" : "purchases";
-  const statusDesc = tradeProduct.tradeStatus?.description ?? null;
 
-  const isDelivery = tradeType?.description === "택배거래";
-  const isPending = statusDesc === "예약중";
-  const isCanceled = statusDesc === "취소";
-  const isCompleted = statusDesc === "거래완료";
-
-  // 상태바용 flowType / key 계산
-  const flowType = tradeFlowLabels({ tradeType });
+  const isDelivery =
+    tradeType?.name === "DELIVERY" || tradeType?.description === "택배거래";
 
   // 목록 페이지와 동일하게: 취소거나 숨기기면 버튼 숨김
-  const hideActions = isCanceled || isHidden;
-
-  const statusKey = tradeProduct.tradeStatus?.name ?? null;
-  const tradeStatusKey = getTradeStatusKey(statusDesc, statusKey);
+  const hideActions = isHidden || isCanceled || isCompleted;
 
   const headerDate = getHeaderDate(tradeProduct);
   const paidDate = formatDate(createdAt);
@@ -126,6 +147,7 @@ const TradeDetailPage = () => {
     });
 
     if (!ok) return;
+
     try {
       await updateTradeStatusApi({
         tradeId,
@@ -163,6 +185,26 @@ const TradeDetailPage = () => {
     }
   };
 
+  const handleConfirmOrder = async (tradeId) => {
+    const ok = await confirm({
+      description: "주문 확인 상태로 변경하시겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
+
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        nextStatus: "DELIVERY_READY",
+      });
+
+      await fetchTradeProduct();
+    } catch (err) {
+      console.error("주문 확인으로 변경 실패:", err);
+    }
+  };
+
   return (
     <div className="flex flex-col -mt-8">
       <div className="flex bg-black text-white justify-between p-4">
@@ -177,11 +219,9 @@ const TradeDetailPage = () => {
               <div className="text-brand-red font-semibold">거래취소</div>
             ) : isCompleted ? (
               <div className="text-brand-green font-semibold">거래완료</div>
-            ) : isDelivery && isPending ? (
-              <div className="text-brand-green font-semibold">결제완료</div>
             ) : (
               <div className="text-brand-mediumgray font-semibold">
-                {tradeStatus?.description}
+                {displayStatusLabel}
               </div>
             )}
 
@@ -203,6 +243,7 @@ const TradeDetailPage = () => {
                 : "판매자에게 주문 확인을 요청해주세요."}
             </div>
           </div>
+
           <div
             className="flex flex-row gap-10 pt-2 pb-5 items-center"
             onClick={() => navigate(`/products/${productId}`)}
@@ -211,6 +252,7 @@ const TradeDetailPage = () => {
               <img
                 src={thumbnailUrl}
                 className="object-cover w-[100px] h-[70px] rounded-2xl"
+                alt=""
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -218,23 +260,18 @@ const TradeDetailPage = () => {
               <div>{sellPrice.toLocaleString()}원</div>
             </div>
           </div>
+
           {isCompleted ? (
-            <TradeReviewButton
-              tradeId={tradeId}
-              reviewStatus={tradeProduct.reviewStatus}
-            />
+            <TradeReviewButton tradeId={tradeId} reviewStatus={reviewStatus} />
           ) : !hideActions ? (
             <TradeActionStatusButton
-              trade={tradeProduct}
               flowType={flowType}
-              tradeStatusKey={tradeStatusKey}
+              displayStatusKey={displayStatusKey}
               mode={mode}
-              onComplete={() => {
-                handleUpdateCompleteTrade(tradeId);
-              }}
-              onCancel={() => {
-                handleUpdateCancelTrade(tradeId);
-              }}
+              isHidden={isHidden}
+              onComplete={() => handleUpdateCompleteTrade(tradeId)}
+              onCancel={() => handleUpdateCancelTrade(tradeId)}
+              onConfirmOrder={() => handleConfirmOrder(tradeId)}
               showStatusBar={false}
             />
           ) : null}
@@ -350,9 +387,7 @@ const TradeDetailPage = () => {
               </div>
             )}
           </div>
-        ) : (
-          <></>
-        )}
+        ) : null}
       </div>
     </div>
   );

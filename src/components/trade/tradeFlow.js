@@ -1,63 +1,104 @@
-// trade 테이블만 사용해서 쓰는 임시용
-export const tradeFlowLabels = (params = {}) => {
-  const { tradeType } = params;
-
-  // tradeType 자체가 없으면 기본 흐름(방어용)
-  if (!tradeType) {
-    return "CHAT_DIRECT";
-  }
-
-  const key = tradeType.description ?? tradeType.name ?? String(tradeType);
-
-  // 택배거래: 바로구매 - 택배거래(5단계)
-  if (key === "택배거래" || key === "DELIVERY") {
-    return "INSTANT_DELIVERY";
-  }
-
-  // 직거래: 채팅 - 직거래(2단계)
-  if (key === "직거래" || key === "DIRECT") {
-    return "CHAT_DIRECT";
-  }
-
-  // 그 외: 바로구매 - 직거래(3단계)
-  return "INSTANT_DIRECT";
+// tradeFlow 종류
+export const FLOW = {
+  INSTANT_DELIVERY: "INSTANT_DELIVERY",
+  INSTANT_DIRECT: "INSTANT_DIRECT",
+  CHAT_DIRECT: "CHAT_DIRECT",
 };
 
+// tradeFlow 판별용. order가 있으면 바로구매, 없으면 채팅
+export const tradeFlowLabels = (params = {}) => {
+  const { orderId, hasOrder, tradeType } = params;
+
+  const ordered = Boolean(hasOrder ?? orderId);
+
+  // order 없으면 채팅(직거래)
+  if (!ordered) return FLOW.CHAT_DIRECT;
+
+  // order 있으면 바로구매 + tradeType으로 택배/직거래 구분
+  const key = tradeType?.name ?? tradeType?.description ?? tradeType;
+
+  if (key === "DELIVERY" || key === "택배거래") return FLOW.INSTANT_DELIVERY;
+  if (key === "DIRECT" || key === "직거래") return FLOW.INSTANT_DIRECT;
+};
+
+// 종류별로 나뉘어지는  tradeFlow 시스템
 export const tradeFlows = {
-  INSTANT_DELIVERY: [
-    { label: "결제완료", key: "PENDING" },
-    { label: "주문확인", key: "PENDING" },
-    { label: "배송중", key: "PENDING" },
-    { label: "배송완료", key: "PENDING" },
+  [FLOW.INSTANT_DELIVERY]: [
+    { label: "결제완료", key: "PAID" },
+    { label: "주문확인", key: "DELIVERY_READY" },
+    { label: "배송중", key: "SHIPPED" },
+    { label: "배송완료", key: "DELIVERED" },
     { label: "거래완료", key: "COMPLETED" },
   ],
-  INSTANT_DIRECT: [
-    { label: "결제완료", key: "PENDING" },
-    { label: "주문확인", key: "PENDING" },
+  [FLOW.INSTANT_DIRECT]: [
+    { label: "결제완료", key: "PAID" },
+    { label: "주문확인", key: "DELIVERY_READY" },
     { label: "거래완료", key: "COMPLETED" },
   ],
-  CHAT_DIRECT: [
+  [FLOW.CHAT_DIRECT]: [
     { label: "예약중", key: "PENDING" },
     { label: "거래완료", key: "COMPLETED" },
   ],
 };
 
-// tradeFlows를 한 번 돌면서 { label(결제완료/예약중/거래완료) : 상태 key(PENDING/COMPLETED)} 맵 생성
-const tradeStatusKeyByLabel = {};
+// 특정 flowType에서 key -> label
+export const getStatusLabelByKey = (flowType, key) => {
+  const steps = tradeFlows[flowType] || [];
+  return steps.find((s) => s.key === key)?.label;
+};
 
-Object.values(tradeFlows).forEach((steps) => {
-  steps.forEach((step) => {
-    // 같은 라벨이 여러 단계에 있어도, 먼저 들어온 값 사용
-    if (!tradeStatusKeyByLabel[step.label]) {
-      tradeStatusKeyByLabel[step.label] = step.key;
-    }
+/*
+  화면 표시용 상태키 정규화
+  - CHAT_DIRECT: trade_status 사용
+  - INSTANT_*: order_status 사용 (trade_status가 COMPLETED/CANCELED면 그게 우선)
+*/
+export const getDisplayStatusKey = (params = {}) => {
+  const { flowType, tradeStatusKey, orderStatusKey } = params;
+
+  if (!flowType) return null;
+
+  // 종료 상태는 trade가 우선
+  if (tradeStatusKey === "COMPLETED") return "COMPLETED";
+  if (tradeStatusKey === "CANCELED") return "CANCELED";
+
+  // 채팅 흐름은 trade_status 기반
+  if (flowType === FLOW.CHAT_DIRECT) return tradeStatusKey || null;
+
+  // 바로구매 흐름은 order_status 기반
+  if (orderStatusKey) return orderStatusKey;
+
+  return null;
+};
+
+/*
+  MySales/MyPurchases/TradeDetail 공통으로 쓰는 상태 계산용
+  trade 객체(목록/상세 응답)를 그대로 넣으면 동일한 결과 셍상
+*/
+export const buildTradeViewState = (trade = {}) => {
+  const flowType = tradeFlowLabels({
+    orderId: trade.orderId,
+    hasOrder: trade.hasOrder,
+    tradeType: trade.tradeType,
   });
-});
 
-// 화면용 라벨로부터 enum key 구하는 헬퍼
-export const getTradeStatusKey = (label, fallbackKey) => {
-  if (!label) {
-    return fallbackKey || null;
-  }
-  return tradeStatusKeyByLabel[label] || fallbackKey || null;
+  const tradeStatusKey = trade.tradeStatus?.name ?? trade.tradeStatus ?? null;
+  const orderStatusKey = trade.orderStatus?.name ?? trade.orderStatus ?? null;
+
+  const displayStatusKey = getDisplayStatusKey({
+    flowType,
+    tradeStatusKey,
+    orderStatusKey,
+  });
+
+  const isCanceled = displayStatusKey === "CANCELED";
+  const isCompleted = displayStatusKey === "COMPLETED";
+
+  return {
+    flowType,
+    tradeStatusKey,
+    orderStatusKey,
+    displayStatusKey,
+    isCanceled,
+    isCompleted,
+  };
 };

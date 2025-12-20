@@ -4,10 +4,7 @@ import { Filter, Search, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LongProductCard from "@/components/trade/LongProductCard";
-import {
-  getTradeStatusKey,
-  tradeFlowLabels,
-} from "@/components/trade/tradeFlow";
+import { buildTradeViewState } from "@/components/trade/tradeFlow";
 import {
   getTradeListApi,
   updateTradeStatusApi,
@@ -236,8 +233,6 @@ const MyPurchasesPage = () => {
               tradeStatus,
               tradeType,
               isHidden: productIsHidden,
-              isDirect,
-              isDelivery,
               productTitle,
               sellPrice,
               thumbnailUrl,
@@ -245,26 +240,24 @@ const MyPurchasesPage = () => {
               reviewStatus,
             } = trade;
 
-            const hasTrade =
-              tradeId != null && tradeStatus != null && tradeType != null;
+            const {
+              flowType,
+              displayStatusKey,
+              tradeStatusKey,
+              isCanceled,
+              isCompleted,
+            } = buildTradeViewState(trade);
 
-            const statusDesc = hasTrade ? tradeStatus.description : null;
+            const statusDesc = tradeStatus?.description ?? null;
 
-            // 거래가 있는 경우만 flowType/상태 계산
-            const flowType = hasTrade ? tradeFlowLabels({ tradeType }) : null;
-
-            const statusKey = hasTrade ? tradeStatus.name : null;
-            const tradeStatusKey = getTradeStatusKey(statusDesc, statusKey);
-
-            // 상태 관련 변수들
-            const isCanceled = statusDesc === "취소";
+            // 숨김 여부
             const isHidden = productIsHidden === true;
-            const hideActions = isCanceled || isHidden;
-            const isCompleted = tradeStatusKey === "COMPLETED";
 
-            // 숨기기 뱃지 별도로 계산 (구매내역에서는 완료나 취소 상태일 땐 숨기기 뱃지 표시 X)
-            const isHiddenBadge =
-              productIsHidden === true && !isCanceled && !isCompleted;
+            // 거래 액션 버튼 제어 (취소, 상태변경 등)
+            const hideTradeHistoryAction = isCanceled || isCompleted;
+
+            // 숨김 뱃지 표시 여부 (구매자 기준)
+            const showHiddenBadge = isHidden && !isCanceled && !isCompleted;
 
             return (
               <div key={tradeId}>
@@ -280,38 +273,30 @@ const MyPurchasesPage = () => {
 
                 <div
                   className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
-                  onClick={() =>
-                    hasTrade
-                      ? goToTradeDetail(tradeId)
-                      : navigate(`/products/${productId}`)
-                  }
+                  onClick={() => goToTradeDetail(tradeId)}
                 >
                   <LongProductCard
                     productId={productId}
                     productTitle={productTitle}
                     sellPrice={sellPrice}
                     tradeType={tradeType}
-                    isDirect={isDirect}
-                    isDelivery={isDelivery}
                     tradeStatus={statusDesc}
                     thumbnailUrl={thumbnailUrl}
-                    isHidden={isHiddenBadge}
+                    isHidden={showHiddenBadge}
                   />
 
-                  {!hideActions && hasTrade && (
+                  {!hideTradeHistoryAction && (
                     <TradeActionStatusButton
-                      trade={trade}
                       flowType={flowType}
-                      tradeStatusKey={tradeStatusKey}
+                      displayStatusKey={displayStatusKey}
                       mode="purchases"
-                      onCancel={() => {
-                        handleUpdateCancelTrade(tradeId);
-                      }}
+                      isHidden={isHidden}
+                      onCancel={() => handleUpdateCancelTrade(tradeId)}
                     />
                   )}
 
                   {/* 거래완료 상태 + 후기 버튼 */}
-                  {hasTrade && tradeStatusKey === "COMPLETED" && (
+                  {tradeStatusKey === "COMPLETED" && (
                     <TradeReviewButton
                       tradeId={tradeId}
                       reviewStatus={reviewStatus}
