@@ -16,7 +16,10 @@ const NotificationsPage = () => {
     <>
       <div className="p-8 flex flex-col space-y-4">
         {notis.map((noti) => (
-          <NotificationCard noti={noti}></NotificationCard>
+          <NotificationCard
+            key={noti.notificationId}
+            noti={noti}
+          ></NotificationCard>
         ))}
       </div>
     </>
