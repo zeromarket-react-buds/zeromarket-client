@@ -180,7 +180,7 @@
   }
 
   .custom-marker-wrapper:hover .marker-emoji {
-    transform: scale(1.4);
+    transform: scale(1.5);
   }
   .custom-marker-wrapper:active .marker-emoji {
     transform: scale(1.1);

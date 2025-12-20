@@ -43,6 +43,9 @@ const handleBeforeUnload = (e) => {
 const ProductCreatePage = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const routerLocation = useLocation();
+  const [images, setImages] = useState(() => {
+    return routerLocation.state?.images ?? [];
+  });
   const [form, setForm] = useState(() => {
     return routerLocation.state?.form ?? INITIAL_FORM;
     // if (routerLocation.state?.form) {
@@ -50,7 +53,7 @@ const ProductCreatePage = () => {
     // }
     // return INITIAL_FORM;
   });
-  const [images, setImages] = useState([]);
+  // const [images, setImages] = useState([]);
   const navigate = useNavigate();
   const { setHeader } = useHeader();
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -176,13 +179,16 @@ const ProductCreatePage = () => {
   useEffect(() => {
     if (routerLocation.state?.selectedLocation) {
       const previousForm = routerLocation.state.form;
+      const previousImages = routerLocation.state.images;
 
       setForm((prev) => ({
         ...(previousForm || prev),
-
         location: routerLocation.state.selectedLocation,
         direct: true,
       }));
+      if (previousImages) {
+        setImages(previousImages);
+      }
       navigate(routerLocation.pathname, { replace: true, state: undefined });
     }
   }, [routerLocation.state, navigate, routerLocation.pathname]);
@@ -299,7 +305,6 @@ const ProductCreatePage = () => {
       console.log("최종 legalDongCode (10자리):", finalLegalDongCode);
 
       const payload = {
-        // ...restForm, // location 필드는 제외
         ...form,
         sellingArea:
           form.direct && form.location ? form.location.locationName : null,
@@ -470,6 +475,7 @@ const ProductCreatePage = () => {
           <div>
             <TradeMethodSelector
               value={form}
+              images={images}
               onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
             />
           </div>

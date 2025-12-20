@@ -8,11 +8,12 @@ import LocationNameSheet from "@/components/product/create/LocationNameSheet";
 const ProductLocationSelectPage = () => {
   const navigate = useNavigate();
   const routerLocation = useLocation();
-  const previousForm = routerLocation.state?.form;
   const mapRef = useRef(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const previousForm = routerLocation.state?.form;
+  const previousImages = routerLocation.state?.images;
 
   //주소<>위도/경도 변환위한 Geocoder객체
   const geocoder = useMemo(() => {
@@ -88,6 +89,7 @@ const ProductLocationSelectPage = () => {
           locationName, //최종장소명으로 덮어씀
         },
         form: previousForm,
+        images: previousImages,
         // form: routerLocation.state?.form ?? null,
       },
     });

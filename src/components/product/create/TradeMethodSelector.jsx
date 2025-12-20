@@ -4,7 +4,7 @@ import { X, Plus } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 
-const TradeMethodSelector = ({ value, onChange }) => {
+const TradeMethodSelector = ({ value, images, onChange }) => {
   const delivery = value?.delivery ?? false;
   const direct = value?.direct ?? false;
   const location = value?.location;
@@ -71,6 +71,7 @@ const TradeMethodSelector = ({ value, onChange }) => {
                 navigate("/products/location", {
                   state: {
                     form: value,
+                    images: images,
                   },
                 })
               }
