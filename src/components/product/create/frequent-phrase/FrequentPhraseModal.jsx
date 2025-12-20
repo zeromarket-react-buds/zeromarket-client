@@ -4,26 +4,41 @@ import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
 const FrequentPhraseModal = ({ open, onClose }) => {
   if (!open) return null;
 
+  //mock 데이터
+  //문구 목록 state
+  const [phrases, setPhrases] = useState([
+    { id: 1, text: "자주 쓰는 문구 1" },
+    { id: 2, text: "자주 쓰는 문구 1" },
+    { id: 3, text: "자주 쓰는 문구 1" },
+  ]);
+
+  //문구등록 인풋창
+  //상태 관리
+  const [newText, setNewText] = useState("");
+
   //UI 상태 전환(state toggle): 카드 편집모드, 일반모드
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
 
-  // 자주 쓰는 문구 추가하기 클릭 핸들러
+  // 문구 등록 클릭 핸들러
+  const handleRegister = () => {
+    if (!newText.trim()) return; //빈값 방지
+
+    setPhrases((prev) => [
+      ...prev,
+      {
+        id: Date.now(), // 임시 ID
+        text: newText.trim(),
+      },
+    ]);
+
+    setNewText(""); // 입력창 초기화
+  };
+
+  // 하단 자주 쓰는 문구 추가하기 클릭 핸들러
   const handleAdd = () => {
     console.log("추가하기 클릭");
   };
-
-  // 문구 등록 클릭 핸들러
-  const handleRegister = () => {
-    console.log("문구 등록 클릭");
-  };
-
-  //mock 데이터
-  const phrases = [
-    { id: 1, text: "자주 쓰는 문구 1", selected: true },
-    { id: 2, text: "자주 쓰는 문구 1", selected: false },
-    { id: 3, text: "자주 쓰는 문구 1", selected: false },
-  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -50,13 +65,22 @@ const FrequentPhraseModal = ({ open, onClose }) => {
         <div className="px-4 pt-4 flex gap-2">
           <input
             type="text"
+            value={newText}
+            onChange={(e) => setNewText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault(); // 엔터로 form submit 방지
+                handleRegister();
+              }
+            }}
             placeholder="자주 쓰는 문구를 등록해주세요"
             className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#1B6439]"
           />
 
           <button
             onClick={handleRegister}
-            className="w-9 h-9 flex items-center justify-center bg-[#1B6439] text-white rounded-lg"
+            disabled={!newText.trim()}
+            className="w-9 h-9 flex items-center justify-center bg-[#1B6439] text-white rounded-lg disabled:opacity-40"
           >
             <Plus size={18} />
           </button>
@@ -99,8 +123,16 @@ const FrequentPhraseModal = ({ open, onClose }) => {
                   {isEditing ? (
                     <button
                       onClick={() => {
-                        console.log("수정 완료:", editText);
-                        setEditingId(null);
+                        if (!editText.trim()) return; //빈값 방지
+
+                        setPhrases((prev) =>
+                          prev.map((p) =>
+                            p.id === phrase.id
+                              ? { ...p, text: editText.trim() } //수정된 문구 반영
+                              : p
+                          )
+                        );
+                        setEditingId(null); //편집모드 종료
                       }}
                       className="p-1 rounded hover:bg-white"
                     >
@@ -117,9 +149,13 @@ const FrequentPhraseModal = ({ open, onClose }) => {
                       >
                         <Pencil size={16} />
                       </button>
-
+                      {/* 삭제 버튼 */}
                       <button
-                        onClick={() => console.log("삭제 클릭:", phrase.id)}
+                        onClick={() => {
+                          setPhrases(
+                            (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
+                          );
+                        }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
                         <X size={16} />

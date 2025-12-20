@@ -453,7 +453,7 @@ const ProductCreatePage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
-              onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)}// 자주 쓰는 문구 모달 열기
             />
           </div>
 
