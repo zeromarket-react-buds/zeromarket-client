@@ -7,6 +7,7 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
  * @param {function} onSelect - 지도 클릭 또는 현재 위치 로드 시 호출되는 콜백 ({ lat, lng })
  * @param {object} selectedLocation - 현재 선택된 위치 (리렌더링 시 핀 위치 고정용)
  */
+
 const MapSelector = forwardRef(
   ({ center, onSelect, selectedLocation }, ref) => {
     const containerRef = useRef(null);
@@ -111,7 +112,8 @@ const MapSelector = forwardRef(
 
         setTimeout(() => map.relayout(), 0);
       });
-    }, [center, onSelect, selectedLocation]);
+    }, []); // 마운트시1회만 실행
+    // }, [center, onSelect, selectedLocation]);
 
     useEffect(() => {
       if (mapRef.current && selectMarkerRef.current && selectedLocation) {

@@ -9,30 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { Crosshair } from "lucide-react";
 import { useMapToast } from "@/components/GlobalToast";
 
-/**
- * @description 검색 전용 지도 컴포넌트: 홈 화면, 상품 검색 페이지에서 사용됩니다.
- * 지도를 이동/확대할 때마다 검색 경계가 변경되면 콜백을 호출합니다.
- * @param {object} center - 초기 지도 중심
- * @param {function} onSearchBoundaryChange - 지도를 이동/확대 완료 시 호출되는 콜백
- * @param {Array<object>} products - 지도에 표시할 상품 배열 (추가)
- */
-
 const getMarkerContentHtml = (categoryName, productId, productTitle) => {
-  const emojiMap = {
-    "가구/인테리어": "🛋️",
-    도서: "📖",
-    "디지털/가전": "💻",
-    "생활/건강": "🍵",
-    식품: "🍎",
-    "스포츠/레저": "⚽",
-    "여가/생활편의": "🎬",
-    "출산/육아": "🍼",
-    패션의류: "👕",
-    패션잡화: "👜",
-    "화장품/미용": "💄",
-    ETC: "📦",
-  };
-  const emoji = emojiMap[categoryName] || emojiMap["ETC"];
+  const emoji = getCategoryEmoji(categoryName);
   return `
     <div class="custom-marker-wrapper" onclick="goToProductDetail(${productId})">
       <div class="marker-tooltip">
