@@ -1,6 +1,7 @@
 import Container from "@/components/Container";
 import { useNavigate, useParams } from "react-router-dom";
-import { UserRound, Heart } from "lucide-react";
+import { useHeader } from "@/hooks/HeaderContext";
+import { UserRound, Heart, Settings, MoreVertical } from "lucide-react";
 import ProductCard from "@/components/display/ProductCard";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getProductsBySeller } from "@/common/api/sellerShop.api";
@@ -17,12 +18,39 @@ import { getTargetIdIsBlockedApi } from "@/common/api/block.api";
 import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const SellerShopPage = () => {
+  const navigate = useNavigate();
   const { alert } = useModal();
   const { sellerId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const currentMemberId = user?.memberId;
-
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast(); //찜토스트
+  const { setHeader } = useHeader();
+  const isMe = isAuthenticated && String(user?.memberId) === String(sellerId);
+
+  // 헤더
+  useEffect(() => {
+    setHeader({
+      title: isMe ? "마이 샵" : "셀러 샵",
+      showBellWithRightSlot: true,
+      rightSlot: isAuthenticated ? (
+        isMe ? (
+          [<Settings key="settings" onClick={() => navigate("/me/settings")} />]
+        ) : (
+          <MoreVertical
+            key="more"
+            size={24}
+            className="cursor-pointer"
+            onClick={(e) => {
+              const anchorEl = e.currentTarget;
+              window.dispatchEvent(
+                new CustomEvent("seller-menu-open", { detail: { anchorEl } })
+              );
+            }}
+          />
+        )
+      ) : null,
+    });
+  }, [setHeader, isMe, isAuthenticated, navigate, sellerId]);
 
   // 판매 상품 목록 & 페이지네이션(커서 기반) 관련 상태/Ref
   // const [products, setProducts] = useState([]);
@@ -184,7 +212,18 @@ const SellerShopPage = () => {
   // 셀러 찜 토글
   const handleToggleLikeSeller = async (e) => {
     e.stopPropagation(); // 점 3개 메뉴 이벤트, 상위 이벤트 충돌 방지(이벤트 버블링 방지)
-
+    //로긴체크
+    if (!isAuthenticated) {
+      if (
+        window.confirm(
+          "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?"
+        )
+      ) {
+        //현 셀러샵페이지로 돌아올수있게 redirect 경로 포함
+        navigate(`/login?redirect=${window.location.pathname}`);
+      }
+      return;
+    }
     try {
       const data = await toggleSellerLikeApi(sellerId);
       // console.log(data);
@@ -207,6 +246,19 @@ const SellerShopPage = () => {
 
   // 상품 목록 찜 토글 기능
   const handleToggleLikeProduct = async (productId) => {
+    //로긴체크
+    if (!isAuthenticated) {
+      if (
+        window.confirm(
+          "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?"
+        )
+      ) {
+        //현 셀러샵페이지로 돌아올수있게 redirect 경로 포함
+        navigate(`/login?redirect=${window.location.pathname}`);
+      }
+      return;
+    }
+
     try {
       const newState = await onToggleLike(productId);
       // console.log(newState);
@@ -343,14 +395,16 @@ const SellerShopPage = () => {
         </div>
 
         {/* 점 세 개 메뉴 */}
-        <MenuActionsContainer
-          menuOpen={menuOpen}
-          targetMemberId={sellerId}
-          setMenuOpen={setMenuOpen}
-          reportTargetType="MEMBER"
-          onAfterBlock={fetchBlockedSellerState}
-          anchorEl={anchorEl}
-        />
+        {!isMe && isAuthenticated && (
+          <MenuActionsContainer
+            menuOpen={menuOpen}
+            targetMemberId={sellerId}
+            setMenuOpen={setMenuOpen}
+            reportTargetType="MEMBER"
+            onAfterBlock={fetchBlockedSellerState}
+            anchorEl={anchorEl}
+          />
+        )}
       </Container>
 
       {/* ====== 신고 모달 ===== */}
