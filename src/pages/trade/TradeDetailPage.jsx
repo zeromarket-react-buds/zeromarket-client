@@ -124,6 +124,9 @@ const TradeDetailPage = () => {
     nickname,
     name,
     phone,
+    zipcode,
+    addrBase,
+    addrDetail,
     createdAt,
     canceledBy,
     reviewStatus,
@@ -313,7 +316,10 @@ const TradeDetailPage = () => {
                     <span>연락처</span> <span>{formatPhone(phone)}</span>
                   </div>
                   <div className="flex flex-row justify-between">
-                    <span>주소</span> <span>[우편번호] 주소</span>
+                    <span>주소</span>{" "}
+                    <span>
+                      [{zipcode}] {addrBase} {addrDetail}
+                    </span>
                   </div>
                 </div>
               </div>
