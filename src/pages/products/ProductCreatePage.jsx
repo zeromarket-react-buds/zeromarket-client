@@ -18,6 +18,7 @@ import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
 import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import { getProductCustomTextsApi } from "@/common/api/customText.api"; //자주 쓰는 문구 목록불러오기 API
 
 // 입력 데이터 (DTO 매칭
 const INITIAL_FORM = {
@@ -88,10 +89,26 @@ const ProductCreatePage = () => {
   //mock 데이터
   //문구 목록 state
   const [phrases, setPhrases] = useState([
-    { id: 1, text: "자주 쓰는 문구 1" },
-    { id: 2, text: "자주 쓰는 문구 1" },
-    { id: 3, text: "자주 쓰는 문구 1" },
+    // { id: 1, text: "자주 쓰는 문구 1" },
+    // { id: 2, text: "자주 쓰는 문구 1" },
+    // { id: 3, text: "자주 쓰는 문구 1" },
   ]);
+
+  //서버에서 자주 쓰는 문구 목록 불러오기
+  useEffect(() => {
+    const loadPhrases = async () => {
+      try {
+        const data = await getProductCustomTextsApi();
+        console.log("자주 쓰는 문구 조회 결과 👉", data);
+
+        setPhrases(data); //서버 데이터로 교체
+      } catch (e) {
+        console.error("자주 쓰는 문구 불러오기 실패", e);
+      }
+    };
+
+    loadPhrases();
+  }, []);
 
   // 대표 이미지 계산
   const mainImage = useMemo(() => {
