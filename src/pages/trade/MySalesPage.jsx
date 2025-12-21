@@ -28,6 +28,7 @@ const MySalesPage = () => {
   const navigate = useNavigate();
 
   const {
+    showConfirmOrderUpdatedToast,
     showCompletedUpdatedToast,
     showCanceledUpdatedToast,
     showSoftDeletedToast,
@@ -104,11 +105,12 @@ const MySalesPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "DELIVERY_READY",
+        orderStatus: "DELIVERY_READY",
       });
 
       // 상태 변경 성공 후 목록 다시 불러오기
-      await fetchTradeProduct();
+      await fetchTradeList();
+      showConfirmOrderUpdatedToast();
     } catch (err) {
       console.error("주문 확인으로 변경 실패:", err);
     }
@@ -125,7 +127,7 @@ const MySalesPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "COMPLETED",
+        status: "COMPLETED",
       });
 
       // 상태 변경 성공 후 목록 다시 불러오기
@@ -148,7 +150,7 @@ const MySalesPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "CANCELED",
+        status: "CANCELED",
       });
 
       // 거래 취소 성공 후 목록 다시 불러오기

@@ -41,7 +41,7 @@ export const tradeFlows = {
   ],
 };
 
-// 특정 flowType에서 key -> label
+// 같은 상태 key라도 거래 흐름(flowType)에 따라 화면에 보여줄 문구(label)를 다르게 결정
 export const getStatusLabelByKey = (flowType, key) => {
   const steps = tradeFlows[flowType] || [];
   return steps.find((s) => s.key === key)?.label;
