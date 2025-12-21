@@ -26,6 +26,15 @@ export const useLikeToast = () => {
 
 // 거래 토스트 함수
 export const useTradeToast = () => {
+  const showConfirmOrderUpdatedToast = () => {
+    toast.success("주문 확인이 완료되었습니다", {
+      position: "bottom-center",
+      autoClose: 3000,
+      hideProgressBar: true,
+      pauseOnHover: false,
+    });
+  };
+
   const showCompletedUpdatedToast = () => {
     toast.success("거래 완료되었습니다", {
       position: "bottom-center",
@@ -54,6 +63,7 @@ export const useTradeToast = () => {
   };
 
   return {
+    showConfirmOrderUpdatedToast,
     showCompletedUpdatedToast,
     showCanceledUpdatedToast,
     showSoftDeletedToast,
