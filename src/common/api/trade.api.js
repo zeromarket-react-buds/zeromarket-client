@@ -58,12 +58,15 @@ export const getTradeDetailApi = async (tradeId) => {
 };
 
 // 거래 상태 변경 (판매내역/구매내역용)
-const updateTradeStatusApi = async ({ tradeId, nextStatus }) => {
+const updateTradeStatusApi = async ({ tradeId, status, orderStatus }) => {
+  const body = {};
+
+  if (status) body.status = status;
+  if (orderStatus) body.orderStatus = orderStatus;
+
   const { data } = await apiClient(`/api/trades/${tradeId}/status`, {
     method: "PATCH",
-    body: {
-      status: nextStatus,
-    },
+    body,
   });
 
   return data;

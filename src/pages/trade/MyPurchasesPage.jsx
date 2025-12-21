@@ -101,7 +101,7 @@ const MyPurchasesPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "CANCELED",
+        status: "CANCELED",
       });
 
       // 거래 취소 성공 후 목록 다시 불러오기
