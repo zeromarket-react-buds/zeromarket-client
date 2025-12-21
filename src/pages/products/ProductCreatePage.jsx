@@ -81,6 +81,14 @@ const ProductCreatePage = () => {
   // 자주 쓰는 문구 모달
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
 
+  //mock 데이터
+  //문구 목록 state
+  const [phrases, setPhrases] = useState([
+    { id: 1, text: "자주 쓰는 문구 1" },
+    { id: 2, text: "자주 쓰는 문구 1" },
+    { id: 3, text: "자주 쓰는 문구 1" },
+  ]);
+
   useEffect(() => {
     formRef.current = form;
   }, [form]);
@@ -453,7 +461,7 @@ const ProductCreatePage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
-              onOpenPhraseModal={() => setIsPhraseModalOpen(true)}// 자주 쓰는 문구 모달 열기
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
             />
           </div>
 
@@ -461,6 +469,8 @@ const ProductCreatePage = () => {
           <FrequentPhraseModal
             open={isPhraseModalOpen}
             onClose={() => setIsPhraseModalOpen(false)}
+            phrases={phrases}
+            setPhrases={setPhrases}
           />
 
           {/* 상품 상태 */}

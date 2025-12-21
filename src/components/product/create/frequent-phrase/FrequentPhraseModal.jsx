@@ -1,16 +1,17 @@
 import { Plus, Pencil, X, Check } from "lucide-react";
 import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
 
-const FrequentPhraseModal = ({ open, onClose }) => {
+//phrases, setPhrases props로 받아옴
+const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
   if (!open) return null;
 
   //mock 데이터
-  //문구 목록 state
-  const [phrases, setPhrases] = useState([
-    { id: 1, text: "자주 쓰는 문구 1" },
-    { id: 2, text: "자주 쓰는 문구 1" },
-    { id: 3, text: "자주 쓰는 문구 1" },
-  ]);
+  //문구 목록 state. ProductCreatePage.jsx로 옮김(js작업중: 모달닫아도 유지용)
+  // const [phrases, setPhrases] = useState([
+  //   { id: 1, text: "자주 쓰는 문구 1" },
+  //   { id: 2, text: "자주 쓰는 문구 1" },
+  //   { id: 3, text: "자주 쓰는 문구 1" },
+  // ]);
 
   //문구등록 인풋창
   //상태 관리
