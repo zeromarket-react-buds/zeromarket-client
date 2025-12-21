@@ -675,7 +675,7 @@ const router = createBrowserRouter([
             header: {
               component: "TitleHeader",
               props: {
-                title: "셀러 샵",
+                title: "샵",
                 rightSlot: (
                   <MoreVertical
                     size={24}
