@@ -276,7 +276,7 @@ const SellerShopPage = () => {
               <span>환경점수</span>
               <span className="text-brand-green font-bold text-xl">
                 {profile.environmentScoreTotal
-                  ? profile.environmentScoreTotal
+                  ? profile.environmentScoreTotal?.toLocaleString()
                   : 0}
               </span>
             </div>

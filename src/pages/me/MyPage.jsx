@@ -169,7 +169,7 @@ export default function MyPage() {
         <div className="flex justify-between text-[16px]">
           <span>환경점수</span>
           <span className="text-brand-green font-bold text-lg text-[20px]">
-            {envScore}
+            {envScore?.toLocaleString()}
           </span>
         </div>
       </section>
