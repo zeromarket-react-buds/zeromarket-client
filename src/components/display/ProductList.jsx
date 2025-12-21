@@ -158,6 +158,36 @@ const ProductList = () => {
     setSort(value);
   };
 
+  const STORAGE_KEY = "recent_searches";
+  const RECENT_SEARCH_MAX_SIZE = 5;
+
+  const saveRecentSearch = (keyword, minPrice, maxPrice) => {
+    if (!keyword || !keyword.trim()) return;
+
+    const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    const item = {
+      keyword: keyword.trim(),
+      minPrice: minPrice ?? null,
+      maxPrice: maxPrice ?? null,
+      ts: Date.now(),
+    };
+
+    // 동일 검색어 + 동일 가격 조건 제거
+    const filtered = list.filter(
+      (v) =>
+        !(
+          (v.keyword === item.keyword)
+          // &&
+          // v.minPrice === item.minPrice &&
+          // v.maxPrice === item.maxPrice
+        )
+    );
+
+    const next = [item, ...filtered].slice(0, RECENT_SEARCH_MAX_SIZE);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  };
+
   // 모달에서 검색 버튼 눌렀을 때 검색 페이지로 이동
   const handleFilterApply = (payload) => {
     const params = new URLSearchParams();
@@ -173,6 +203,8 @@ const ProductList = () => {
     if (payload.area) {
       params.set("area", payload.area);
     }
+
+    saveRecentSearch(payload.keyword, payload.minPrice, payload.maxPrice);
 
     navigate(`/search?${params.toString()}`, {
       state: {

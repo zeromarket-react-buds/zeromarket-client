@@ -46,7 +46,9 @@ import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
 import OrderCompletePage from "@/pages/order/OrderCompletePage";
 import { NotificationProvider } from "@/hooks/NotificationContext";
-import NotificationsPage from "@/pages/me/NotificationsPages";
+import NotificationsPage from "@/pages/me/NotificationsPage";
+import KeywordAlertSettingPage from "@/pages/me/KeywordAlertSettingPage";
+import KeywordAlertEditPage from "@/pages/me/KeywordAlertEditPage";
 
 const router = createBrowserRouter([
   {
@@ -391,7 +393,38 @@ const router = createBrowserRouter([
               },
             },
           },
-
+          {
+            path: "keywords",
+            element: <KeywordAlertSettingPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "키워드 알림 설정",
+                    showBack: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+          {
+            path: "keywords/edit/:alertId",
+            element: <KeywordAlertEditPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "알림 조건 설정",
+                    showBack: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
           // 알림 목록
           {
             path: "notifications",
