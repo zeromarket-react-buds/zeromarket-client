@@ -9,7 +9,10 @@ const MenuOpen = ({
   onOpenReportModal,
   onOpenBlockModal,
   anchorEl,
+  isMe,
 }) => {
+  if (isMe) return null;
+
   const [pos, setPos] = useState({
     top: 80,
     left: window.innerWidth - MENU_W - 16,
