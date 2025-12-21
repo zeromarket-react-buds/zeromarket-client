@@ -26,20 +26,23 @@ export default function MenuActionsContainer({
 }) {
   const navigate = useNavigate();
   const { alert, confirm } = useModal();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const isMe =
+    isAuthenticated && String(user?.memberId) === String(targetMemberId);
 
   useEffect(() => {
     const onOpen = (e) => {
+      if (isMe) return;
       setAnchorEl(e.detail?.anchorEl ?? null);
       setMenuOpen(true);
     };
 
     window.addEventListener("seller-menu-open", onOpen);
     return () => window.removeEventListener("seller-menu-open", onOpen);
-  }, [setMenuOpen]);
+  }, [setMenuOpen, isMe]);
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -62,6 +65,12 @@ export default function MenuActionsContainer({
     );
     if (!ok) return;
 
+    if (String(user?.memberId) === String(targetMemberId)) {
+      await alert({ description: "본인은 신고할 수 없습니다." });
+      setMenuOpen(false);
+      return;
+    }
+
     if (!targetMemberId) {
       await alert({ description: "신고 대상을 찾을 수 없습니다." });
       return;
@@ -76,6 +85,12 @@ export default function MenuActionsContainer({
       "차단 기능은 로그인 후 이용 가능합니다.\n로그인 화면으로 이동하시겠습니까?"
     );
     if (!ok) return;
+
+    if (String(user?.memberId) === String(targetMemberId)) {
+      await alert({ description: "본인은 차단할 수 없습니다." });
+      setMenuOpen(false);
+      return;
+    }
 
     if (!targetMemberId) {
       await alert({ description: "차단 대상을 찾을 수 없습니다." });
@@ -138,6 +153,7 @@ export default function MenuActionsContainer({
           onOpenReportModal={openReportModal}
           onOpenBlockModal={openBlockModal}
           anchorEl={anchorEl}
+          isMe={isMe}
         />
       )}
 
