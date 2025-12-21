@@ -1,4 +1,4 @@
-import { Outlet, useParams, useNavigate } from "react-router-dom";
+﻿import { Outlet, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProductDetailApi } from "@/common/api/product.api";
 
@@ -11,16 +11,25 @@ export default function PurchaseLayout() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // canceled(또는 abort 플래그)는 “이 요청이 더 이상 유효하지 않음”을 나타냅니다.
     let cancelled = false;
 
     const fetchProduct = async () => {
       try {
         setLoading(true);
         const data = await getProductDetailApi(productId);
-        if (!cancelled) {
-          setProduct(data);
+        if (cancelled) return;
+
+        // 상품 상태 1차 검증
+        const status = data.salesStatus.name;
+        const BLOCKED_STATUS = ["RESERVED", "SOLD_OUT"];
+        const isForSale = status === "FOR_SALE";
+
+        if (!isForSale || BLOCKED_STATUS.includes(status)) {
+          navigate(`/products/${productId}`, { replace: true });
+          return;
         }
+
+        setProduct(data);
       } catch (err) {
         if (!cancelled) {
           setError(err.message);
@@ -37,12 +46,14 @@ export default function PurchaseLayout() {
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, navigate]);
 
   if (loading) {
     return (
       <div className="max-w-md mx-auto p-4">
-        <p className="text-sm text-gray-500">상품 정보를 불러오는 중...</p>
+        <p className="text-sm text-gray-500">
+          상품 정보를 불러오는 중입니다...
+        </p>
       </div>
     );
   }
@@ -50,9 +61,9 @@ export default function PurchaseLayout() {
   if (error || !product) {
     return (
       <div className="max-w-md mx-auto p-4 space-y-4">
-        <p className="text-sm text-red-500">상품 정보를 불러오지 못했어요.</p>
+        <p className="text-sm text-red-500">상품 정보를 불러오지 못했습니다.</p>
         <button className="text-sm underline" onClick={() => navigate(-1)}>
-          이전 페이지로
+          뒤로 가기
         </button>
       </div>
     );
