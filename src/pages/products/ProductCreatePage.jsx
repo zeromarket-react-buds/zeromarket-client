@@ -78,6 +78,10 @@ const ProductCreatePage = () => {
   // 대표이미지 기준으로 자동입력 1회만 하도록 키 저장
   const autoFilledKeyRef = useRef("");
 
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+
   // 자주 쓰는 문구 모달
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
 
@@ -88,10 +92,6 @@ const ProductCreatePage = () => {
     { id: 2, text: "자주 쓰는 문구 1" },
     { id: 3, text: "자주 쓰는 문구 1" },
   ]);
-
-  useEffect(() => {
-    formRef.current = form;
-  }, [form]);
 
   // 대표 이미지 계산
   const mainImage = useMemo(() => {
@@ -389,6 +389,16 @@ const ProductCreatePage = () => {
     autoFilledKeyRef.current = "";
   }, []);
 
+  // 자주 쓰는 문구 적용 핸들러
+  const handleApplyPhrase = useCallback((text) => {
+    setForm((prev) => ({
+      ...prev,
+      productDescription: prev.productDescription
+        ? prev.productDescription + "\n" + text
+        : text,
+    }));
+  }, []);
+
   if (error) {
     return (
       <Container>
@@ -471,6 +481,7 @@ const ProductCreatePage = () => {
             onClose={() => setIsPhraseModalOpen(false)}
             phrases={phrases}
             setPhrases={setPhrases}
+            onApplyPhrase={handleApplyPhrase}
           />
 
           {/* 상품 상태 */}

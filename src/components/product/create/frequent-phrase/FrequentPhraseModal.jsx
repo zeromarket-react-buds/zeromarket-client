@@ -1,8 +1,14 @@
 import { Plus, Pencil, X, Check } from "lucide-react";
 import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
 
-//phrases, setPhrases props로 받아옴
-const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
+//phrases, setPhrases, onApplyPhrase, props로 받아옴
+const FrequentPhraseModal = ({
+  open,
+  onClose,
+  phrases,
+  setPhrases,
+  onApplyPhrase,
+}) => {
   if (!open) return null;
 
   //mock 데이터
@@ -22,7 +28,7 @@ const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
   const [editText, setEditText] = useState("");
 
   //선택된 문구 ID 상태: 카드선택시 연두색으로
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]); //null에서 []로 다중선택 가능하게, 변수&상태명 s복수로 변경
 
   // 문구 등록 클릭 핸들러
   const handleRegister = () => {
@@ -40,10 +46,30 @@ const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
   };
 
   // 하단 자주 쓰는 문구 추가하기 클릭 핸들러
-  const handleAdd = () => {
-    console.log("추가하기 클릭");
-  };
+  //단일
+  // const handleAdd = () => {
+  //   const selected = phrases.find((p) => p.id === selectedId);
+  //   if (!selected) return;
 
+  //   onApplyPhrase(selected.text); // 부모 textarea에 반영
+  //   onClose(); // 모달 닫기
+  // };
+
+  //다중선택
+  const handleAdd = () => {
+    const selectedPhrases = selectedIds
+      .map((id) => phrases.find((p) => p.id === id))
+      .filter(Boolean); // 안전장치
+
+    if (selectedPhrases.length === 0) return;
+
+    selectedPhrases.forEach((p) => {
+      onApplyPhrase(p.text);
+    });
+
+    setSelectedIds([]); // 선택 초기화
+    onClose(); // 모달 닫기
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 배경 */}
@@ -101,11 +127,20 @@ const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
             return (
               <div
                 key={phrase.id}
-                onClick={() => setSelectedId(phrase.id)} // 연두색:선택된 문구 ID 설정
+                //setSelectedIds상태변경. 선택시 연두색으로
+                onClick={() => {
+                  setSelectedIds(
+                    (prev) =>
+                      prev.includes(phrase.id)
+                        ? prev.filter((id) => id !== phrase.id) // 이미 선택 → 해제
+                        : [...prev, phrase.id] // 미선택 → 추가
+                  );
+                }} // 연두색:선택된 문구 ID 설정
                 className={`flex items-center justify-between px-3 py-2 rounded-lg border
                     ${
                       //isEditing // 편집모드일때 배경색
-                      selectedId === phrase.id //selectedId기준 색칠
+                      //selectedId === phrase.id //selectedId기준 색칠. selectedId는 이제 배열이므로 비교x
+                      selectedIds.includes(phrase.id) //다중선택 처리
                         ? "bg-[#E6EFEA] border-[#1B6439]" //선택 시 연두색
                         : "bg-white border-gray-300"
                     }
@@ -165,9 +200,12 @@ const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
                             (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
                           );
                           // 선택된 문구가 삭제된 경우 selectedId 초기화
-                          if (selectedId === phrase.id) {
-                            setSelectedId(null);
-                          }
+                          // if (selectedId === phrase.id) {
+                          //   setSelectedId(null);
+                          // }
+                          setSelectedIds((prev) =>
+                            prev.filter((id) => id !== phrase.id)
+                          );
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
@@ -185,7 +223,10 @@ const FrequentPhraseModal = ({ open, onClose, phrases, setPhrases }) => {
         <div className="px-4 py-3 border-t">
           <button
             onClick={handleAdd}
-            className="w-full bg-[#1B6439] text-white py-2 rounded-lg font-semibold hover:opacity-90"
+            //disabled={!selectedId} 배열에서는 의미x
+            disabled={selectedIds.length === 0} //선택된 문구가 없으면 비활성화
+            className="w-full bg-[#1B6439] text-white py-2 rounded-lg
+             disabled:opacity-40"
           >
             추가하기
           </button>
