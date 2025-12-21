@@ -206,6 +206,20 @@ const PurchasePage = () => {
     },
   });
 
+  // 상품 상태 2차 검증
+  const productStatusCode = product?.salesStatus.name;
+
+  useEffect(() => {
+    if (!product) return;
+    const BLOCKED_STATUS = ["RESERVED", "SOLD_OUT"];
+    const isForSale = productStatusCode === "FOR_SALE";
+
+    if (!isForSale || BLOCKED_STATUS.includes(productStatusCode)) {
+      alert("판매 중이 아닌 상품입니다. 상품 페이지로 이동합니다.");
+      navigate(`/products/${product.productId}`, { replace: true });
+    }
+  }, [product, productStatusCode, navigate]);
+
   useEffect(() => {
     if (!tradeType && product?.productId) {
       navigate(`/products/${product.productId}`);
@@ -320,7 +334,13 @@ const PurchasePage = () => {
 
       navigate(`/orders/${data.orderId}/complete`);
     } catch (err) {
-      console.error(err);
+      console.log(err.code);
+
+      if (err.code === "TRADE_ALREADY_EXIST") {
+        alert("예약 중인 상품입니다.");
+        navigate("/");
+        return;
+      }
       alert("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
