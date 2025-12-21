@@ -20,6 +20,9 @@ const FrequentPhraseModal = ({ open, onClose }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
 
+  //선택된 문구 ID 상태: 카드선택시 연두색으로
+  const [selectedId, setSelectedId] = useState(null);
+
   // 문구 등록 클릭 핸들러
   const handleRegister = () => {
     if (!newText.trim()) return; //빈값 방지
@@ -93,14 +96,16 @@ const FrequentPhraseModal = ({ open, onClose }) => {
         {/* 문구 카드 리스트 */}
         <div className="p-5 space-y-2">
           {phrases.map((phrase) => {
-            const isEditing = editingId === phrase.id;
+            const isEditing = editingId === phrase.id; //편집모드 여부
             return (
               <div
                 key={phrase.id}
+                onClick={() => setSelectedId(phrase.id)} // 연두색:선택된 문구 ID 설정
                 className={`flex items-center justify-between px-3 py-2 rounded-lg border
                     ${
-                      isEditing
-                        ? "bg-[#E6EFEA] border-[#1B6439]"
+                      //isEditing // 편집모드일때 배경색
+                      selectedId === phrase.id //selectedId기준 색칠
+                        ? "bg-[#E6EFEA] border-[#1B6439]" //선택 시 연두색
                         : "bg-white border-gray-300"
                     }
                     `}
@@ -122,7 +127,8 @@ const FrequentPhraseModal = ({ open, onClose }) => {
                 <div className="flex gap-2 ml-2">
                   {isEditing ? (
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation(); //카드선택시 역두색칠 작업: 버블링 방지 (e) => e.stopPropagation();
                         if (!editText.trim()) return; //빈값 방지
 
                         setPhrases((prev) =>
@@ -141,7 +147,8 @@ const FrequentPhraseModal = ({ open, onClose }) => {
                   ) : (
                     <>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation(); //버블링방지
                           setEditingId(phrase.id);
                           setEditText(phrase.text);
                         }}
@@ -151,10 +158,15 @@ const FrequentPhraseModal = ({ open, onClose }) => {
                       </button>
                       {/* 삭제 버튼 */}
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation(); //연두색 버블링 방지
                           setPhrases(
                             (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
                           );
+                          // 선택된 문구가 삭제된 경우 selectedId 초기화
+                          if (selectedId === phrase.id) {
+                            setSelectedId(null);
+                          }
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
