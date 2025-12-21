@@ -37,8 +37,11 @@ const TradeDetailPage = () => {
   const { alert, confirm } = useModal();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { showCompletedUpdatedToast, showCanceledUpdatedToast } =
-    useTradeToast();
+  const {
+    showConfirmOrderUpdatedToast,
+    showCompletedUpdatedToast,
+    showCanceledUpdatedToast,
+  } = useTradeToast();
   const { tradeId } = useParams();
 
   const [tradeProduct, setTradeProduct] = useState(null);
@@ -151,7 +154,7 @@ const TradeDetailPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "COMPLETED",
+        status: "COMPLETED",
       });
 
       // 상태 변경 성공 후 목록 다시 불러오기
@@ -174,7 +177,7 @@ const TradeDetailPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "CANCELED",
+        status: "CANCELED",
       });
 
       // 거래 취소 성공 후 목록 다시 불러오기
@@ -196,10 +199,12 @@ const TradeDetailPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        nextStatus: "DELIVERY_READY",
+        orderStatus: "DELIVERY_READY",
       });
 
+      // 상태 변경 성공 후 목록 다시 불러오기
       await fetchTradeProduct();
+      showConfirmOrderUpdatedToast();
     } catch (err) {
       console.error("주문 확인으로 변경 실패:", err);
     }
