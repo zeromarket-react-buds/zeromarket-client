@@ -88,8 +88,8 @@ function AuthProvider({ children }) {
   };
 
   // ✅ 회원탈퇴
-  const withdraw = async () => {
-    await withdrawApi();
+  const withdraw = async (payload) => {
+    await withdrawApi(payload);
 
     localStorage.removeItem("accessToken");
 

@@ -21,7 +21,7 @@ export default function MyPage() {
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
   const { alert } = useModal();
-  const { user, loading, logout, withdraw, isAuthenticated } = useAuth();
+  const { user, loading, logout, isAuthenticated } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
   const [envScore, setEnvScore] = useState(0);
@@ -121,13 +121,8 @@ export default function MyPage() {
     navigate("/");
   };
 
-  const handleWithdrawal = async () => {
-    if (!window.confirm("회원탈퇴 하시겠습니까?")) {
-      return;
-    }
-    await withdraw();
-    alert("회원탈퇴되었습니다. 홈으로 이동합니다.");
-    navigate("/");
+  const handleWithdrawal = () => {
+    navigate("/me/withdraw");
   };
 
   // 페이지 진입 시 헤더 설정
@@ -255,7 +250,7 @@ export default function MyPage() {
             로그아웃
           </li>
           <li className="cursor-pointer" onClick={handleWithdrawal}>
-            탈퇴
+            회원 탈퇴
           </li>
         </ul>
       </section>

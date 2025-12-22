@@ -31,7 +31,6 @@ import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
-import AuthStatusIcon from "@/components/AuthStatusIcon";
 import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
@@ -49,6 +48,8 @@ import { NotificationProvider } from "@/hooks/NotificationContext";
 import NotificationsPage from "@/pages/me/NotificationsPage";
 import KeywordAlertSettingPage from "@/pages/me/KeywordAlertSettingPage";
 import KeywordAlertEditPage from "@/pages/me/KeywordAlertEditPage";
+import WithdrawWarnPage from "@/pages/me/WithdrawWarnPage";
+import WithdrawReasonPage from "@/pages/me/WithdrawReasonPage";
 
 const router = createBrowserRouter([
   {
@@ -372,6 +373,40 @@ const router = createBrowserRouter([
                 footer: {
                   component: "DefaultFooter",
                 },
+              },
+            },
+          },
+          {
+            path: "withdraw",
+            element: <WithdrawWarnPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "회원 탈퇴",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+          {
+            path: "withdraw/reason",
+            element: <WithdrawReasonPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "탈퇴 사유 선택",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
               },
             },
           },

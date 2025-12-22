@@ -48,8 +48,17 @@ const oauthLoginApi = async (code) => {
 };
 
 // 회원탈퇴
-const withdrawApi = async () => {
-  const { data } = await apiClient(`/api/members/withdraw`, { method: "POST" });
+const withdrawApi = async (payload = {}) => {
+  const body = {};
+  if (payload.withdrawalReasonId) body.withdrawalReasonId = payload.withdrawalReasonId;
+  if (payload.withdrawalReasonDetail) {
+    body.withdrawalReasonDetail = payload.withdrawalReasonDetail;
+  }
+
+  const { data } = await apiClient(`/api/members/withdraw`, {
+    method: "POST",
+    body: Object.keys(body).length ? body : undefined,
+  });
   return data;
 };
 
