@@ -1,11 +1,11 @@
 import { refreshAccessToken, handleLogout } from "./token";
 import { ApiError } from "./error";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_SERVER_URL;
 
 // 기본 옵션
 const defaultOptions = {
-  timeout: 10000,
+  timeout: 20000,
   retry: false,
 };
 

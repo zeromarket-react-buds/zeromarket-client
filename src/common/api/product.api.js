@@ -43,7 +43,7 @@ const getProductsByMapBoundaryApi = async (
 };
 
 // 상품등록 전 Vision
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_SERVER_URL;
 
 const productVisionApi = async (file) => {
   const accessToken = localStorage.getItem("accessToken");

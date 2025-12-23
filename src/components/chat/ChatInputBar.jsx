@@ -15,9 +15,6 @@ const ChatInputBar = ({ text, setText, sendMessage, connected }) => {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="메시지 입력..."
         ></Input>
-
-        <input style={{ flex: 1 }} />
-
         <div
           className="py-1 text-brand-green"
           onClick={sendMessage}

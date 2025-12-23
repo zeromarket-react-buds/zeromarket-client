@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Container from "@/components/Container";
 import { GreenToggle } from "@/components/ui/greentoggle";
 import { useNotification } from "@/hooks/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 const SectionLabel = ({ children }) => (
   <p className="mb-2 font-semibold">{children}</p>
@@ -85,6 +86,7 @@ function PermissionHelpSheet({ open, onClose }) {
 const SettingPage = () => {
   const { settings, setSetting, setSettingWithPermission } = useNotification();
   const [helpOpen, setHelpOpen] = useState(false);
+  const navigate = useNavigate();
 
   // permission 상태는 브라우저 전역
   const permission = useMemo(() => {
@@ -151,7 +153,9 @@ const SettingPage = () => {
             }}
           />
         </div>
-        <p>키워드 알림 설정</p>
+        <p className="cursor-pointer" onClick={() => navigate("/me/keywords")}>
+          키워드 알림 설정
+        </p>
       </Box>
 
       {/* 시스템 알림 */}

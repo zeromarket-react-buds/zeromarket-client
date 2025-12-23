@@ -121,7 +121,8 @@ const TradeDetailPage = () => {
     thumbnailUrl,
     productTitle,
     sellPrice,
-    nickname,
+    sellerNickname,
+    buyerNickname,
     name,
     phone,
     zipcode,
@@ -299,14 +300,24 @@ const TradeDetailPage = () => {
               </div>
               <div className="flex flex-row justify-between ">
                 <span className="text-brand-mediumgray">닉네임</span>
-                <span>{nickname}</span>
+                <span>{sellerNickname}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col text-lg font-semibold border-t border-brand-mediumgray gap-2 py-5">
+              <div className="flex flex-row justify-between items-center">
+                <span>구매자 정보</span>
+              </div>
+              <div className="flex flex-row justify-between ">
+                <span className="text-brand-mediumgray">닉네임</span>
+                <span>{buyerNickname}</span>
               </div>
             </div>
 
             {isDelivery && (
               <div>
-                <div className="flex flex-col text-brand-mediumgray border-top border-brand-mediumgray gap-2 py-4">
-                  <div className="text-black text-lg font-semibold py-2">
+                <div className="flex flex-col text-brand-mediumgray border-t border-brand-mediumgray gap-2 py-5">
+                  <div className="text-black text-lg font-semibold pb-2">
                     배송지 정보
                   </div>
                   <div className="flex flex-row justify-between">
@@ -325,8 +336,8 @@ const TradeDetailPage = () => {
               </div>
             )}
 
-            <div className="flex flex-col text-brand-mediumgray border-t border-brand-mediumgray gap-2 py-4">
-              <div className="text-black text-lg font-semibold py-2">
+            <div className="flex flex-col text-brand-mediumgray border-t border-brand-mediumgray gap-2 py-6">
+              <div className="text-black text-lg font-semibold pb-2">
                 거래 정보
               </div>
               <div className="flex flex-row justify-between">
@@ -342,8 +353,8 @@ const TradeDetailPage = () => {
               </div>
             </div>
 
-            <div className="flex flex-col text-brand-mediumgray border-t border-brand-mediumgray gap-2 py-4">
-              <div className="text-black text-lg font-semibold py-2">
+            <div className="flex flex-col text-brand-mediumgray border-t border-brand-mediumgray gap-2 py-5">
+              <div className="text-black text-lg font-semibold pb-2">
                 결제금액 정보
               </div>
               <div className="flex flex-row justify-between">

@@ -3,7 +3,7 @@ import { createChatClient } from "@/lib/chatStompClient";
 
 let isRefreshing = false;
 let refreshPromise = null;
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_SERVER_URL;
 
 // TODO: 쿠키로 refresh token flow 구현
 

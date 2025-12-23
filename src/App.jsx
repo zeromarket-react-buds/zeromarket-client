@@ -31,7 +31,6 @@ import ReviewCreatePage from "@/pages/review/ReviewCreatePage";
 import ReviewDetailPage from "@/pages/review/ReviewDetailPage";
 import ReceivedReviewSummaryPage from "@/pages/review/ReceivedReviewSummaryPage";
 import ReceivedReviewListPage from "@/pages/review/ReceivedReviewListPage";
-import AuthStatusIcon from "@/components/AuthStatusIcon";
 import EnvGradeGuidePage from "@/pages/me/EnvGradeGuidePage";
 import KakaoCallback from "@/pages/auth/KakaoCallback";
 import MemberEditPage from "@/pages/me/MemberEditPage";
@@ -46,7 +45,11 @@ import BlockUserLIstPage from "@/pages/me/BlockUserLIstPage";
 import PurchaseLayout from "@/pages/order/PurchaseLayout";
 import OrderCompletePage from "@/pages/order/OrderCompletePage";
 import { NotificationProvider } from "@/hooks/NotificationContext";
-import NotificationsPage from "@/pages/me/NotificationsPages";
+import NotificationsPage from "@/pages/me/NotificationsPage";
+import KeywordAlertSettingPage from "@/pages/me/KeywordAlertSettingPage";
+import KeywordAlertEditPage from "@/pages/me/KeywordAlertEditPage";
+import WithdrawWarnPage from "@/pages/me/WithdrawWarnPage";
+import WithdrawReasonPage from "@/pages/me/WithdrawReasonPage";
 
 const router = createBrowserRouter([
   {
@@ -373,6 +376,40 @@ const router = createBrowserRouter([
               },
             },
           },
+          {
+            path: "withdraw",
+            element: <WithdrawWarnPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "회원 탈퇴",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+          {
+            path: "withdraw/reason",
+            element: <WithdrawReasonPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "탈퇴 사유 선택",
+                    showBack: true,
+                    hideRight: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
 
           // 알림 설정
           {
@@ -391,7 +428,38 @@ const router = createBrowserRouter([
               },
             },
           },
-
+          {
+            path: "keywords",
+            element: <KeywordAlertSettingPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "키워드 알림 설정",
+                    showBack: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
+          {
+            path: "keywords/edit/:alertId",
+            element: <KeywordAlertEditPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "알림 조건 설정",
+                    showBack: true,
+                  },
+                },
+                footer: { component: "DefaultFooter" },
+              },
+            },
+          },
           // 알림 목록
           {
             path: "notifications",

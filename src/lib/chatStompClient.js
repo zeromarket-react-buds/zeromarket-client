@@ -6,7 +6,7 @@ import {
   handleLogout,
 } from "@/common/token";
 
-const WS_BASE = "http://localhost:8080"; // TODO: 배포시 변경
+const WS_BASE = import.meta.env.VITE_SERVER_URL;
 
 // ===== 싱글턴 상태 =====
 let client = null;
@@ -37,7 +37,8 @@ function buildClient({ debug } = {}) {
     reconnectDelay: 3000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
-    debug: debug ? (s) => console.log("[stomp]", s) : undefined,
+    // debug: debug ? (s) => console.log("[stomp]", s) : undefined,
+    debug: undefined,
   });
 
   // 연결되면 저장해둔 구독 전부 복구

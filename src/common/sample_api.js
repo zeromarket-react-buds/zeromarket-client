@@ -1,5 +1,5 @@
 // 기본 API 경로
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = `${import.meta.env.VITE_SERVER_URL}/api`;
 
 /**
  * fetch 응답이 성공적인지 확인하고 JSON 데이터를 반환합니다.
