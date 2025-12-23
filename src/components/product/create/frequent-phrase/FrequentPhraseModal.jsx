@@ -1,6 +1,8 @@
 import { Plus, Pencil, X, Check } from "lucide-react";
 import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
 import { createProductCustomTextApi } from "@/common/api/customText.api";
+import { deleteProductCustomTextApi } from "@/common/api/customText.api";
+import { updateProductCustomTextApi } from "@/common/api/customText.api";
 
 //phrases, setPhrases, onApplyPhrase, props로 받아옴
 const FrequentPhraseModal = ({
@@ -182,21 +184,27 @@ const FrequentPhraseModal = ({
                 <div className="flex gap-2 ml-2">
                   {isEditing ? (
                     <button
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation(); //카드선택시 역두색칠 작업: 버블링 방지 (e) => e.stopPropagation();
                         if (!editText.trim()) return; //빈값 방지
 
-                        // setPhrases((prev) =>
-                        //   prev.map((p) =>
-                        //     p.id === phrase.id
-                        //       ? { ...p, text: editText.trim() } //수정된 문구 반영
-                        //       : p
-                        //   )
-                        // );
-                        // setEditingId(null); //편집모드 종료
+                        try {
+                          // 수정 API 호출
+                          await updateProductCustomTextApi(
+                            phrase.id,
+                            editText.trim()
+                          );
 
-                        alert("문구 수정 기능은 다음 단계에서 구현합니다.");
-                        setEditingId(null);
+                          // 부모에서 문구 목록 재조회
+                          await onReloadPhrases();
+
+                          // 편집 모드 종료
+                          setEditingId(null);
+                          setEditText("");
+                        } catch (e) {
+                          console.error("문구 수정 실패", e);
+                          alert("문구 수정에 실패했습니다.");
+                        }
                       }}
                       className="p-1 rounded hover:bg-white"
                     >
@@ -216,19 +224,27 @@ const FrequentPhraseModal = ({
                       </button>
                       {/* 삭제 버튼 */}
                       <button
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation(); //연두색 버블링 방지
-                          alert("문구 삭제 기능은 다음 단계에서 구현합니다.");
-                          // setPhrases(
-                          //   (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
-                          // );
-                          // // 선택된 문구가 삭제된 경우 selectedId 초기화
-                          // // if (selectedId === phrase.id) {
-                          // //   setSelectedId(null);
-                          // // }
-                          // setSelectedIds((prev) =>
-                          //   prev.filter((id) => id !== phrase.id)
-                          // );
+                          const confirmed =
+                            window.confirm("이 문구를 삭제할까요?");
+                          if (!confirmed) return;
+
+                          try {
+                            //  삭제 API 호출
+                            await deleteProductCustomTextApi(phrase.id);
+
+                            // 부모에서 문구 목록 재조회
+                            await onReloadPhrases();
+
+                            // 선택된 문구 목록에서도 제거 (UX 안정성)
+                            setSelectedIds((prev) =>
+                              prev.filter((id) => id !== phrase.id)
+                            );
+                          } catch (e) {
+                            console.error("문구 삭제 실패", e);
+                            alert("문구 삭제에 실패했습니다.");
+                          }
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
