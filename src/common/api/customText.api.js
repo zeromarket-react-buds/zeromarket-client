@@ -9,3 +9,13 @@ export const getProductCustomTextsApi = async () => {
   });
   return data;
 };
+
+//상품 등록용 자주 쓰는 문구 등록
+export const createProductCustomTextApi = async (text) => {
+  await apiClient("/api/product/custom-texts", {
+    method: "POST",
+    body: {
+      text,
+    },
+  });
+};

@@ -110,6 +110,12 @@ const ProductCreatePage = () => {
     loadPhrases();
   }, []);
 
+  //등록 후 재조회용 함수
+  const reloadPhrases = useCallback(async () => {
+    const updated = await getProductCustomTextsApi();
+    setPhrases(updated);
+  }, []);
+
   // 대표 이미지 계산
   const mainImage = useMemo(() => {
     if (!images || images.length === 0) return null;
@@ -492,13 +498,14 @@ const ProductCreatePage = () => {
             />
           </div>
 
-          {/*자주 쓰는 문구 모달 */}
+          {/*자주 쓰는 문구 모달: reloadPhrases(등록) */}
           <FrequentPhraseModal
             open={isPhraseModalOpen}
             onClose={() => setIsPhraseModalOpen(false)}
             phrases={phrases}
             setPhrases={setPhrases}
             onApplyPhrase={handleApplyPhrase}
+            onReloadPhrases={reloadPhrases}
           />
 
           {/* 상품 상태 */}

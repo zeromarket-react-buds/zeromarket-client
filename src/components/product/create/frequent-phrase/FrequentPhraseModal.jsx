@@ -1,13 +1,15 @@
 import { Plus, Pencil, X, Check } from "lucide-react";
 import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
+import { createProductCustomTextApi } from "@/common/api/customText.api";
 
 //phrases, setPhrases, onApplyPhrase, props로 받아옴
 const FrequentPhraseModal = ({
   open,
   onClose,
   phrases,
-  setPhrases,
-  onApplyPhrase,
+  //setPhrases,//수정: setPhrases 제거 (모달이 부모 상태 직접 수정)  //문구목록 상태
+  onApplyPhrase, //부모 textarea에 반영용 함수
+  onReloadPhrases, //등록 후 재조회용 함수
 }) => {
   if (!open) return null;
 
@@ -22,6 +24,7 @@ const FrequentPhraseModal = ({
   //문구등록 인풋창
   //상태 관리
   const [newText, setNewText] = useState("");
+  const [loading, setLoading] = useState(false); //새 문구 입력 상태
 
   //UI 상태 전환(state toggle): 카드 편집모드, 일반모드
   const [editingId, setEditingId] = useState(null);
@@ -30,19 +33,39 @@ const FrequentPhraseModal = ({
   //선택된 문구 ID 상태: 카드선택시 연두색으로
   const [selectedIds, setSelectedIds] = useState([]); //null에서 []로 다중선택 가능하게, 변수&상태명 s복수로 변경
 
-  // 문구 등록 클릭 핸들러
-  const handleRegister = () => {
-    if (!newText.trim()) return; //빈값 방지
+  // 문구 등록(Post) 클릭 핸들러: 문구 목록 불러오기시 작업했던거
+  // const handleRegister = () => {
+  //   if (!newText.trim()) return; //빈값 방지
 
-    setPhrases((prev) => [
-      ...prev,
-      {
-        id: Date.now(), // 임시 ID
-        text: newText.trim(),
-      },
-    ]);
+  //   setPhrases((prev) => [
+  //     ...prev,
+  //     {
+  //       id: Date.now(), // 임시 ID
+  //       text: newText.trim(),
+  //     },
+  //   ]);
 
-    setNewText(""); // 입력창 초기화
+  //   setNewText(""); // 입력창 초기화
+  // };
+  //등록 API연동버전
+  const handleRegister = async () => {
+    if (!newText.trim()) return;
+
+    try {
+      setLoading(true);
+
+      await createProductCustomTextApi(newText);
+
+      // ☆등록 성공 → 부모에서 다시 조회
+      await onReloadPhrases();
+
+      setNewText("");
+    } catch (e) {
+      console.error("자주 쓰는 문구 등록 실패", e);
+      alert("문구 등록에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 하단 자주 쓰는 문구 추가하기 클릭 핸들러
@@ -61,15 +84,11 @@ const FrequentPhraseModal = ({
       .map((id) => phrases.find((p) => p.id === id))
       .filter(Boolean); // 안전장치
 
-    if (selectedPhrases.length === 0) return;
-
-    selectedPhrases.forEach((p) => {
-      onApplyPhrase(p.text);
-    });
-
+    selectedPhrases.forEach((p) => onApplyPhrase(p.text)); //부모 textarea에 반영. 백엔드 등록작업중 수정
     setSelectedIds([]); // 선택 초기화
     onClose(); // 모달 닫기
   };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 배경 */}
@@ -167,14 +186,17 @@ const FrequentPhraseModal = ({
                         e.stopPropagation(); //카드선택시 역두색칠 작업: 버블링 방지 (e) => e.stopPropagation();
                         if (!editText.trim()) return; //빈값 방지
 
-                        setPhrases((prev) =>
-                          prev.map((p) =>
-                            p.id === phrase.id
-                              ? { ...p, text: editText.trim() } //수정된 문구 반영
-                              : p
-                          )
-                        );
-                        setEditingId(null); //편집모드 종료
+                        // setPhrases((prev) =>
+                        //   prev.map((p) =>
+                        //     p.id === phrase.id
+                        //       ? { ...p, text: editText.trim() } //수정된 문구 반영
+                        //       : p
+                        //   )
+                        // );
+                        // setEditingId(null); //편집모드 종료
+
+                        alert("문구 수정 기능은 다음 단계에서 구현합니다.");
+                        setEditingId(null);
                       }}
                       className="p-1 rounded hover:bg-white"
                     >
@@ -196,16 +218,17 @@ const FrequentPhraseModal = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation(); //연두색 버블링 방지
-                          setPhrases(
-                            (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
-                          );
-                          // 선택된 문구가 삭제된 경우 selectedId 초기화
-                          // if (selectedId === phrase.id) {
-                          //   setSelectedId(null);
-                          // }
-                          setSelectedIds((prev) =>
-                            prev.filter((id) => id !== phrase.id)
-                          );
+                          alert("문구 삭제 기능은 다음 단계에서 구현합니다.");
+                          // setPhrases(
+                          //   (prev) => prev.filter((p) => p.id !== phrase.id) //prev에서 해당 id제외
+                          // );
+                          // // 선택된 문구가 삭제된 경우 selectedId 초기화
+                          // // if (selectedId === phrase.id) {
+                          // //   setSelectedId(null);
+                          // // }
+                          // setSelectedIds((prev) =>
+                          //   prev.filter((id) => id !== phrase.id)
+                          // );
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
