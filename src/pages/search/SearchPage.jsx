@@ -18,7 +18,7 @@ const SearchPage = () => {
 
   // 검색/sort 관련 받아오는 쪽
   const searchParams = new URLSearchParams(location.search);
-  const keywordFromUrl = searchParams.get("keyword") || "";
+  const keywordFromUrl = searchParams.get("keyword") ?? "";
   const sortFromUrl = searchParams.get("sort") ?? "popularity";
 
   const categoryFromUrl = searchParams.get("categoryId");
@@ -46,6 +46,17 @@ const SearchPage = () => {
 
   // 스크롤 하단 감지용 ref
   const loaderRef = useRef(null);
+
+  // 화면 표시용 검색어 (keyword가 비어있으면 categoryId로 들어온 카테고리명 표시)
+  let displayKeyword = "";
+
+  // keyword가 있으면 (상품목록에서 들어온 경우)
+  if (keyword && keyword.trim()) {
+    displayKeyword = keyword;
+    // keyword는 없고 categoryId로 들어온 경우 (상품상세에서 넘긴 카테고리명 표시)
+  } else if (selectedLevel3Id != null) {
+    displayKeyword = location.state?.categoryName ?? "";
+  }
 
   // 검색 fetch 요청 함수
   const fetchProducts = async (nextOffset = null) => {
@@ -94,23 +105,36 @@ const SearchPage = () => {
     }
   };
 
-  // ProductList에서 넘어올 때 state로 준 값 반영
+  // 상품상세 카테고리/상품리스트에서 검색으로 올때 state로 준 값 반영
   useEffect(() => {
-    if (!location.state) return;
+    const params = new URLSearchParams(location.search);
 
+    // URL 기준 기본값 (항상 적용)
+    const urlKeyword = params.get("keyword") ?? "";
+    const urlSort = params.get("sort") ?? "popularity";
+
+    const urlCategoryId = params.get("categoryId");
+    const urlLevel3Id = urlCategoryId ? Number(urlCategoryId) : null;
+
+    setKeyword(urlKeyword);
+    setSort(urlSort);
+
+    // state가 있으면 state로 덮어쓰기 (없으면 URL만으로 동작)
     const s = location.state;
 
-    setSelectedLevel1Id(s.level1Id ?? null);
-    setSelectedLevel2Id(s.level2Id ?? null);
-    setSelectedLevel3Id(
-      s.level3Id ?? (categoryFromUrl ? Number(categoryFromUrl) : null)
-    );
-    setMinPrice(s.minPrice ?? minPriceFromUrl ?? "");
-    setMaxPrice(s.maxPrice ?? maxPriceFromUrl ?? "");
-    setArea(s.area ?? areaFromUrl ?? "");
+    setSelectedLevel1Id(s?.level1Id ?? null);
+    setSelectedLevel2Id(s?.level2Id ?? null);
+
+    const finalLevel3Id = s?.level3Id ?? urlLevel3Id;
+    // state의 level3Id가 있으면 그걸 우선, 없으면 URL categoryId 유지
+    setSelectedLevel3Id(finalLevel3Id);
+
+    setMinPrice(s?.minPrice ?? minPriceFromUrl ?? "");
+    setMaxPrice(s?.maxPrice ?? maxPriceFromUrl ?? "");
+    setArea(s?.area ?? areaFromUrl ?? "");
   }, [
+    location.search,
     location.state,
-    categoryFromUrl,
     minPriceFromUrl,
     maxPriceFromUrl,
     areaFromUrl,
@@ -321,7 +345,9 @@ const SearchPage = () => {
           onApply={handleFilterApply}
         />
 
-        <div className="text-2xl font-semibold">"{keyword}" 검색 결과</div>
+        <div className="text-2xl font-semibold">
+          "{displayKeyword}" 검색 결과
+        </div>
         <ProductCard
           products={products}
           onToggleLikeInProductList={onToggleLike} //ProductList와 통일
