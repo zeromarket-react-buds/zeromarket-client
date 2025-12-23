@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getBoards, getBoardById } from "@/common/api";
+import { getBoards, getBoardById } from "@/common/sample_api";
 
 // 전체 게시물 목록 조회용 훅
-export function useBoardsQuery() {
+const useBoardsQuery = function () {
   return useQuery({
     queryKey: ["boards"],
     queryFn: async () => {
@@ -11,10 +11,10 @@ export function useBoardsQuery() {
       return response.content;
     },
   });
-}
+};
 
 // 특정 게시물 상세 조회용 훅
-export function useBoardByIdQuery(id) {
+const useBoardByIdQuery = function (id) {
   return useQuery({
     queryKey: ["boards", id],
     queryFn: async () => {
@@ -23,4 +23,6 @@ export function useBoardByIdQuery(id) {
     },
     enabled: !!id,
   });
-}
+};
+
+export { useBoardsQuery, useBoardByIdQuery };

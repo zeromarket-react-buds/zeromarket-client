@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useDeleteBoardMutation } from "@/hooks/useBoardMutation";
 import { useNavigate } from "react-router-dom";
 
-export default function Board() {
+const Board = function () {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -82,4 +82,6 @@ export default function Board() {
       )}
     </Container>
   );
-}
+};
+
+export default Board;

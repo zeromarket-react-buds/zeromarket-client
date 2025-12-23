@@ -1,4 +1,11 @@
 import Container from "@/components/Container";
-export default function Home() {
-  return <Container>홈입니다!!</Container>;
-}
+
+import ProductList from "@/components/display/ProductList";
+const Home = function () {
+  return (
+    <Container>
+      <ProductList />
+    </Container>
+  );
+};
+export default Home;

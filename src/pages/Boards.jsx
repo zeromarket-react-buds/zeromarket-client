@@ -11,18 +11,28 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useBoardsQuery } from "@/hooks/useBoardsQuery";
 import { Link } from "react-router-dom";
+import { boardsApi } from "@/common/api/board.api";
+import { useEffect, useState } from "react";
 
-export default function Boards() {
-  const { data: boards, isLoading, isError, error } = useBoardsQuery();
+const Boards = function () {
+  // const { data: boards, isLoading, isError, error } = useBoardsQuery();
+  const [boards, setBoards] = useState([]);
   const navigate = useNavigate();
+  useEffect(() => {
+    const getBoards = async function () {
+      const data = await boardsApi();
+      setBoards(data.content);
+    };
+    getBoards();
+  }, []);
 
-  if (isLoading) return <div>로딩 중...</div>;
-  if (isError || !boards)
-    return (
-      <div>
-        에러 발생: {error.message} | boards: {boards}
-      </div>
-    );
+  // if (isLoading) return <div>로딩 중...</div>;
+  // if (isError || !boards)
+  //   return (
+  //     <div>
+  //       에러 발생: {error.message} | boards: {boards}
+  //     </div>
+  //   );
 
   return (
     <Container>
@@ -38,16 +48,17 @@ export default function Boards() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {boards.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell>{b.id}</TableCell>
-                <TableCell className="font-bold">
-                  <Link to={`/boards/${b.id}`}>{b.title}</Link>
-                </TableCell>
-                <TableCell>{b.createdAt}</TableCell>
-                <TableCell>{b.updatedAt}</TableCell>
-              </TableRow>
-            ))}
+            {boards &&
+              boards.map((b) => (
+                <TableRow key={b.id}>
+                  <TableCell>{b.id}</TableCell>
+                  <TableCell className="font-bold">
+                    <Link to={`/boards/${b.id}`}>{b.title}</Link>
+                  </TableCell>
+                  <TableCell>{b.createdAt}</TableCell>
+                  <TableCell>{b.updatedAt}</TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
         <Button
@@ -59,4 +70,6 @@ export default function Boards() {
       </div>
     </Container>
   );
-}
+};
+
+export default Boards;
