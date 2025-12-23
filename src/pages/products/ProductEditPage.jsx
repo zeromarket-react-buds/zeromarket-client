@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import {
   updateProductApi,
@@ -19,6 +19,8 @@ import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
+import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
+import useProductVisionAi from "@/hooks/useProductVisionAi";
 
 // 입력 데이터 (DTO 매칭)
 const INITIAL_FORM = {
@@ -34,6 +36,8 @@ const INITIAL_FORM = {
   delivery: false,
   sellingArea: "",
   location: null,
+  environmentScore: null,
+  aiWriteEnabled: false,
 };
 
 //안전성위해 외부분리,한번만 생성
@@ -44,7 +48,6 @@ const handleBeforeUnload = (e) => {
 
 const ProductEditPage = () => {
   const [form, setForm] = useState(INITIAL_FORM);
-  const formRef = useRef(form);
   const [images, setImages] = useState([]);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const routerLocation = useLocation();
@@ -55,9 +58,22 @@ const ProductEditPage = () => {
   const navigate = useNavigate();
   const { setHeader } = useHeader();
 
-  useEffect(() => {
-    formRef.current = form;
-  }, [form]);
+  // vision/aiDraft/mainImage 관련은 훅으로 이동
+  const {
+    mainImage,
+
+    vision,
+    visionLoading,
+    visionError,
+
+    aiWriteEnabled,
+    setAiWriteEnabled,
+
+    handleVisionResult,
+    handleVisionReset,
+    handleVisionLoading,
+    handleVisionError,
+  } = useProductVisionAi({ images, form, setForm });
 
   //인증상태확인
   useEffect(() => {
@@ -115,6 +131,10 @@ const ProductEditPage = () => {
           //       locationName: data.sellingArea,
           //     }
           //   : null,
+          environmentScore:
+            typeof data.environmentScore !== "undefined"
+              ? data.environmentScore
+              : null,
         }));
 
         setImages(
@@ -137,6 +157,7 @@ const ProductEditPage = () => {
     fetchDetail();
   }, [id, user, isAuthenticated, authLoading]);
 
+  // 직거래 위치 선택 후 복귀 처리
   useEffect(() => {
     if (routerLocation.state?.selectedLocation) {
       const newLocation = routerLocation.state.selectedLocation;
@@ -309,6 +330,10 @@ const ProductEditPage = () => {
         // location: form.location,
         images: finalImages,
         // environmentScore: form.environmentScore ,
+
+        aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
+        aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
+        environmentScore: form.environmentScore ?? null,
       };
 
       // delete payload.location;
@@ -340,6 +365,7 @@ const ProductEditPage = () => {
       </Container>
     );
   }
+
   if (error) {
     return (
       <Container>
@@ -349,6 +375,7 @@ const ProductEditPage = () => {
       </Container>
     );
   }
+
   return (
     <Container>
       {submitLoading && <div>로딩중...</div>}
@@ -361,7 +388,10 @@ const ProductEditPage = () => {
 
           {/* AI로 작성하기 - 2,3차 개발*/}
           <div>
-            <AiWriteSection />
+            <AiWriteSection
+              value={aiWriteEnabled}
+              onChange={setAiWriteEnabled}
+            />
           </div>
 
           {/* 상품 이미지 */}
@@ -435,13 +465,27 @@ const ProductEditPage = () => {
               images={images}
               isEdit={true}
               productId={id}
+              routeState={routerLocation.state}
               onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
             />
           </div>
 
+          {/* Vision 브릿지 */}
+          <ProductVisionBridge
+            file={mainImage?.file}
+            onLoading={handleVisionLoading}
+            onResult={handleVisionResult}
+            onError={handleVisionError}
+            onReset={handleVisionReset}
+          />
+
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection />
+            <EcoScoreSection
+              score={form.environmentScore}
+              loading={visionLoading}
+              error={visionError}
+            />
           </div>
         </div>
 
@@ -456,4 +500,5 @@ const ProductEditPage = () => {
     </Container>
   );
 };
+
 export default ProductEditPage;

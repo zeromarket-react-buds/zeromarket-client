@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
@@ -12,13 +12,14 @@ import ProductConditionSelector from "@/components/product/create/ProductConditi
 import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
-import { createProductApi, productAiDraftApi } from "@/common/api/product.api";
+import { createProductApi } from "@/common/api/product.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
 import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
 import { getProductCustomTextsApi } from "@/common/api/customText.api"; //자주 쓰는 문구 목록불러오기 API
+import useProductVisionAi from "@/hooks/useProductVisionAi";
 
 // 입력 데이터 (DTO 매칭)
 const INITIAL_FORM = {
@@ -43,7 +44,7 @@ const handleBeforeUnload = (e) => {
 };
 
 const ProductCreatePage = () => {
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const routerLocation = useLocation();
   const [images, setImages] = useState(() => {
     return routerLocation.state?.images ?? [];
@@ -61,34 +62,6 @@ const ProductCreatePage = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
   // const [selectedLocation, setSelectedLocation] = useState(null); // ProductLocationDto 객체 전체를 저장
-
-  // vision / 환경점수 관련
-  const [vision, setVision] = useState({ caption: "", tags: [] });
-  const [envScore, setEnvScore] = useState(null);
-  const [visionLoading, setVisionLoading] = useState(false);
-  const [visionError, setVisionError] = useState("");
-
-  // ai 초안 관련
-  const aiWriteEnabled = Boolean(form?.aiWriteEnabled); // AI로 작성하기 토글이 켜져 있는가에 대한 값
-  const setAiWriteEnabled = useCallback((next) => {
-    setForm((prev) => ({
-      ...prev,
-      aiWriteEnabled: Boolean(next), // form 안의 aiWriteEnabled 값만 새로 덮어씀
-    }));
-  }, []);
-  const [aiDraftLoading, setAiDraftLoading] = useState(false);
-  const [aiDraftError, setAiDraftError] = useState("");
-  const [aiDraftDone, setAiDraftDone] = useState(false);
-
-  // 최신 form을 effect에서 안전하게 읽기 위한 ref
-  const formRef = useRef(form);
-
-  // 대표이미지 기준으로 자동입력 1회만 하도록 키 저장
-  const autoFilledKeyRef = useRef("");
-
-  useEffect(() => {
-    formRef.current = form;
-  }, [form]);
 
   // 자주 쓰는 문구 모달
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
@@ -123,97 +96,23 @@ const ProductCreatePage = () => {
     setPhrases(updated);
   }, []);
 
-  // 대표 이미지 계산
-  const mainImage = useMemo(() => {
-    if (!images || images.length === 0) return null;
-    return images.find((i) => i.isMain) ?? images[0];
-  }, [images]);
+  // vision/aiDraft/mainImage 관련은 훅으로 이동
+  const {
+    mainImage,
 
-  // aidraft 호출
-  useEffect(() => {
-    // ai 토글 안켜면 호출x
-    if (!aiWriteEnabled) return;
+    vision,
 
-    const file = mainImage?.file;
-
-    // 대표이미지 없으면 draft 불가
-    if (!file) return;
-
-    // vision 결과가 없으면 draft 불가
-    const hasVision =
-      (vision?.caption && vision.caption.trim()) ||
-      (Array.isArray(vision?.tags) && vision.tags.length > 0);
-    if (!hasVision) return;
-
-    // 대표이미지 기준 key
-    const fileKey = [file.name, file.size, file.lastModified].join("|");
-
-    // 이미 같은 대표이미지에 대해 자동입력을 한 번 수행했으면 중단
-    if (autoFilledKeyRef.current === fileKey) return;
-
-    // 사용자 입력 덮어쓰기 방지: 둘 다 이미 있으면 자동 작성 안 함
-    const titleEmpty = !formRef.current.productTitle?.trim();
-    const descEmpty = !formRef.current.productDescription?.trim();
-    if (!titleEmpty && !descEmpty) {
-      autoFilledKeyRef.current = fileKey; // 다음에 또 호출되는 것 방지
-      return;
-    }
-
-    let cancelled = false;
-
-    const run = async () => {
-      setAiDraftLoading(true);
-      setAiDraftError("");
-      setAiDraftDone(false);
-
-      try {
-        const payload = {
-          caption: vision.caption ?? "",
-          tags: Array.isArray(vision.tags) ? vision.tags : [],
-          sellPrice: formRef.current.sellPrice
-            ? Number(formRef.current.sellPrice)
-            : null,
-        };
-
-        const draft = await productAiDraftApi(payload); // { title, description }
-
-        if (cancelled) return;
-
-        setForm((prev) => ({
-          ...prev,
-          productTitle: titleEmpty // 상품명 비어있는지 체크
-            ? draft?.title ?? prev.productTitle
-            : prev.productTitle,
-          productDescription: descEmpty // 상품상세 비어있는지 체크
-            ? draft?.description ?? prev.productDescription
-            : prev.productDescription,
-        }));
-
-        autoFilledKeyRef.current = fileKey; //AI 자동완성이 이미 이 이미지에 대해 한 번 실행되었는지를 기억하기 위한 부분
-        setAiDraftDone(true);
-      } catch (e) {
-        if (cancelled) return;
-        console.error(e);
-        setAiDraftError("AI 자동 작성 중 오류가 발생했습니다.");
-      } finally {
-        if (cancelled) return;
-        setAiDraftLoading(false);
-      }
-    };
-
-    run(); // 조건이 맞으면 AI 초안 생성 작업을 한 번 실행
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
     aiWriteEnabled,
-    mainImage?.file,
-    vision.caption,
-    // tags는 참조가 바뀌면 effect가 너무 자주 돌 수 있으니 길이 정도만 의존성으로
-    vision.tags?.length,
-  ]);
+    setAiWriteEnabled,
 
+    handleVisionResult,
+    handleVisionReset,
+
+    handleVisionLoading,
+    handleVisionError,
+  } = useProductVisionAi({ images, form, setForm });
+
+  // 직거래 위치 선택 후 복귀 처리
   useEffect(() => {
     if (routerLocation.state?.selectedLocation) {
       const previousForm = routerLocation.state.form;
@@ -310,6 +209,7 @@ const ProductCreatePage = () => {
       );
       return;
     }
+
     setSubmitLoading(true);
     setError("");
     console.log("상품 등록 요청 시작");
@@ -355,7 +255,6 @@ const ProductCreatePage = () => {
 
         aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
         aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
-
         environmentScore: form.environmentScore ?? null,
       };
 
@@ -387,37 +286,6 @@ const ProductCreatePage = () => {
       setSubmitLoading(false);
     }
   }, [form, images, navigate]);
-
-  // Vision 결과 저장 + 환경점수 세팅
-  const handleVisionResult = useCallback((v) => {
-    setVision(v);
-    setEnvScore(v.environmentScore);
-    setForm((prev) => ({
-      ...prev,
-      environmentScore: v.environmentScore,
-    }));
-
-    setVisionError("");
-    setVisionLoading(false);
-    setAiDraftLoading(false);
-    setAiDraftError("");
-    setAiDraftDone(false);
-    autoFilledKeyRef.current = "";
-  }, []);
-
-  // Vision 관련 상태 초기화(이미지 제거/변경 시 사용)
-  const handleVisionReset = useCallback(() => {
-    setVision({ caption: "", tags: [] });
-    setEnvScore(null);
-    setVisionError("");
-    setVisionLoading(false);
-
-    // draft 상태도 같이 초기화
-    setAiDraftLoading(false);
-    setAiDraftError("");
-    setAiDraftDone(false);
-    autoFilledKeyRef.current = "";
-  }, []);
 
   // 자주 쓰는 문구 적용 핸들러
   const handleApplyPhrase = useCallback((text) => {
@@ -532,11 +400,12 @@ const ProductCreatePage = () => {
             />
           </div>
 
+          {/* Vision 브릿지 */}
           <ProductVisionBridge
             file={mainImage?.file}
-            onLoading={setVisionLoading}
+            onLoading={handleVisionLoading}
             onResult={handleVisionResult}
-            onError={setVisionError}
+            onError={handleVisionError}
             onReset={handleVisionReset}
           />
 
@@ -545,6 +414,7 @@ const ProductCreatePage = () => {
             <EcoScoreSection score={form.environmentScore} />
           </div>
         </div>
+
         {/* 하단 버튼 */}
         <div className="sticky bottom-0  bg-white border-t z-40 ">
           <ActionButtonBar
@@ -557,4 +427,5 @@ const ProductCreatePage = () => {
     </Container>
   );
 };
+
 export default ProductCreatePage;
