@@ -37,8 +37,9 @@ function buildClient({ debug } = {}) {
     reconnectDelay: 3000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
-    // debug: debug ? (s) => console.log("[stomp]", s) : undefined,
-    debug: undefined,
+    debug: (s) => {
+      // console.log("[stomp]", s);
+    },
   });
 
   // 연결되면 저장해둔 구독 전부 복구
