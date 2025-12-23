@@ -17,7 +17,7 @@ export function showBrowserNotification({ title, body, onClick }) {
 
   const notification = new Notification(title, {
     body,
-    icon: "src/assets/zm_logo.svg", // public 폴더 기준
+    icon: "/zm_logo.svg", // public 폴더 기준
     // badge: "/badge.png", // 선택
     silent: false,
   });

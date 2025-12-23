@@ -133,11 +133,7 @@ function LoginPage() {
       <div className="space-y-6">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img
-            src="src/assets/zm_logo.svg"
-            alt="logo"
-            className=" w-60 h-auto"
-          />
+          <img src="/zm_logo.svg" alt="logo" className=" w-60 h-auto" />
         </div>
 
         {/* Form */}
