@@ -32,7 +32,7 @@ export const SectionItem = ({ title, data, memberId = null }) => {
         </div>
       </div>
 
-      <div className="border border-brand-mediumgray rounded-3xl p-5 bg-white shadow-sm">
+      <div className="border rounded-3xl p-5 bg-white ">
         {data.totalCount > 0 ? (
           <ul className="list-disc list-outside px-6 space-y-2 ">
             {data.latestReviews.map((item) => (

@@ -355,7 +355,7 @@ const SellerShopPage = () => {
           )}
 
           {/* ---------- 점수 ---------- */}
-          <div className="border rounded-3xl p-4 mb-6 border-brand-mediumgray px-10 shadow-sm cursor-default select-none">
+          <div className="border rounded-3xl p-4 mb-6 px-10 cursor-default select-none">
             <div className="flex justify-between items-center mb-2 ">
               <span>신뢰점수</span>
               <span className="text-brand-green font-bold text-xl">
@@ -376,7 +376,7 @@ const SellerShopPage = () => {
           {/* ---------- 한줄 소개 ---------- */}
           <div className="mb-6">
             <h2 className="mb-4 text-lg font-semibold pl-2">한줄 소개</h2>
-            <div className="flex  items-center border border-brand-mediumgray rounded-3xl p-6 shadow-sm">
+            <div className="flex  items-center border  rounded-3xl p-6 ">
               {profile.description}
             </div>
           </div>
