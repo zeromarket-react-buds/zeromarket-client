@@ -21,30 +21,35 @@ export const SectionItem = ({ title, data, memberId = null }) => {
   };
 
   return (
-    <div className="mb-6 w-full">
-      <div className="flex justify-between items-center text-gray-700 mb-3">
-        <p className="text-sm">{title}</p>
-        <span className="text-green-600 font-semibold">
-          {data.totalCount} 건
-        </span>
+    <div className="mb-4 w-full">
+      <div className="flex justify-between items-center mb-3">
+        <p className="font-medium text-lg">{title}</p>
+        <div className="mr-4">
+          <span className="text-brand-green text-2xl font-bold ">
+            {data.totalCount}
+          </span>
+          <span className=" font-semibold ml-1">건</span>
+        </div>
       </div>
 
-      <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
-        <ul className="list-disc list-inside text-black space-y-2">
-          {data.totalCount > 0 ? (
-            data.latestReviews.map((item) => (
-              <li key={item.reviewId} className="line-clamp-1">
-                {item.content}
+      <div className="border border-brand-mediumgray rounded-3xl p-5 bg-white shadow-sm">
+        {data.totalCount > 0 ? (
+          <ul className="list-disc list-outside px-6 space-y-2 ">
+            {data.latestReviews.map((item) => (
+              <li key={item.reviewId}>
+                <span className="line-clamp-1">{item.content}</span>
               </li>
-            ))
-          ) : (
-            <p className="text-gray-500">아직 받은 리뷰가 없어요!</p>
-          )}
-        </ul>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex justify-center">
+            <p className="text-brand-mediumgray ">아직 받은 리뷰가 없어요!</p>
+          </div>
+        )}
       </div>
 
       <button
-        className="w-full mt-3 text-center text-gray-600 text-sm underline cursor-pointer"
+        className="w-full mt-4 text-center text-brand-darkgray hover:underline cursor-pointer"
         onClick={() => handleMoreClick(data.rating)}
       >
         더 보기
@@ -102,7 +107,7 @@ export default function ReceivedReviewSummaryPage() {
 
       {/* Rating 5 Section */}
       <SectionItem
-        title="이런 점이 최고예요"
+        title="이런 점이 최고예요!"
         data={reviewSummary.rating5}
         // memberId={memberId}
       />
