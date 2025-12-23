@@ -6,7 +6,7 @@ import {
   handleLogout,
 } from "@/common/token";
 
-const WS_BASE = "http://localhost:8080"; // TODO: 배포시 변경
+const WS_BASE = import.meta.env.VITE_SERVER_URL;
 
 // ===== 싱글턴 상태 =====
 let client = null;
