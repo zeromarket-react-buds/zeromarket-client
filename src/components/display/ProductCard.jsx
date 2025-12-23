@@ -49,10 +49,7 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
       {products.map((p) => {
         // 본인 상품 여부 판단
         const isMyProduct = isAuthenticated && p.sellerId === user?.memberId;
-        const isHiddenStatus =
-          p.isHidden ||
-          p.salesStatus?.code === "HIDDEN" ||
-          p.salesStatus?.description === "숨김";
+        const isHiddenStatus = p.hidden === true;
 
         return (
           <div key={p.productId} onClick={() => goDetail(p.productId)}>
@@ -66,18 +63,15 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                     className="relative rounded-xl w-full h-full object-cover "
                   />
                   <div className="flex absolute justify-between items-center bottom-0 w-full px-4 py-3">
-                    {p.salesStatus?.description === "예약중" ? (
-                      <Badge>{p.salesStatus.description}</Badge>
-                    ) : isHiddenStatus ? (
-                      <Badge
-                        variant="destructive"
-                        className="bg-gray-500/80 text-white border-none"
-                      >
-                        숨김
-                      </Badge>
-                    ) : (
-                      <div></div>
-                    )}
+                    <div className="flex flex-col gap-1 items-start">
+                      {isHiddenStatus && <Badge variant="gray">비공개</Badge>}
+
+                      {p.salesStatus?.description === "예약중" ? (
+                        <Badge>{p.salesStatus.description}</Badge>
+                      ) : (
+                        <div></div>
+                      )}
+                    </div>
 
                     {/* 찜하기 버튼  1.productId*/}
                     {/* 본인 상품이면 하트 미노출 */}

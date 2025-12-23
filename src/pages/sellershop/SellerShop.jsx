@@ -143,6 +143,7 @@ const SellerShopPage = () => {
           // cursorCreatedAt: cursor.cursorCreatedAt,
           // includeHidden: isMe,
         });
+
         if (isFirstLoad) {
           setProducts(data.items);
         } else {
@@ -166,12 +167,15 @@ const SellerShopPage = () => {
     [sellerId, cursor, hasNext, loading, isMe]
   ); // cursor, hasNext, loading
 
-  //첫페이지 로딩위한 별도의 useEffect
-  useEffect(() => {
-    if (sellerId) {
-      fetchProductsBySeller(true);
-    }
-  }, [sellerId, isMe]);
+  // //첫페이지 로딩위한 별도의 useEffect
+  // useEffect(() => {
+  //   if (sellerId) {
+  //     fetchProductsBySeller(true);
+  //     fetchMemberProfile();
+  //     fetchReviewsSummary();
+  //     fetchBlockedSellerState();
+  //   }
+  // }, [sellerId]);
 
   // 차단한 사람인지 체크
   const fetchBlockedSellerState = useCallback(async () => {
@@ -196,24 +200,31 @@ const SellerShopPage = () => {
   // 초기 fetch
   useEffect(() => {
     if (!sellerId) return;
+
     const initFetch = async () => {
       setProducts([]);
+      setHasNext(true);
       setCursor({
         cursorProductId: null,
         cursorCreatedAt: null,
       });
-      setHasNext(true);
-      setReviewSummary({});
+
+      // setReviewSummary({});
       await fetchMemberProfile();
       await fetchBlockedSellerState();
       await fetchReviewsSummary();
+      //isMe가 확정될 때까지 fetch를 잠시 미룸
+      if (isAuthenticated !== undefined) {
+        fetchProductsBySeller(true);
+      }
+      // await fetchProductsBySeller(true);
     };
     initFetch();
     // fetchProductsBySeller();
     // fetchReviewsSummary();
     // fetchMemberProfile();
     // fetchBlockedSellerState(); // 차단한 상태
-  }, [sellerId, isMe]);
+  }, [sellerId, isMe, isAuthenticated]);
   // 무한 스크롤이면서 첫 로딩도 호출해야 하므로, -> 더 안전하게 동작(??)
 
   // IntersectionObserver (첫 호출 완료 후 활성화)
