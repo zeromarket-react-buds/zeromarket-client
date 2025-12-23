@@ -11,6 +11,7 @@ const badgeVariants = cva(
       variant: {
         default: "bg-brand-green text-brand-ivory cursor-default border-none",
         red: "bg-brand-red text-white cursor-default border-none",
+        gray: "bg-brand-darkgray text-white cursor-default border-none",
       },
     },
     defaultVariants: {
