@@ -20,7 +20,7 @@ import ProductDescriptionEditor from "@/components/product/create/ProductDescrip
 import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
 import { getProductCustomTextsApi } from "@/common/api/customText.api"; //자주 쓰는 문구 목록불러오기 API
 
-// 입력 데이터 (DTO 매칭
+// 입력 데이터 (DTO 매칭)
 const INITIAL_FORM = {
   productTitle: "",
   categoryDepth1: null,
@@ -34,6 +34,7 @@ const INITIAL_FORM = {
   sellingArea: "",
   environmentScore: null,
   location: null,
+  aiWriteEnabled: false,
 };
 
 const handleBeforeUnload = (e) => {
@@ -68,7 +69,13 @@ const ProductCreatePage = () => {
   const [visionError, setVisionError] = useState("");
 
   // ai 초안 관련
-  const [aiWriteEnabled, setAiWriteEnabled] = useState(false);
+  const aiWriteEnabled = Boolean(form?.aiWriteEnabled); // AI로 작성하기 토글이 켜져 있는가에 대한 값
+  const setAiWriteEnabled = useCallback((next) => {
+    setForm((prev) => ({
+      ...prev,
+      aiWriteEnabled: Boolean(next), // form 안의 aiWriteEnabled 값만 새로 덮어씀
+    }));
+  }, []);
   const [aiDraftLoading, setAiDraftLoading] = useState(false);
   const [aiDraftError, setAiDraftError] = useState("");
   const [aiDraftDone, setAiDraftDone] = useState(false);
