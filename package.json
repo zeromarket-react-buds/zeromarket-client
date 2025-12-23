@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "pm2 serve dist 5173 --no-daemon --spa"
+    "start": "pm2 serve dist 8080 --no-daemon --spa"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
