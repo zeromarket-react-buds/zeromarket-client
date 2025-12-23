@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "pm2 serve dist 8080 --no-daemon --spa"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -19,11 +20,13 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
     "lucide-react": "^0.553.0",
+    "pm2": "^6.0.14",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.3",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
     "react-toastify": "^11.0.5",
+    "serve": "^14.2.5",
     "sockjs-client": "^1.6.1",
     "tailwind-merge": "^3.4.0"
   },
