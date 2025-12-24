@@ -265,8 +265,70 @@ const router = createBrowserRouter([
         path: "purchase/:productId",
         element: <PurchaseLayout />,
         children: [
-          { index: true, element: <PurchasePanelPage /> },
-          { path: "payment", element: <PurchasePage /> },
+          {
+            index: true,
+            element: <PurchasePanelPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "거래 방법",
+                    showBack: true,
+                    hideRight: true,
+                    onBack: () => {
+                      const match =
+                        window.location.pathname.match(/purchase\/([^/]+)/);
+                      const productId = match?.[1];
+
+                      if (productId) {
+                        window.location.assign(`/products/${productId}`);
+                      } else {
+                        window.history.back();
+                      }
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            path: "payment",
+            element: <PurchasePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "",
+                    hideLeft: true,
+                    showBack: false,
+                    hideRight: false,
+                    rightActions: [
+                      {
+                        key: "close",
+                        label: "×",
+                        onClick: () => {
+                          const match =
+                            window.location.pathname.match(/purchase\/([^/]+)/);
+                          const productId = match?.[1];
+
+                          if (productId) {
+                            window.location.assign(`/products/${productId}`);
+                          } else {
+                            window.history.back();
+                          }
+                        },
+                        className:
+                          "text-2xl leading-none font-semibold text-black px-2",
+                      },
+                    ],
+                  },
+                },
+                footer: { component: null },
+              },
+            },
+          },
           {
             path: "addresses",
             children: [

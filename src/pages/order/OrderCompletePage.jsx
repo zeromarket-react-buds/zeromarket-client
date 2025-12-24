@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getOrderCompleteApi } from "@/common/api/order.api";
+import Container from "@/components/Container";
 
 const Section = ({ title, children }) => (
   <div className="border rounded-lg p-4 space-y-2">
@@ -18,6 +19,18 @@ const Row = ({ label, value, bold }) => (
     <span>{value}</span>
   </div>
 );
+
+const formatDateTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mi = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}.${mm}.${dd} ${hh}:${mi}`;
+};
 
 // API 응답을 신뢰해 금액/수수료/최종금액을 채우고, 필수 데이터 누락 시 가드 및 안내 추가.
 const normalizeOrderData = (data) => {
@@ -130,9 +143,7 @@ const OrderCompletePage = () => {
   // 제품 이미지/결제 정보/주소 등을 null-safe로 렌더링.
   const { tradeType, createdAt, product, receiver, payment } = order;
   const isDelivery = tradeType === "DELIVERY";
-  const formattedDate = createdAt
-    ? createdAt.replace("T", " ").slice(0, 16)
-    : "";
+  const formattedDate = formatDateTime(createdAt);
   const tradeTypeLabel = isDelivery ? "택배 거래" : "직거래";
   const displayOrderId = order.orderId || orderId;
   const productPrice = Number(product?.price ?? 0);
@@ -171,7 +182,7 @@ const OrderCompletePage = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto pb-28">
+    <Container>
       <div className="flex flex-col items-center py-10 space-y-4">
         <CheckCircle size={64} className="text-green-600" />
         <div className="text-lg font-semibold">주문 완료</div>
@@ -183,61 +194,70 @@ const OrderCompletePage = () => {
       </div>
 
       {/* 제품 이미지/결제 정보/주소 등을 null-safe로 렌더링. */}
-      <Section title="상품 정보">
-        <div className="flex gap-3 items-center">
-          {productImageUrl ? (
-            <img src={productImageUrl} alt="" className="w-14 h-14 rounded" />
-          ) : (
-            <div className="w-14 h-14 rounded bg-gray-100" />
-          )}
-          <div>
-            <div className="text-sm font-medium">{product?.title}</div>
-            <div className="text-xs text-gray-500">
-              {productPrice.toLocaleString()}원
+      <div className="space-y-3">
+        <Section title="상품 정보">
+          <div className="flex gap-3 items-center">
+            {productImageUrl ? (
+              <img src={productImageUrl} alt="" className="w-14 h-14 rounded" />
+            ) : (
+              <div className="w-14 h-14 rounded bg-gray-100" />
+            )}
+            <div>
+              <div className="text-sm font-medium">{product?.title}</div>
+              <div className="text-xs text-gray-500">
+                {productPrice.toLocaleString()}원
+              </div>
             </div>
           </div>
-        </div>
-      </Section>
-
-      {isDelivery && receiver && (
-        <Section title="배송지 정보">
-          <Row label="이름" value={receiver?.name} />
-          <Row label="연락처" value={receiver?.phone} />
-          <Row label="주소" value={receiver?.address} />
         </Section>
-      )}
 
-      <Section title="거래 정보">
-        <Row label="결제일시" value={formattedDate} />
-        <Row label="거래방식" value={tradeTypeLabel} />
-        <Row label="결제수단" value={payment?.method} />
-      </Section>
+        {isDelivery && receiver && (
+          <Section title="배송지 정보">
+            <Row label="이름" value={receiver?.name} />
+            <Row label="연락처" value={receiver?.phone} />
+            <Row label="주소" value={receiver?.address} />
+          </Section>
+        )}
 
-      <Section title="결제금액 정보">
-        <Row label="상품금액" value={`${paymentTotal.toLocaleString()}원`} />
-        <Row label="결제 수수료" value={`${paymentFee.toLocaleString()}원`} />
-        <Row
-          label="최종 결제 금액"
-          value={`${paymentFinal.toLocaleString()}원`}
-          bold
-        />
-      </Section>
+        <Section title="거래 정보">
+          <Row label="결제일시" value={formattedDate} />
+          <Row label="거래방식" value={tradeTypeLabel} />
+          <Row label="결제수단" value={payment?.method} />
+        </Section>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-2">
-        <button
-          onClick={() => navigate("/")}
-          className="w-1/2 border py-3 rounded-lg text-sm"
-        >
-          계속 둘러보기
-        </button>
-        <button
-          onClick={() => navigate("/me/purchases")}
-          className="w-1/2 bg-green-700 text-white py-3 rounded-lg text-sm"
-        >
-          구매 이력
-        </button>
+        <Section title="결제금액 정보">
+          <Row label="상품금액" value={`${paymentTotal.toLocaleString()}원`} />
+          <Row
+            label="결제 수수료"
+            value={
+              <span className="text-gray-400 line-through">
+                {paymentFee.toLocaleString()}원
+              </span>
+            }
+          />
+          <Row
+            label="최종 결제 금액"
+            value={`${paymentFinal.toLocaleString()}원`}
+            bold
+          />
+        </Section>
+
+        <div className="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-2">
+          <button
+            onClick={() => navigate("/")}
+            className="w-1/2 border py-3 rounded-lg text-sm"
+          >
+            계속 둘러보기
+          </button>
+          <button
+            onClick={() => navigate("/me/purchases")}
+            className="w-1/2 bg-green-700 text-white py-3 rounded-lg text-sm"
+          >
+            구매 이력
+          </button>
+        </div>
       </div>
-    </div>
+    </Container>
   );
 };
 
