@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Crosshair } from "lucide-react";
 import { useMapToast } from "@/components/GlobalToast";
 import { getCategoryEmoji } from "./map.constant";
+import { useModal } from "@/hooks/useModal";
 
 const getMarkerContentHtml = (categoryName, productId, productTitle) => {
   const emoji = getCategoryEmoji(categoryName);
@@ -33,7 +34,8 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   const radiusRef = useRef(radius);
   const lastProductsRef = useRef([]);
   const { showLocationDeniedToast } = useMapToast();
-
+  const { alert } = useModal();
+  const [locationStatus, setLocationStatus] = useState("prompt");
   useEffect(() => {
     radiusRef.current = radius;
   }, [radius]);
@@ -41,7 +43,10 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
   const handleMoveToMyLocation = async () => {
     if (!navigator.geolocation) {
       // 브라우저 자체에서 위치기능 미제공시(Geolocation API 미탑재)
-      alert("이 브라우저에서는 위치 서비스를 지원하지 않습니다.");
+      await alert({
+        description: "이 브라우저에서는 위치 서비스를 지원하지 않습니다.",
+        variant: "destructive",
+      });
       return;
     }
     try {

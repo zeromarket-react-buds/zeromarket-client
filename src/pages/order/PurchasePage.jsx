@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useNavigate,
   useOutletContext,
@@ -14,14 +14,14 @@ import {
 } from "@/common/api/address.api";
 
 const BottomPayButton = ({ disabled, label, onClick }) => (
-  <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-center">
+  <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-center z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full max-w-[600px] py-3 rounded-lg font-semibold cursor-pointer ${
+      className={`w-full max-w-[720px] py-3 rounded-lg font-semibold cursor-pointer ${
         disabled
           ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-          : "bg-green-700 text-white"
+          : "bg-green-700 text-white hover:bg-green-800"
       }`}
     >
       {label}
@@ -46,7 +46,7 @@ const TermsAgreement = ({
   onToggleItem,
   onToggleDetail,
 }) => (
-  <div className="border rounded-lg p-4 text-sm">
+  <div className="border rounded-lg p-4 text-sm bg-white space-y-3">
     <div className="flex justify-between items-center">
       <div
         className="flex items-center gap-2 cursor-pointer"
@@ -55,7 +55,9 @@ const TermsAgreement = ({
         <CheckCircle
           className={terms.all ? "text-green-700" : "text-gray-300"}
         />
-        <span className="font-medium">전체 약관 동의</span>
+        <span className="font-medium">
+          상품정보 및 결제 대행 서비스 이용약관 동의
+        </span>
       </div>
 
       <button onClick={onToggleDetail}>
@@ -64,7 +66,7 @@ const TermsAgreement = ({
     </div>
 
     {showTerms && (
-      <div className="mt-3 space-y-2 pl-6">
+      <div className="space-y-2 pl-6">
         <TermItem
           label="결제 이용 동의"
           checked={terms.items.payment}
@@ -94,40 +96,51 @@ const Row = ({ label, value, bold }) => (
 
 const PriceSummary = ({ sellPrice, feeRate = 0 }) => {
   const paymentFee = 0; // 결제 수수료 없음
-  const totalAmount = sellPrice + paymentFee;
+  const totalAmount = sellPrice; // 최종 금액 = 상품 금액
 
   return (
-    <div className="border rounded-lg p-4 text-sm space-y-2">
-      <Row label="상품 금액" value={`${sellPrice.toLocaleString()}원`} />
-      <Row
-        label={`결제 수수료 (${(feeRate * 100).toFixed(1)}%)`}
-        value={`${paymentFee.toLocaleString()}원`}
-      />
-      <Row
-        label="최종 결제 금액"
-        value={`${totalAmount.toLocaleString()}원`}
-        bold
-      />
+    <div className="border rounded-lg p-4 text-sm space-y-2 bg-white">
+      <div className="flex items-center justify-between font-semibold text-base">
+        <span>최종 결제 금액</span>
+        <span className="text-green-700">
+          {totalAmount.toLocaleString()}원
+        </span>
+      </div>
+      <div className="border-t pt-3 space-y-1">
+        <Row label="상품 금액" value={`${sellPrice.toLocaleString()}원`} bold />
+        <Row
+          label={`안심 결제 수수료 ${feeRate * 100}%`}
+          value={<span className="text-gray-400 line-through">0원</span>}
+        />
+      </div>
     </div>
   );
 };
 
 const PaymentSection = () => {
   const methods = [
+    "토스페이",
     "네이버페이",
     "카카오페이",
-    "신용/체크카드",
-    "계좌이체",
+    "페이코",
+    "카드 결제",
     "무통장입금",
-    "PAYCO",
   ];
 
   return (
-    <div className="border rounded-lg p-4 space-y-3">
-      <div className="text-sm font-semibold">결제 수단</div>
+    <div className="border rounded-lg p-4 space-y-3 bg-white">
+      <div className="flex items-center justify-between text-sm font-semibold">
+        <span>안심결제 선택</span>
+        <span className="text-xs text-gray-500">
+          오늘도 안전해서, 안심결제
+        </span>
+      </div>
       <div className="grid grid-cols-2 gap-2">
         {methods.map((m) => (
-          <button key={m} className="border rounded-lg py-2 text-sm">
+          <button
+            key={m}
+            className="border rounded-lg py-3 text-sm font-medium bg-gray-50 hover:bg-white"
+          >
             {m}
           </button>
         ))}
@@ -140,11 +153,22 @@ const DeliverySection = ({ address, handleNavigate }) => {
   const hasAddress = Boolean(address?.addressId);
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="text-sm font-semibold mb-2">배송지</div>
+    <div className="border rounded-lg p-4 bg-white">
+      <div className="flex items-center justify-between text-sm font-semibold mb-3">
+        <span>배송지 정보</span>
+        <button
+          className="text-xs text-gray-600 underline"
+          onClick={handleNavigate}
+        >
+          배송지 변경
+        </button>
+      </div>
 
       {hasAddress ? (
-        <div onClick={handleNavigate} className="cursor-pointer">
+        <div
+          onClick={handleNavigate}
+          className="cursor-pointer border rounded-lg p-3 bg-gray-50 hover:bg-white"
+        >
           <div className="flex items-center gap-2">
             <MapPin size={16} />
             <span className="font-medium">{address.receiverName}</span>
@@ -156,7 +180,7 @@ const DeliverySection = ({ address, handleNavigate }) => {
       ) : (
         <button
           onClick={handleNavigate}
-          className="w-full border rounded-lg py-2 text-sm text-gray-500 cursor-pointer"
+          className="w-full border rounded-lg py-3 text-sm text-gray-600 cursor-pointer bg-gray-50 hover:bg-white"
         >
           + 배송지 추가
         </button>
@@ -170,14 +194,23 @@ const ProductSummary = ({
   productStatus,
   sellPrice,
   productTitle,
+  tradeLabel,
 }) => (
-  <div className="flex gap-3 items-center">
-    <img src={imageUrl} alt="" className="w-14 h-14 rounded" />
-    <div>
-      <div className="text-sm font-medium">
-        {productTitle} ({productStatus})
+  <div className="flex gap-3 items-center border rounded-lg p-4 bg-white">
+    <img
+      src={imageUrl}
+      alt=""
+      className="w-14 h-14 rounded object-cover bg-gray-100"
+    />
+    <div className="flex-1">
+      <div className="flex items-center gap-2 text-xs text-green-700 font-semibold">
+        <span className="px-2 py-0.5 bg-green-50 rounded-full border border-green-200">
+          {tradeLabel}
+        </span>
+        <span className="text-gray-500">{productStatus}</span>
       </div>
-      <div className="text-xs text-gray-500">
+      <div className="text-sm font-medium mt-1">{productTitle}</div>
+      <div className="text-sm font-semibold text-green-700 mt-1">
         {Number(sellPrice).toLocaleString()}원
       </div>
     </div>
@@ -353,46 +386,37 @@ const PurchasePage = () => {
 
   return (
     <Container>
-      <div className="bg-white">
-        <div className="space-y-6">
-          <div className="text-sm font-medium">
-            거래 방식: {tradeType === "DELIVERY" ? "택배 거래" : "직거래"}
-          </div>
+      <div className="bg-white pb-28 space-y-6">
+        <ProductSummary
+          imageUrl={product.images?.[0]?.imageUrl}
+          sellPrice={product.sellPrice}
+          productStatus={product.productStatus.description}
+          productTitle={product.productTitle}
+          tradeLabel={tradeType === "DELIVERY" ? "택배 거래" : "만나서 직거래"}
+        />
 
-          <ProductSummary
-            // 제품 이미지 접근을 optional chaining으로 수정해 로드 전 런타임 오류 방지.
-            imageUrl={product.images?.[0]?.imageUrl}
-            sellPrice={product.sellPrice}
-            productStatus={product.productStatus.description}
-            productTitle={product.productTitle}
-          />
+        {tradeType === "DELIVERY" && (
+          <DeliverySection address={address} handleNavigate={handleNavigate} />
+        )}
 
-          {tradeType === "DELIVERY" && (
-            <DeliverySection
-              address={address}
-              handleNavigate={handleNavigate}
-            />
-          )}
+        <PaymentSection />
 
-          <PaymentSection />
+        <PriceSummary sellPrice={product.sellPrice} feeRate={feeRate} />
 
-          <PriceSummary sellPrice={product.sellPrice} feeRate={feeRate} />
-
-          <TermsAgreement
-            terms={terms}
-            showTerms={showTerms}
-            onToggleAll={toggleAllTerms}
-            onToggleItem={toggleTerm}
-            onToggleDetail={() => setShowTerms((p) => !p)}
-          />
-        </div>
-
-        <BottomPayButton
-          onClick={handleSubmit}
-          disabled={!terms.all || isSubmitting}
-          label={payableLabel}
+        <TermsAgreement
+          terms={terms}
+          showTerms={showTerms}
+          onToggleAll={toggleAllTerms}
+          onToggleItem={toggleTerm}
+          onToggleDetail={() => setShowTerms((p) => !p)}
         />
       </div>
+
+      <BottomPayButton
+        onClick={handleSubmit}
+        disabled={!terms.all || isSubmitting}
+        label={payableLabel}
+      />
     </Container>
   );
 };

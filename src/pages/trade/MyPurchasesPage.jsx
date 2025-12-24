@@ -26,7 +26,11 @@ const MyPurchasesPage = () => {
   const { alert, confirm } = useModal();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { showCanceledUpdatedToast, showSoftDeletedToast } = useTradeToast();
+  const {
+    showCompleteUpdatedToast,
+    showCancelUpdatedToast,
+    showSoftDeletedToast,
+  } = useTradeToast();
 
   const [keyword, setKeyword] = useState("");
   const [tradeList, setTradeList] = useState([]);
@@ -89,6 +93,28 @@ const MyPurchasesPage = () => {
     fetchTradeList();
   };
 
+  const handleUpdateCompleteTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "거래 완료로 변경하시겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
+
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        status: "COMPLETED",
+      });
+
+      // 상태 변경 성공 후 목록 다시 불러오기
+      await fetchTradeList();
+      showCompleteUpdatedToast();
+    } catch (err) {
+      console.error("거래 완료로 변경 실패:", err);
+    }
+  };
+
   const handleUpdateCancelTrade = async (tradeId) => {
     const ok = await confirm({
       description: "거래를 취소하시겠습니까?",
@@ -106,7 +132,7 @@ const MyPurchasesPage = () => {
 
       // 거래 취소 성공 후 목록 다시 불러오기
       await fetchTradeList();
-      showCanceledUpdatedToast();
+      showCancelUpdatedToast();
     } catch (err) {
       console.error("거래 취소로 변경 실패:", err);
     }
@@ -291,6 +317,7 @@ const MyPurchasesPage = () => {
                       displayStatusKey={displayStatusKey}
                       mode="purchases"
                       isHidden={isHidden}
+                      onComplete={() => handleUpdateCompleteTrade(tradeId)}
                       onCancel={() => handleUpdateCancelTrade(tradeId)}
                     />
                   )}

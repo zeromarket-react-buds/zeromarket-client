@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import { getProductDetailApi } from "@/common/api/product.api";
 import { createReportApi } from "@/common/api/report.api";
-
+import { UserRound, Share2 } from "lucide-react";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductSellerInfo from "@/components/product/detail/ProductSellerInfo";
@@ -17,6 +18,9 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import ProductDescriptionSection from "@/components/product/detail/ProductDescriptionSection";
 import ProductStatusSection from "@/components/product/detail/ProductStatusSection";
 import ReportModal from "@/components/report/ReportModal";
+import { notificationApi } from "@/common/api/notification.api";
+import { useNotification } from "@/hooks/NotificationContext";
+import { useModal } from "@/hooks/useModal";
 
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
@@ -34,7 +38,8 @@ const ProductDetailPage = () => {
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const isFetched = useRef(false);
-
+  const { refreshUnreadCount } = useNotification();
+  const { alert, confirm } = useModal();
   const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
   if (user === undefined) {
@@ -56,39 +61,44 @@ const ProductDetailPage = () => {
   // }));
 
   /** 수정됨: apiClient 기반으로 상세조회 */
-  const fetchProductDetail = async () => {
-    setLoading(true);
-    try {
-      // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
-      const data = await getProductDetailApi(id, user?.memberId); //user?.memberId 전달
+  const fetchProductDetail = useCallback(
+    async (memberId) => {
+      setLoading(true);
+      try {
+        // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
+        const data = await getProductDetailApi(id, user?.memberId); //user?.memberId 전달
 
-      console.log(" 서버에서 받은 상세 응답:", data);
-      console.log(" 서버 wished:", data.wished, "wishCount:", data.wishCount);
+        console.log(" 서버에서 받은 상세 응답:", data);
+        console.log(" 서버 wished:", data.wished, "wishCount:", data.wishCount);
 
-      if (!data || typeof data !== "object") {
-        setError("상품 정보를 불러오지 못했습니다.");
-        return;
-      }
+        if (!data || typeof data !== "object") {
+          setError("상품 정보를 불러오지 못했습니다.");
+          return;
+        }
 
-      setDetail(data);
-    } catch (err) {
-      const status = err.status;
-      if (status === 403) {
-        setError("HIDDEN");
-        alert("숨겨진 게시글입니다.");
-        navigate(-1);
-        return;
+        setDetail(data);
+      } catch (err) {
+        const status = err.status;
+        if (status === 403) {
+          setError("HIDDEN");
+          await alert({ description: "숨겨진 게시글입니다." });
+          navigate(-1);
+        } else {
+          setError("서버 연결 실패");
+          onsole.error("상세 페이지 에러:", err);
+        }
+        // if (status === 404 || status === 410) {
+        //   setError("상품이 삭제되었거나 존재하지 않습니다.");
+        //   return;
+        // }
+        // setError("상품 정보를 불러오는 중 오류가 발생했습니다.");
+        // console.error("상품 상세 페이지 불러오기 실패 : ", err);
+      } finally {
+        setLoading(false);
       }
-      if (status === 404 || status === 410) {
-        setError("상품이 삭제되었거나 존재하지 않습니다.");
-        return;
-      }
-      setError("상품 정보를 불러오는 중 오류가 발생했습니다.");
-      console.error("상품 상세 페이지 불러오기 실패 : ", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [id, navigate, alert]
+  );
 
   // 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
   const toggleWish = async () => {
@@ -166,32 +176,62 @@ const ProductDetailPage = () => {
       // navigator.share 미지원시 > URL 클립보드 복사
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert("URL이 클립보드에 복사되었습니다!");
+        await alert({ description: "URL이 클립보드에 복사되었습니다!" });
       } catch (err) {
         console.error("클립보드 복사 실패함:", err);
-        alert("공유 기능을 사용할 수 없습니다.");
+        await alert({ description: "공유 기능을 사용할 수 없습니다." });
       }
     }
   }, [detail]);
 
+  //헤더
   useEffect(() => {
     setHeader({
-      title: "",
-      showBack: true,
-      rightActions: [
-        {
-          key: "share",
-          label: "공유하기",
-          onClick: handleShare,
-          className: "font-semibold text-sm cursor-pointer",
-        },
-        <AuthStatusIcon
-          isAuthenticated={isAuthenticated}
-          navigate={navigate}
-        />,
-      ],
+      rightSlot: (
+        <div className="flex items-center gap-3">
+          <button onClick={handleShare} className="cursor-pointer mr-3 ">
+            <Share2 size={22} />
+          </button>
+          <button>
+            <Link to="/me">
+              {user?.profileImage ? (
+                <img
+                  src={user?.profileImage}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <UserRound className="w-8 h-8 bg-brand-green rounded-full text-brand-ivory" />
+              )}
+            </Link>
+          </button>
+        </div>
+      ),
     });
-  }, [handleShare]);
+  }, [handleShare, setHeader, user]);
+
+  const readOnceRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!user?.memberId || !detail?.productId) return;
+
+    const key = `PRODUCT:${detail.productId}`;
+    if (readOnceRef.current.has(key)) return;
+    readOnceRef.current.add(key);
+
+    (async () => {
+      try {
+        const updated = await notificationApi.markReadByRef({
+          refType: "PRODUCT",
+          refId: Number(detail.productId),
+          notificationType: "KEYWORD_MATCH", // 선택
+        });
+        if (updated && updated > 0) refreshUnreadCount();
+      } catch (e) {
+        readOnceRef.current.delete(key);
+        console.error(e);
+      }
+    })();
+  }, [user?.memberId, detail, refreshUnreadCount]);
 
   if (loading)
     return (
@@ -234,11 +274,12 @@ const ProductDetailPage = () => {
   };
 
   //신고하기
-  const handleOpenReportModal = () => {
+  const handleOpenReportModal = async () => {
     if (!isAuthenticated) {
-      const goLogin = window.confirm(
-        "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?"
-      );
+      const goLogin = await confirm({
+        description:
+          "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?",
+      });
       if (goLogin) {
         navigate("/login");
       }
@@ -264,17 +305,17 @@ const ProductDetailPage = () => {
 
     try {
       const result = await createReportApi(payload);
-      alert(result?.message || "신고가 접수되었습니다.");
+      await alert(result?.message || { description: "신고가 접수되었습니다." });
 
       setIsReportModalOpen(false);
     } catch (error) {
       console.error("신고 제출 실패", error);
-      alert("신고 처리 중 문제가 발생했습니다.");
+      await alert({ description: "신고 처리 중 문제가 발생했습니다." });
     }
   };
 
   return (
-    <div>
+    <div className="-mt-5">
       <Container>
         <div className="relative">
           <div>
@@ -345,6 +386,7 @@ const ProductDetailPage = () => {
               onToggleWish={toggleWish}
               productId={detail.productId}
               isHidden={isProductHidden}
+              salesStatus={detail.salesStatus}
               onHide={handleStatusUpdateSuccess}
               onUnhide={handleStatusUpdateSuccess}
             />

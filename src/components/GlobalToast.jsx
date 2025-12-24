@@ -35,7 +35,16 @@ export const useTradeToast = () => {
     });
   };
 
-  const showCompletedUpdatedToast = () => {
+  const showDeliveryCompleteUpdatedToast = () => {
+    toast.success("배송이 완료되었습니다", {
+      position: "bottom-center",
+      autoClose: 3000,
+      hideProgressBar: true,
+      pauseOnHover: false,
+    });
+  };
+
+  const showCompleteUpdatedToast = () => {
     toast.success("거래 완료되었습니다", {
       position: "bottom-center",
       autoClose: 3000,
@@ -44,7 +53,7 @@ export const useTradeToast = () => {
     });
   };
 
-  const showCanceledUpdatedToast = () => {
+  const showCancelUpdatedToast = () => {
     toast.info("거래 취소되었습니다.", {
       position: "bottom-center",
       autoClose: 3000,
@@ -64,8 +73,9 @@ export const useTradeToast = () => {
 
   return {
     showConfirmOrderUpdatedToast,
-    showCompletedUpdatedToast,
-    showCanceledUpdatedToast,
+    showDeliveryCompleteUpdatedToast,
+    showCompleteUpdatedToast,
+    showCancelUpdatedToast,
     showSoftDeletedToast,
   };
 };

@@ -88,7 +88,7 @@ const ProductSellerInfo = ({ detail }) => {
             </span>
 
             {showTrustTooltip && (
-              <div className="absolute top-14 -right-1.5 w-48 p-3 bg-white border rounded-lg shadow-md z-50">
+              <div className="absolute top-14 -right-1.5 w-56 p-3 bg-white border rounded-lg shadow-md z-50">
                 <div className="absolute -top-[6px] right-4 w-3 h-3 bg-white border-t border-l rotate-45 z-40"></div>
                 <div className="flex justify-between items-start mb-0.5 relative z-50">
                   <div className="flex flex-col">
@@ -101,7 +101,9 @@ const ProductSellerInfo = ({ detail }) => {
                   </div>
                 </div>
                 <p className="text-[11px] text-brand-darkgray leading-relaxed relative z-50">
-                  거래 매너, 후기 등을 종합하여 계산된 판매자 신뢰 등급입니다.
+                  {"거래 매너와 후기를 종합하여 산정된 점수로"}
+                  <br />
+                  {"판매자 신뢰 등급을 확인할 수 있습니다."}
                 </p>
               </div>
             )}

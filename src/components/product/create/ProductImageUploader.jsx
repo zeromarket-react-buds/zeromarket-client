@@ -1,12 +1,14 @@
 import { useState, useRef } from "react";
 import { Upload, X, CircleX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/hooks/useModal";
 
 const ProductImageUploader = ({ images, setImages }) => {
   const fileInputRef = useRef(null);
+  const { alert } = useModal();
   // const [mainIndex, setMainIndex] = useState(null);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
     const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
     const validFiles = [];
@@ -15,7 +17,11 @@ const ProductImageUploader = ({ images, setImages }) => {
       const extension = file.name.split(".").pop().toLowerCase();
 
       if (!allowedExtensions.includes(extension)) {
-        alert("이미지 파일(JPG, JPEG, PNG, WebP)만 업로드할 수 있습니다.");
+        await alert({
+          description:
+            "이미지 파일(JPG, JPEG, PNG, WebP)만 업로드할 수 있습니다.",
+          variant: "destructive",
+        });
         continue;
       }
 

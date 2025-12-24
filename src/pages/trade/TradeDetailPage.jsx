@@ -29,8 +29,11 @@ const formatDate = (isoString) => {
 // 헤더용 날짜: 취소/완료/업데이트/생성 순으로 우선순위 세우는 함수
 const getHeaderDate = (trade) => {
   if (!trade) return "";
-  const { canceledAt, completedAt, updatedAt, createdAt } = trade;
-  return formatDate(canceledAt ?? completedAt ?? updatedAt ?? createdAt);
+  const { canceledAt, completedAt, orderUpdatedAt, updatedAt, createdAt } =
+    trade;
+  return formatDate(
+    canceledAt ?? completedAt ?? orderUpdatedAt ?? updatedAt ?? createdAt
+  );
 };
 
 const TradeDetailPage = () => {
@@ -39,8 +42,9 @@ const TradeDetailPage = () => {
   const navigate = useNavigate();
   const {
     showConfirmOrderUpdatedToast,
-    showCompletedUpdatedToast,
-    showCanceledUpdatedToast,
+    showDeliveryCompleteUpdatedToast,
+    showCompleteUpdatedToast,
+    showCancelUpdatedToast,
   } = useTradeToast();
   const { tradeId } = useParams();
 
@@ -147,6 +151,28 @@ const TradeDetailPage = () => {
   const headerDate = getHeaderDate(tradeProduct);
   const paidDate = formatDate(createdAt);
 
+  const handleUpdateDeliveryCompleteTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "배송 완료로 변경하시겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
+
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        orderStatus: "DELIVERED",
+      });
+
+      // 상태 변경 성공 후 목록 다시 불러오기
+      await fetchTradeList();
+      showDeliveryCompleteUpdatedToast();
+    } catch (err) {
+      console.error("배송 완료로 변경 실패:", err);
+    }
+  };
+
   const handleUpdateCompleteTrade = async (tradeId) => {
     const ok = await confirm({
       description: "거래 완료로 변경하시겠습니까?",
@@ -163,7 +189,7 @@ const TradeDetailPage = () => {
 
       // 상태 변경 성공 후 목록 다시 불러오기
       await fetchTradeProduct();
-      showCompletedUpdatedToast();
+      showCompleteUpdatedToast();
     } catch (err) {
       console.error("거래 완료로 변경 실패:", err);
     }
@@ -186,7 +212,7 @@ const TradeDetailPage = () => {
 
       // 거래 취소 성공 후 목록 다시 불러오기
       await fetchTradeProduct();
-      showCanceledUpdatedToast();
+      showCancelUpdatedToast();
     } catch (err) {
       console.error("거래 취소로 변경 실패:", err);
     }
@@ -253,15 +279,12 @@ const TradeDetailPage = () => {
             </div>
           </div>
 
-          <div
-            className="flex flex-row gap-10 pt-2 pb-5 items-center"
-            onClick={() => navigate(`/products/${productId}`)}
-          >
+          <div className="flex flex-row gap-10 pt-2 pb-5 items-center">
             <div className="overflow-hidden">
               <img
                 src={thumbnailUrl}
-                className="object-cover w-[100px] h-[70px] rounded-2xl"
-                alt=""
+                className="object-cover w-[100px] h-[70px] rounded-2xl cursor-pointer"
+                onClick={() => navigate(`/products/${productId}`)}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -278,6 +301,9 @@ const TradeDetailPage = () => {
               displayStatusKey={displayStatusKey}
               mode={mode}
               isHidden={isHidden}
+              onDeliveryCompleted={() =>
+                handleUpdateDeliveryCompleteTrade(tradeId)
+              }
               onComplete={() => handleUpdateCompleteTrade(tradeId)}
               onCancel={() => handleUpdateCancelTrade(tradeId)}
               onConfirmOrder={() => handleConfirmOrder(tradeId)}

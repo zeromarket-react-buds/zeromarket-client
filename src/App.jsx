@@ -124,6 +124,9 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "상품 등록",
+                    showBack: true,
+                    showHome: false,
+                    hideRight: true,
                   },
                 },
                 footer: {
@@ -142,6 +145,7 @@ const router = createBrowserRouter([
                   props: {
                     title: "만날 장소 선택",
                     showBack: true,
+                    showHome: false,
                     hideRight: true,
                   },
                 },
@@ -158,6 +162,9 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "",
+                    showBack: true,
+                    showHome: true,
+                    hideRight: false,
                   },
                 },
                 footer: {
@@ -173,8 +180,12 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
+
                   props: {
                     title: "상품 수정",
+                    showBack: true,
+                    hideRight: true,
+                    hideRight: true,
                   },
                 },
                 footer: {
@@ -265,8 +276,70 @@ const router = createBrowserRouter([
         path: "purchase/:productId",
         element: <PurchaseLayout />,
         children: [
-          { index: true, element: <PurchasePanelPage /> },
-          { path: "payment", element: <PurchasePage /> },
+          {
+            index: true,
+            element: <PurchasePanelPage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "거래 방법",
+                    showBack: true,
+                    hideRight: true,
+                    onBack: () => {
+                      const match =
+                        window.location.pathname.match(/purchase\/([^/]+)/);
+                      const productId = match?.[1];
+
+                      if (productId) {
+                        window.location.assign(`/products/${productId}`);
+                      } else {
+                        window.history.back();
+                      }
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            path: "payment",
+            element: <PurchasePage />,
+            handle: {
+              layout: {
+                header: {
+                  component: "TitleHeader",
+                  props: {
+                    title: "",
+                    hideLeft: true,
+                    showBack: false,
+                    hideRight: false,
+                    rightActions: [
+                      {
+                        key: "close",
+                        label: "×",
+                        onClick: () => {
+                          const match =
+                            window.location.pathname.match(/purchase\/([^/]+)/);
+                          const productId = match?.[1];
+
+                          if (productId) {
+                            window.location.assign(`/products/${productId}`);
+                          } else {
+                            window.history.back();
+                          }
+                        },
+                        className:
+                          "text-2xl leading-none font-semibold text-black px-2",
+                      },
+                    ],
+                  },
+                },
+                footer: { component: null },
+              },
+            },
+          },
           {
             path: "addresses",
             children: [
@@ -744,16 +817,6 @@ const router = createBrowserRouter([
               component: "TitleHeader",
               props: {
                 title: "샵",
-                rightSlot: (
-                  <MoreVertical
-                    size={24}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      // 셀러샵에서 커스텀 이벤트 발생
-                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
-                    }}
-                  />
-                ),
               },
             },
             footer: {
