@@ -209,7 +209,6 @@ const SellerShopPage = () => {
         cursorCreatedAt: null,
       });
 
-      // setReviewSummary({});
       await fetchMemberProfile();
       await fetchBlockedSellerState();
       await fetchReviewsSummary();
@@ -217,7 +216,6 @@ const SellerShopPage = () => {
       if (isAuthenticated !== undefined) {
         fetchProductsBySeller(true);
       }
-      // await fetchProductsBySeller(true);
     };
     initFetch();
     // fetchProductsBySeller();

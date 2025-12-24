@@ -274,7 +274,11 @@ const ProductDetailPage = () => {
         <div className="relative">
           <div>
             {/* 상품 이미지 */}
-            <ProductImageCarousel images={sortedImages} />
+            <ProductImageCarousel
+              images={sortedImages}
+              salesStatus={detail.salesStatus}
+              isHidden={isProductHidden}
+            />
             {/*detail.wished, wishCount값 들어오는지 ui,콘솔 확인용*/}
             {/* {detail && (
               <Heart
