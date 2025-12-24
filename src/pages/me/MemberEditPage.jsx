@@ -6,12 +6,18 @@ import PhoneEditModal from "@/components/profile/PhoneEditModal";
 import EmailEditModal from "@/components/profile/EmailEditModal";
 import formatPhone from "@/utils/formatPhone";
 import Container from "@/components/Container";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import { useModal } from "@/hooks/useModal";
 
 const MemberEditPage = () => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const {
+    isAuthenticated,
+    loading: authLoading,
+    user,
+    linkKakaoAccount,
+    unlinkKakaoAccount,
+  } = useAuth();
   const { alert } = useModal();
   const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
@@ -202,8 +208,42 @@ const MemberEditPage = () => {
               <p className="font-medium">카카오</p>
             </div>
 
-            <Button variant="green" className="px-4 py-1 text-sm">
-              연동하기
+            <Button
+              onClick={async () => {
+                if (!isAuthenticated) {
+                  alert("로그인 후 연동 가능합니다.");
+                  navigate("/login");
+                  return;
+                }
+                if (user?.socialLinked) {
+                  await unlinkKakaoAccount();
+                  return;
+                }
+                // const clientId = import.meta.env.VITE_KAKAO_REST_API_KEY;
+                // const redirectUri =
+                //   import.meta.env.VITE_KAKAO_REDIRECT_URI ||
+                //   `${window.location.origin}/oauth/kakao/callback`;
+
+                // oauth 화면 이동
+                const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+                const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
+                if (!KAKAO_CLIENT_ID) {
+                  alert("Kakao REST API 키가 설정되지 않았습니다.");
+                  return;
+                }
+
+                const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+                window.location.href = kakaoAuthUrl;
+
+                // window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+                //   redirectUri
+                // )}&response_type=code`;
+              }}
+              variant="green"
+              className="px-4 py-1 text-sm"
+            >
+              {user?.kakaoLinked ? "연동 해제" : "카카오 계정 연동하기"}
             </Button>
           </div>
 

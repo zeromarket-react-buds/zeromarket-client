@@ -4,6 +4,8 @@ import {
   loginApi,
   logoutApi,
   oauthLoginApi,
+  linkKakaoAccountApi,
+  unlinkKakaoAccountApi,
   withdrawApi,
 } from "@/common/api/auth.api";
 import { refreshAccessToken } from "@/common/token";
@@ -96,6 +98,20 @@ function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // 카카오 계정 연동
+  const linkKakaoAccount = async (code, redirectUri) => {
+    await linkKakaoAccountApi({ code, redirectUri });
+    const userData = await getMyInfoApi();
+    setUser(userData);
+  };
+
+  // 카카오 계정 해제
+  const unlinkKakaoAccount = async () => {
+    await unlinkKakaoAccountApi();
+    const userData = await getMyInfoApi();
+    setUser(userData);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -103,6 +119,8 @@ function AuthProvider({ children }) {
         isAuthenticated,
         login,
         oauthLogin,
+        linkKakaoAccount,
+        unlinkKakaoAccount,
         logout,
         withdraw,
         loading,

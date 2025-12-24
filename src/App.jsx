@@ -271,6 +271,19 @@ const router = createBrowserRouter([
       {
         path: "orders/:orderId/complete",
         element: <OrderCompletePage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: {
+                title: "주문/결제 완료",
+              },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
       },
       {
         path: "purchase/:productId",

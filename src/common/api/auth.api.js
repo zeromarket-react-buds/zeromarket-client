@@ -47,6 +47,23 @@ const oauthLoginApi = async (code) => {
   return data;
 };
 
+// 카카오 계정 연동
+const linkKakaoAccountApi = async ({ code, redirectUri }) => {
+  const { data } = await apiClient("/api/oauth/kakao/link", {
+    method: "POST",
+    body: { code, redirectUri },
+  });
+  return data;
+};
+
+// 카카오 계정 연동 해제
+const unlinkKakaoAccountApi = async () => {
+  const { data } = await apiClient("/api/oauth/kakao/unlink", {
+    method: "POST",
+  });
+  return data;
+};
+
 // 회원탈퇴
 const withdrawApi = async (payload = {}) => {
   const body = {};
@@ -69,5 +86,7 @@ export {
   checkDuplicateIdApi,
   logoutApi,
   oauthLoginApi,
+  linkKakaoAccountApi,
+  unlinkKakaoAccountApi,
   withdrawApi,
 };
