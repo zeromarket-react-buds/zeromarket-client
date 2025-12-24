@@ -272,7 +272,7 @@ const MyPurchasesPage = () => {
                 </div>
 
                 <div
-                  className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5"
+                  className="flex flex-col gap-2 border border-brand-mediumgray rounded-2xl p-5 cursor-pointer"
                   onClick={() => goToTradeDetail(tradeId)}
                 >
                   <LongProductCard
