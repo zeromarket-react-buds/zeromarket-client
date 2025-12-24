@@ -44,7 +44,7 @@ const ProductList = () => {
   // 찜 토글 후 UI 즉시 반영 함수
   //* ProductId를 clickedProductId로 분간 쉽게 변경
   const handleToggleWish = async (clickedProductId) => {
-    console.log(" handleToggleWish 호출됨", clickedProductId);
+    //console.log(" handleToggleWish 호출됨", clickedProductId);
 
     // 백엔드 토글 API 수행 (true/false 반환)
     const newState = await onToggleLike(clickedProductId);
@@ -80,9 +80,6 @@ const ProductList = () => {
     setLoading(true);
 
     try {
-      //찜유지위해 memberId추가 콘솔확인
-      console.log("[fetchHomeProducts] memberId 보내는 값 =", memberId);
-
       const query = {
         offset: nextOffset,
         sort,
@@ -92,12 +89,10 @@ const ProductList = () => {
         maxPrice,
         area,
       };
-      // 찜색유지 안돼는 문제콘솔 호출 직전 URL 모양 확인
-      console.log("[fetchHomeProducts] query =", query);
 
       //찜색유지 안돼는 문제콘솔. memberId전달
       const data = await getProductListApi(query, memberId);
-      console.log(" [fetchHomeProducts] API 응답 =", data);
+      console.log("상품 목록 응답:", data);
 
       const fetched = data.content;
       const offset = data.offset;
@@ -126,10 +121,8 @@ const ProductList = () => {
       setLoading(false);
     }
   };
-  // sort/filter 변경 시 목록 재호출
+  // 조회 조건(sort/filter/memberId) 변경시 목록 초기화 후 재조회
   useEffect(() => {
-    //찜 유지 안돼는 문제를 위한콘솔
-    console.log(" memberId 변경 감지 → 상품 목록을 다시 불러옵니다:", memberId);
     setProducts([]);
     setOffset(null);
     fetchHomeProducts(null);
@@ -142,15 +135,8 @@ const ProductList = () => {
     minPrice,
     maxPrice,
     area,
+    memberId,
   ]);
-
-  //  로그인 복구(memberId 변화) 시 → 강제 재조회
-  useEffect(() => {
-    console.log("memberId 변경 감지 → 전체 리스트 다시 조회:", memberId);
-    setProducts([]);
-    setOffset(null);
-    fetchHomeProducts(null);
-  }, [memberId]); //  memberId 변경 시 재조회
 
   // sort 관련 함수
   const handleSort = (value) => {
