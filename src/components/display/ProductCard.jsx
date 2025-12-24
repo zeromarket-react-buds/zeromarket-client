@@ -64,7 +64,7 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                   />
                   <div className="flex absolute justify-between items-center bottom-0 w-full px-4 py-3">
                     <div className="flex flex-col gap-1 items-start">
-                      {isHiddenStatus && <Badge variant="gray">비공개</Badge>}
+                      {isHiddenStatus && <Badge variant="gray">숨김</Badge>}
 
                       {p.salesStatus?.description === "예약중" ? (
                         <Badge>{p.salesStatus.description}</Badge>

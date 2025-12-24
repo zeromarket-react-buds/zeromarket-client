@@ -73,9 +73,10 @@ const ActionButtonBar = ({
     if (handleNotLoggedIn()) return;
     if (!window.confirm("정말로 상품을 삭제하시겠습니까?")) return;
     try {
-      await deleteProductApi(productId); // 분리된 API 호출
+      await deleteProductApi(productId);
       alert("상품이 삭제되었습니다.");
-      window.location.href = "/";
+      // window.location.href = "/";
+      navigate(-1);
     } catch (error) {
       console.error("상품 삭제 오류:", error);
       alert("삭제 중 오류가 발생했습니다.");
