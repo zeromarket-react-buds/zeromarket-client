@@ -21,6 +21,13 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import useProductVisionAi from "@/hooks/useProductVisionAi";
+import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import {
+  getProductCustomTextsApi,
+  createProductCustomTextApi,
+  // updateProductCustomTextApi,
+  // deleteProductCustomTextApi,
+} from "@/common/api/customText.api";
 
 // 입력 데이터 (DTO 매칭)
 const INITIAL_FORM = {
@@ -57,6 +64,41 @@ const ProductEditPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
+
+  //쓰는 문구 모달 open 상태
+  const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
+
+  //자주 쓰는 문구 목록 state
+  const [phrases, setPhrases] = useState([]);
+
+  // 자주 쓰는 문구 목록 조회 함수
+  const reloadPhrases = useCallback(async () => {
+    try {
+      const data = await getProductCustomTextsApi(); // 서버에서 [{id,text}, ...]
+      setPhrases(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("자주 쓰는 문구 조회 실패:", e);
+      // UX 선택: 조용히 실패하거나 alert
+      // alert("자주 쓰는 문구를 불러오지 못했습니다.");
+    }
+  }, []);
+
+  // 모달 열릴 때 목록 로드 (최소 동작)
+  useEffect(() => {
+    if (isPhraseModalOpen) {
+      reloadPhrases();
+    }
+  }, [isPhraseModalOpen, reloadPhrases]);
+
+  // 문구를 상품설명 textarea에 “추가” 적용하는 함수
+  const handleApplyPhrase = useCallback((text) => {
+    setForm((prev) => ({
+      ...prev,
+      productDescription: prev.productDescription
+        ? prev.productDescription + "\n" + text
+        : text,
+    }));
+  }, []);
 
   // vision/aiDraft/mainImage 관련은 훅으로 이동
   const {
@@ -440,8 +482,22 @@ const ProductEditPage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
+              // 자주 쓰는 문구 모달 열기 핸들러 연결
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)}
             />
           </div>
+
+          {/* 자주 쓰는 문구 모달 */}
+          <FrequentPhraseModal
+            open={isPhraseModalOpen}
+            onClose={() => setIsPhraseModalOpen(false)}
+            phrases={phrases}
+            onApplyPhrase={handleApplyPhrase}
+            onReloadPhrases={reloadPhrases}
+            // 아래는 모달에서 "등록" API를 직접 쓰는 구조라면 넘겨줘도 되고,
+            // 모달이 자체적으로 API 호출한다면 빼도 됨
+            //onCreatePhrase={createProductCustomTextApi}
+          />
 
           {/* 상품 상태 */}
           <div>
