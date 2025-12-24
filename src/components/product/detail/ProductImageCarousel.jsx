@@ -114,6 +114,7 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
           </div>
         </div>
       )}
+
       {/* 이미지 슬라이드, 이미지 에러났을때 뜰 대체이미지 */}
       <div
         className={`whitespace-nowrap h-full ${
