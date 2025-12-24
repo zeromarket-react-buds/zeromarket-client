@@ -7,22 +7,14 @@ const TradeActionStatusButton = ({
   mode,
   showStatusBar = true,
   isHidden,
+  onConfirmOrder,
+  onDeliveryCompleted,
   onComplete,
   onCancel,
-  onConfirmOrder,
 }) => {
+  // 해당 거래가 아직 진행 중인지 여부 판단
   const isInProgress =
     displayStatusKey !== "COMPLETED" && displayStatusKey !== "CANCELED";
-
-  // 구매자 취소 가능 조건
-  // - CHAT_DIRECT: PENDING일 때만
-  // - INSTANT_*: PAID일 때만
-  const canBuyerCancel =
-    isInProgress &&
-    !isHidden &&
-    mode === "purchases" &&
-    ((flowType === "CHAT_DIRECT" && displayStatusKey === "PENDING") ||
-      (flowType !== "CHAT_DIRECT" && displayStatusKey === "PAID"));
 
   return (
     <div className="flex flex-col gap-2">
@@ -36,125 +28,10 @@ const TradeActionStatusButton = ({
         </div>
       )}
 
-      {/* 구매자 입장: 주문 취소 요청 버튼만 노출 */}
-      {canBuyerCancel && (
-        <div className="flex flex-row w-full gap-2">
-          <Button
-            variant="green"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCancel && onCancel();
-            }}
-            className="flex-1 py-5"
-          >
-            주문 취소 요청
-          </Button>
-        </div>
-      )}
-
-      {/* 판매자 입장 */}
-      {isInProgress && mode === "sales" && !isHidden && (
+      {/* 구매자 입장 */}
+      {isInProgress && mode === "purchases" && !isHidden && (
         <>
-          {/* 바로구매 - 직거래 */}
-          {flowType === "INSTANT_DIRECT" && (
-            <>
-              {displayStatusKey === "PAID" && (
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onConfirmOrder && onConfirmOrder();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    주문 확인으로 변경
-                  </Button>
-
-                  <Button
-                    variant="green"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancel && onCancel();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    거래 취소
-                  </Button>
-                </div>
-              )}
-
-              {displayStatusKey === "DELIVERY_READY" && (
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onComplete && onComplete();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    거래 완료로 변경
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* 바로구매 - 택배거래 */}
-          {flowType === "INSTANT_DELIVERY" && (
-            <>
-              {displayStatusKey === "PAID" && (
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onConfirmOrder && onConfirmOrder();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    주문 확인으로 변경
-                  </Button>
-
-                  <Button
-                    variant="green"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancel && onCancel();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    거래 취소
-                  </Button>
-                </div>
-              )}
-
-              {displayStatusKey === "DELIVERED" && (
-                <div className="flex flex-row w-full gap-2">
-                  <Button
-                    variant="ivory"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onComplete && onComplete();
-                    }}
-                    className="flex-1 py-5"
-                  >
-                    거래 완료로 변경
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* 채팅 직거래 (order 없음) - 판매자만 완료/취소 가능 */}
+          {/* 채팅 - 직거래 (order 없음) : 거래완료/거래취소 */}
           {flowType === "CHAT_DIRECT" && displayStatusKey === "PENDING" && (
             <div className="flex flex-row w-full gap-2">
               <Button
@@ -181,6 +58,161 @@ const TradeActionStatusButton = ({
                 거래 취소
               </Button>
             </div>
+          )}
+
+          {/* 바로구매 - 직거래: 거래완료 */}
+          {flowType === "INSTANT_DIRECT" &&
+            displayStatusKey === "DELIVERY_READY" && (
+              <div className="flex flex-row w-full gap-2">
+                <Button
+                  variant="ivory"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onComplete && onComplete();
+                  }}
+                  className="flex-1 py-5"
+                >
+                  거래 완료로 변경
+                </Button>
+              </div>
+            )}
+
+          {/* 바로구매 - 택배거래: 거래완료 */}
+          {flowType === "INSTANT_DELIVERY" &&
+            displayStatusKey === "DELIVERED" && (
+              <div className="flex flex-row w-full gap-2">
+                <Button
+                  variant="ivory"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onComplete && onComplete();
+                  }}
+                  className="flex-1 py-5"
+                >
+                  거래 완료로 변경
+                </Button>
+              </div>
+            )}
+
+          {/* 바로구매 결제완료(PAID)에서만: 주문 취소 요청 */}
+          {flowType !== "CHAT_DIRECT" && displayStatusKey === "PAID" && (
+            <div className="flex flex-row w-full gap-2">
+              <Button
+                variant="green"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel && onCancel();
+                }}
+                className="flex-1 py-5"
+              >
+                주문 취소 요청
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* 판매자 입장 */}
+      {isInProgress && mode === "sales" && !isHidden && (
+        <>
+          {/* 채팅 - 직거래 (order 없음) : 판매자는 취소만 */}
+          {flowType === "CHAT_DIRECT" && displayStatusKey === "PENDING" && (
+            <div className="flex flex-row w-full gap-2">
+              <Button
+                variant="green"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel && onCancel();
+                }}
+                className="flex-1 py-5"
+              >
+                거래 취소
+              </Button>
+            </div>
+          )}
+
+          {/* 바로구매 - 직거래: 결제완료에서 주문확인/거래취소 */}
+          {flowType === "INSTANT_DIRECT" && displayStatusKey === "PAID" && (
+            <div className="flex flex-row w-full gap-2">
+              <Button
+                variant="ivory"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onConfirmOrder && onConfirmOrder();
+                }}
+                className="flex-1 py-5"
+              >
+                주문 확인으로 변경
+              </Button>
+
+              <Button
+                variant="green"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancel && onCancel();
+                }}
+                className="flex-1 py-5"
+              >
+                거래 취소
+              </Button>
+            </div>
+          )}
+
+          {/* 바로구매 - 택배거래 */}
+          {flowType === "INSTANT_DELIVERY" && (
+            <>
+              {/* 결제완료에서 주문확인/거래취소 */}
+              {displayStatusKey === "PAID" && (
+                <div className="flex flex-row w-full gap-2">
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onConfirmOrder && onConfirmOrder();
+                    }}
+                    className="flex-1 py-5"
+                  >
+                    주문 확인으로 변경
+                  </Button>
+
+                  <Button
+                    variant="green"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancel && onCancel();
+                    }}
+                    className="flex-1 py-5"
+                  >
+                    거래 취소
+                  </Button>
+                </div>
+              )}
+
+              {/* 주문확인에서 배송완료로 변경 */}
+              {displayStatusKey === "DELIVERY_READY" && (
+                <div className="flex flex-row w-full gap-2">
+                  <Button
+                    variant="ivory"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeliveryCompleted && onDeliveryCompleted();
+                    }}
+                    className="flex-1 py-5"
+                  >
+                    배송 완료로 변경
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </>
       )}

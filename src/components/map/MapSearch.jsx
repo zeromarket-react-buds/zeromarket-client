@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Crosshair } from "lucide-react";
 import { useMapToast } from "@/components/GlobalToast";
+import { getCategoryEmoji } from "./map.constant";
 
 const getMarkerContentHtml = (categoryName, productId, productTitle) => {
   const emoji = getCategoryEmoji(categoryName);

@@ -8,6 +8,7 @@ const NotificationCard = ({ noti }) => {
   };
   const guideMessage = {
     CHAT_MESSAGE: "채팅 메시지가 도착했습니다.",
+    KEYWORD_MATCH: "등록한 키워드의 상품이 등록되었습니다.",
   };
 
   return (

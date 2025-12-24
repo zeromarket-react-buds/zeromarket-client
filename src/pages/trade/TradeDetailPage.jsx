@@ -39,8 +39,9 @@ const TradeDetailPage = () => {
   const navigate = useNavigate();
   const {
     showConfirmOrderUpdatedToast,
-    showCompletedUpdatedToast,
-    showCanceledUpdatedToast,
+    showDeliveryCompleteUpdatedToast,
+    showCompleteUpdatedToast,
+    showCancelUpdatedToast,
   } = useTradeToast();
   const { tradeId } = useParams();
 
@@ -147,6 +148,28 @@ const TradeDetailPage = () => {
   const headerDate = getHeaderDate(tradeProduct);
   const paidDate = formatDate(createdAt);
 
+  const handleUpdateDeliveryCompleteTrade = async (tradeId) => {
+    const ok = await confirm({
+      description: "배송 완료로 변경하시겠습니까?",
+      confirmText: "변경",
+    });
+
+    if (!ok) return;
+
+    try {
+      await updateTradeStatusApi({
+        tradeId,
+        orderStatus: "DELIVERED",
+      });
+
+      // 상태 변경 성공 후 목록 다시 불러오기
+      await fetchTradeList();
+      showDeliveryCompleteUpdatedToast();
+    } catch (err) {
+      console.error("배송 완료로 변경 실패:", err);
+    }
+  };
+
   const handleUpdateCompleteTrade = async (tradeId) => {
     const ok = await confirm({
       description: "거래 완료로 변경하시겠습니까?",
@@ -163,7 +186,7 @@ const TradeDetailPage = () => {
 
       // 상태 변경 성공 후 목록 다시 불러오기
       await fetchTradeProduct();
-      showCompletedUpdatedToast();
+      showCompleteUpdatedToast();
     } catch (err) {
       console.error("거래 완료로 변경 실패:", err);
     }
@@ -186,7 +209,7 @@ const TradeDetailPage = () => {
 
       // 거래 취소 성공 후 목록 다시 불러오기
       await fetchTradeProduct();
-      showCanceledUpdatedToast();
+      showCancelUpdatedToast();
     } catch (err) {
       console.error("거래 취소로 변경 실패:", err);
     }
@@ -278,6 +301,9 @@ const TradeDetailPage = () => {
               displayStatusKey={displayStatusKey}
               mode={mode}
               isHidden={isHidden}
+              onDeliveryCompleted={() =>
+                handleUpdateDeliveryCompleteTrade(tradeId)
+              }
               onComplete={() => handleUpdateCompleteTrade(tradeId)}
               onCancel={() => handleUpdateCancelTrade(tradeId)}
               onConfirmOrder={() => handleConfirmOrder(tradeId)}

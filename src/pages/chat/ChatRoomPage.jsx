@@ -274,18 +274,27 @@ const ChatRoomPage = () => {
 
   const grouped = groupMessagesByDate(chatMessages);
 
+  const notiReadOnceRef = useRef(new Set());
   useEffect(() => {
-    if (!chatRoomId) return;
+    if (!chatRoomId || !user) return;
+
+    // 이미 이 채팅방에서 처리했으면 skip
+    if (notiReadOnceRef.current.has(chatRoomId)) return;
+    notiReadOnceRef.current.add(chatRoomId);
 
     (async () => {
       try {
-        await notificationApi.markChatRoomAsRead(chatRoomId);
-        await refreshUnreadCount();
+        const updated = await notificationApi.markNotificationChatRoomAsRead(
+          chatRoomId
+        );
+        if (updated > 0) await refreshUnreadCount();
       } catch (e) {
-        console.error("markChatRoomAsRead failed", e);
+        console.error("markNotificationChatRoomAsRead failed", e);
+        // 실패했으면 다시 시도 가능하도록 롤백
+        notiReadOnceRef.current.delete(chatRoomId);
       }
     })();
-  }, [chatRoomId, refreshUnreadCount]);
+  }, [chatRoomId, user?.memberId, refreshUnreadCount]);
 
   const listRef = useRef(null);
   const bottomRef = useRef(null);
@@ -325,6 +334,11 @@ const ChatRoomPage = () => {
           onStatusChanged={fetchChatMessages}
         />
       </div>
+      {chatMessages.length <= 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-brand-mediumgray">대화 중인 채팅이 없습니다.</p>
+        </div>
+      )}
       <div className="p-4 flex flex-col space-y-4">
         {/* <div className="text-sm text-gray-500 text-center">날짜</div>
         {chatMessages.length > 0 &&
@@ -335,6 +349,7 @@ const ChatRoomPage = () => {
               message={msg}
             />
           ))} */}
+
         {Object.entries(grouped).map(([dateLabel, messages]) => (
           <div key={dateLabel} className="flex flex-col space-y-4">
             {/* 날짜 가운데 정렬 */}

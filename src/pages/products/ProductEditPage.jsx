@@ -5,6 +5,7 @@ import {
   updateProductApi,
   getProductDetailApi,
 } from "@/common/api/product.api";
+import { useModal } from "@/hooks/useModal";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
@@ -64,6 +65,7 @@ const ProductEditPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
+  const { alert, confirm } = useModal();
 
   //자주쓰는 문구 모달 open 상태
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
@@ -191,7 +193,7 @@ const ProductEditPage = () => {
         );
       } catch (e) {
         console.error(e);
-        alert("상품 정보를 불러오는데에 실패했습니다.");
+        await alert({ description: "상품 정보를 불러오는데에 실패했습니다." });
       } finally {
         setPageLoading(false);
       }
@@ -208,13 +210,14 @@ const ProductEditPage = () => {
         ...prev,
         location: newLocation,
         sellingArea: newLocation.locationName,
-        // location: routerLocation.state.selectedLocation,
         direct: true,
       }));
-      // state 초기화하여 뒤로가기 시 중복 방지
-      // navigate(routerLocation.pathname, { replace: true, state: undefined });
+      const timer = setTimeout(() => {
+        navigate(routerLocation.pathname, { replace: true, state: {} });
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [routerLocation.state]);
+  }, [routerLocation.state, navigate, routerLocation.pathname]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -236,163 +239,143 @@ const ProductEditPage = () => {
   }, []);
 
   //상품 수정
-  const handleSubmit = useCallback(async () => {
-    if (!form.productTitle.trim()) {
-      alert("상품명을 입력해주세요.");
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e) => {
+      if (e && e.preventDefault) e.preventDefault();
 
-    if (!form.sellPrice) {
-      alert("판매 가격을 입력해주세요.");
-      return;
-    }
-
-    if (!Number(form.categoryDepth3)) {
-      alert("카테고리를 선택해주세요.");
-      return;
-    }
-
-    if (!form.delivery && !form.direct) {
-      alert("거래 방법을 1개 이상 선택해주세요.");
-      return;
-    }
-
-    setSubmitLoading(true);
-    setError("");
-    console.log("상품 수정 요청 시작");
-
-    try {
-      //대표이미지 자동설정 로직
-      let adjustedImages = [...images];
-      if (
-        !adjustedImages.some((img) => img.isMain) &&
-        adjustedImages.length > 0
-      ) {
-        adjustedImages = adjustedImages.map((img, idx) => ({
-          ...img,
-          isMain: idx === 0,
-        }));
+      if (!form.productTitle.trim()) {
+        await alert({ description: "상품명을 입력해주세요." });
+        return;
       }
 
-      //새 이미지 파일만 supabase 업로드 + 정렬 + 메인지정
-      const finalImages = [];
-      let order = 1;
+      if (!form.sellPrice) {
+        await alert({ description: "판매 가격을 입력해주세요." });
+        return;
+      }
 
-      for (const img of adjustedImages) {
-        let url = img.imageUrl;
+      if (!Number(form.categoryDepth3)) {
+        await alert({ description: "카테고리를 선택해주세요." });
+        return;
+      }
 
-        //새로 업로드 필요 이미지
-        if (img.file) {
-          // try {
-          //   url = await uploadToSupabase(img.file);
-          // } catch (uploadError) {
-          //   console.error("이미지 업로드 실패:", uploadError);
-          //   alert("이미지 업로드 중 오류가 발생했습니다.");
-          //   setSubmitLoading(false); // 로딩 해제
-          //   return; // 진행 중단
-          // }
-          // 새 파일이 있을 때만 업로드를 시도해서 url을 갱신
-          const uploadedUrl = await uploadToSupabase(img.file);
-          if (uploadedUrl) {
-            url = uploadedUrl;
+      if (!form.delivery && !form.direct) {
+        await alert({ description: "거래 방법을 1개 이상 선택해주세요." });
+        return;
+      }
+
+      if (form.direct && !form.location) {
+        await alert({ description: "직거래 위치를 선택해주세요." });
+        return;
+      }
+
+      const isConfirmed = await confirm({
+        description: "작성하신 정보로 상품을 수정하시겠습니까?",
+      });
+      if (!isConfirmed) return;
+
+      setSubmitLoading(true);
+      setError("");
+      // console.log("상품 수정 요청 시작");
+
+      try {
+        //대표이미지 자동설정 로직
+        let adjustedImages = [...images];
+        if (
+          !adjustedImages.some((img) => img.isMain) &&
+          adjustedImages.length > 0
+        ) {
+          adjustedImages = adjustedImages.map((img, idx) => ({
+            ...img,
+            isMain: idx === 0,
+          }));
+        }
+
+        //새 이미지 파일만 supabase 업로드 + 정렬 + 메인지정
+        const finalImages = [];
+        let order = 1;
+
+        for (const img of adjustedImages) {
+          let url = img.imageUrl;
+
+          //새로 업로드 필요 이미지
+          if (img.file) {
+            const uploadedUrl = await uploadToSupabase(img.file);
+            if (uploadedUrl) {
+              url = uploadedUrl;
+            }
+          }
+          if (!url) {
+            console.error("이미지 URL을 찾을 수 없습니다:", img);
+            continue;
+          }
+          if (url) {
+            finalImages.push({
+              imageId: img.imageId ?? null,
+              imageUrl: url,
+              sortOrder: order++,
+              isMain: img.isMain,
+            });
           }
         }
-        if (!url) {
-          console.error("이미지 URL을 찾을 수 없습니다:", img);
-          continue; // 혹은 에러 alert
+
+        const payload = {
+          productTitle: form.productTitle,
+          categoryDepth1: form.categoryDepth1,
+          categoryDepth2: form.categoryDepth2,
+          categoryDepth3: form.categoryDepth3,
+          sellPrice: Number(form.sellPrice),
+          productDescription: form.productDescription,
+          productStatus: form.productStatus,
+          direct: form.direct,
+          delivery: form.delivery,
+          sellingArea:
+            form.direct && form.location
+              ? form.location.locationName
+              : form.sellingArea,
+
+          // 백엔드 product_location 테이블 업데이트용 객체
+          location:
+            form.direct && form.location
+              ? {
+                  locationName: form.location.locationName,
+                  legalDongCode: form.location.legalDongCode,
+                  latitude: Number(form.location.latitude),
+                  longitude: Number(form.location.longitude),
+                  roadAddress: form.location.roadAddress,
+                  jibunAddress: form.location.jibunAddress,
+                  buildingName: form.location.buildingName,
+                  zipCode: form.location.zipCode,
+                }
+              : null,
+          images: finalImages,
+          // environmentScore: form.environmentScore ,
+
+          aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
+          aiTags: JSON.stringify(
+            Array.isArray(vision?.tags) ? vision.tags : []
+          ),
+          environmentScore: form.environmentScore ?? null,
+        };
+
+        const response = await updateProductApi(id, payload);
+
+        if (response && (response.ok || response.status === 200)) {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+          await alert({ description: "상품 수정이 완료되었습니다!" });
+          navigate(`/products/${id}`, { replace: true });
+        } else {
+          await alert({ description: "상품 수정 실패" });
+          console.error("서버 응답 문제:", response);
         }
-        if (url) {
-          finalImages.push({
-            imageId: img.imageId ?? null,
-            imageUrl: url,
-            sortOrder: order++,
-            isMain: img.isMain,
-          });
-        }
+      } catch (error) {
+        console.error(error);
+        await alert({ description: "상품 수정 실패: 서버 또는 네트워크 오류" });
+      } finally {
+        setSubmitLoading(false);
       }
-
-      //수정내용 서버로 보내는 patch전용 json 데이터
-      // const body = {
-      //   ...form,
-      //   images: finalImages,
-      // };
-
-      const payload = {
-        productTitle: form.productTitle,
-        categoryDepth1: form.categoryDepth1,
-        categoryDepth2: form.categoryDepth2,
-        categoryDepth3: form.categoryDepth3,
-        sellPrice: Number(form.sellPrice),
-        productDescription: form.productDescription,
-        productStatus: form.productStatus,
-        direct: form.direct,
-        delivery: form.delivery,
-        sellingArea:
-          form.direct && form.location
-            ? form.location.locationName
-            : form.sellingArea,
-
-        // 백엔드 product_location 테이블 업데이트용 객체
-        location:
-          form.direct && form.location
-            ? {
-                locationName: form.location.locationName,
-                legalDongCode: form.location.legalDongCode,
-                latitude: Number(form.location.latitude),
-                longitude: Number(form.location.longitude),
-                roadAddress: form.location.roadAddress,
-                jibunAddress: form.location.jibunAddress,
-                buildingName: form.location.buildingName,
-                zipCode: form.location.zipCode,
-              }
-            : null,
-        // ...form,
-        // sellingArea: form.location?.locationName || form.sellingArea,
-        // location: form.location
-        //   ? {
-        //       locationName: form.location.locationName,
-        //       legalDongCode: form.location.legalDongCode,
-        //       latitude: form.location.latitude,
-        //       longitude: form.location.longitude,
-        //       roadAddress: form.location.roadAddress,
-        //       jibunAddress: form.location.jibunAddress,
-        //       buildingName: form.location.buildingName,
-        //       zipCode: form.location.zipCode,
-        //     }
-        //   : null,
-        // legalDongCode: form.location?.legalDongCode || null,
-        // latitude: form.location?.latitude || null,
-        // longitude: form.location?.longitude || null,
-        // location: form.location,
-        images: finalImages,
-        // environmentScore: form.environmentScore ,
-
-        aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
-        aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
-        environmentScore: form.environmentScore ?? null,
-      };
-
-      // delete payload.location;
-
-      const response = await updateProductApi(id, payload);
-      if (response && (response.ok || response.status === 200)) {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-        alert(`상품 수정 완료! 상품ID: ${id}`);
-        navigate(`/products/${id}`, { replace: true });
-      } else {
-        alert("상품 수정 실패");
-        console.error("서버 응답 문제:", response);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("상품 수정 실패: 서버 또는 네트워크 오류");
-    } finally {
-      setSubmitLoading(false);
-    }
-  }, [form, images, navigate, id]);
-
-  // if (submitLoading) return <div>로딩중...</div>;
-  // if (error) return <div>{error}</div>;
+    },
+    [form, images, navigate, id, vision, alert, confirm]
+  );
 
   if (pageLoading) {
     return (
@@ -503,13 +486,6 @@ const ProductEditPage = () => {
 
           {/* 거래 방법*/}
           <div>
-            {/* <TradeMethodSelector
-              value={{ delivery: form.delivery, direct: form.direct }}
-              // onChange={({ delivery, direct }) =>
-              //   setForm((prev) => ({ ...prev, delivery, direct }))
-              // }
-              onChange={(v) => setForm((prev) => ({ ...prev, ...v }))}
-            /> */}
             <TradeMethodSelector
               value={form}
               images={images}

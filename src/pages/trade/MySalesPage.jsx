@@ -29,8 +29,8 @@ const MySalesPage = () => {
 
   const {
     showConfirmOrderUpdatedToast,
-    showCompletedUpdatedToast,
-    showCanceledUpdatedToast,
+    showDeliveryCompleteUpdatedToast,
+    showCancelUpdatedToast,
     showSoftDeletedToast,
   } = useTradeToast();
 
@@ -116,9 +116,9 @@ const MySalesPage = () => {
     }
   };
 
-  const handleUpdateCompleteTrade = async (tradeId) => {
+  const handleUpdateDeliveryCompleteTrade = async (tradeId) => {
     const ok = await confirm({
-      description: "거래 완료로 변경하시겠습니까?",
+      description: "배송 완료로 변경하시겠습니까?",
       confirmText: "변경",
     });
 
@@ -127,14 +127,14 @@ const MySalesPage = () => {
     try {
       await updateTradeStatusApi({
         tradeId,
-        status: "COMPLETED",
+        orderStatus: "DELIVERED",
       });
 
       // 상태 변경 성공 후 목록 다시 불러오기
       await fetchTradeList();
-      showCompletedUpdatedToast();
+      showDeliveryCompleteUpdatedToast();
     } catch (err) {
-      console.error("거래 완료로 변경 실패:", err);
+      console.error("배송 완료로 변경 실패:", err);
     }
   };
 
@@ -155,7 +155,7 @@ const MySalesPage = () => {
 
       // 거래 취소 성공 후 목록 다시 불러오기
       await fetchTradeList();
-      showCanceledUpdatedToast();
+      showCancelUpdatedToast();
     } catch (err) {
       console.error("거래 취소로 변경 실패:", err);
     }
@@ -336,7 +336,9 @@ const MySalesPage = () => {
                       displayStatusKey={displayStatusKey}
                       mode="sales"
                       isHidden={isHidden}
-                      onComplete={() => handleUpdateCompleteTrade(tradeId)}
+                      onDeliveryCompleted={() =>
+                        handleUpdateDeliveryCompleteTrade(tradeId)
+                      }
                       onCancel={() => handleUpdateCancelTrade(tradeId)}
                       onConfirmOrder={() => handleConfirmOrder(tradeId)}
                     />

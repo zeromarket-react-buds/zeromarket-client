@@ -17,6 +17,9 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import ProductDescriptionSection from "@/components/product/detail/ProductDescriptionSection";
 import ProductStatusSection from "@/components/product/detail/ProductStatusSection";
 import ReportModal from "@/components/report/ReportModal";
+import { notificationApi } from "@/common/api/notification.api";
+import { useNotification } from "@/hooks/NotificationContext";
+import { useModal } from "@/hooks/useModal";
 
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
@@ -34,7 +37,8 @@ const ProductDetailPage = () => {
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const isFetched = useRef(false);
-
+  const { refreshUnreadCount } = useNotification();
+  const { alert, confirm } = useModal();
   const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
   if (user === undefined) {
@@ -75,7 +79,7 @@ const ProductDetailPage = () => {
       const status = err.status;
       if (status === 403) {
         setError("HIDDEN");
-        alert("숨겨진 게시글입니다.");
+        await alert({ description: "숨겨진 게시글입니다." });
         navigate(-1);
         return;
       }
@@ -166,10 +170,10 @@ const ProductDetailPage = () => {
       // navigator.share 미지원시 > URL 클립보드 복사
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert("URL이 클립보드에 복사되었습니다!");
+        await alert({ description: "URL이 클립보드에 복사되었습니다!" });
       } catch (err) {
         console.error("클립보드 복사 실패함:", err);
-        alert("공유 기능을 사용할 수 없습니다.");
+        await alert({ description: "공유 기능을 사용할 수 없습니다." });
       }
     }
   }, [detail]);
@@ -192,6 +196,30 @@ const ProductDetailPage = () => {
       ],
     });
   }, [handleShare]);
+
+  const readOnceRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!user?.memberId || !detail?.productId) return;
+
+    const key = `PRODUCT:${detail.productId}`;
+    if (readOnceRef.current.has(key)) return;
+    readOnceRef.current.add(key);
+
+    (async () => {
+      try {
+        const updated = await notificationApi.markReadByRef({
+          refType: "PRODUCT",
+          refId: Number(detail.productId),
+          notificationType: "KEYWORD_MATCH", // 선택
+        });
+        if (updated && updated > 0) refreshUnreadCount();
+      } catch (e) {
+        readOnceRef.current.delete(key);
+        console.error(e);
+      }
+    })();
+  }, [user?.memberId, detail, refreshUnreadCount]);
 
   if (loading)
     return (
@@ -234,11 +262,12 @@ const ProductDetailPage = () => {
   };
 
   //신고하기
-  const handleOpenReportModal = () => {
+  const handleOpenReportModal = async () => {
     if (!isAuthenticated) {
-      const goLogin = window.confirm(
-        "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?"
-      );
+      const goLogin = await confirm({
+        description:
+          "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?",
+      });
       if (goLogin) {
         navigate("/login");
       }
@@ -264,12 +293,12 @@ const ProductDetailPage = () => {
 
     try {
       const result = await createReportApi(payload);
-      alert(result?.message || "신고가 접수되었습니다.");
+      await alert(result?.message || { description: "신고가 접수되었습니다." });
 
       setIsReportModalOpen(false);
     } catch (error) {
       console.error("신고 제출 실패", error);
-      alert("신고 처리 중 문제가 발생했습니다.");
+      await alert({ description: "신고 처리 중 문제가 발생했습니다." });
     }
   };
 
@@ -345,6 +374,7 @@ const ProductDetailPage = () => {
               onToggleWish={toggleWish}
               productId={detail.productId}
               isHidden={isProductHidden}
+              salesStatus={detail.salesStatus}
               onHide={handleStatusUpdateSuccess}
               onUnhide={handleStatusUpdateSuccess}
             />

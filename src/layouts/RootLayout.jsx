@@ -127,6 +127,13 @@ const RootLayout = function () {
     ? footerMap[footerConfig.component]
     : null;
 
+  //등록버튼 있는 페이지 라우트
+  const isProductListPage =
+    location.pathname === "/" || location.pathname.startsWith("/search");
+
+  //ToTheTop 버튼 위치 조건 (등록 버튼과 겹치지 않도록 TOP 버튼 위치 조정)
+  const topBottomClass = isProductListPage ? "bottom-24" : "bottom-6";
+
   return (
     <HeaderProvider key={location.pathname}>
       <div className="flex flex-col w-full min-h-screen">
@@ -144,7 +151,7 @@ const RootLayout = function () {
 
         {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
 
-        <div className="fixed bottom-24 right-6 z-45">
+        <div className={clsx("fixed right-6 z-45", topBottomClass)}>
           <ToTheTop />
         </div>
       </div>
