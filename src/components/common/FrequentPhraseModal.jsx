@@ -51,12 +51,13 @@ const FrequentPhraseModal = ({
   // };
   //등록 API연동버전
   const handleRegister = async () => {
+    console.log("등록할 문구:", newText); // ⭐ 이거 꼭 찍어봐
     if (!newText.trim()) return;
 
     try {
       setLoading(true);
 
-      await createProductCustomTextApi(newText);
+      await createProductCustomTextApi("PRODUCT", newText.trim());
 
       // ☆등록 성공 → 부모에서 다시 조회
       await onReloadPhrases();

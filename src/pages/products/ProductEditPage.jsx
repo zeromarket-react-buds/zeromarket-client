@@ -21,7 +21,7 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import useProductVisionAi from "@/hooks/useProductVisionAi";
-import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
 import {
   getProductCustomTextsApi,
   createProductCustomTextApi,
@@ -74,7 +74,7 @@ const ProductEditPage = () => {
   // 자주 쓰는 문구 목록 조회 함수
   const reloadPhrases = useCallback(async () => {
     try {
-      const data = await getProductCustomTextsApi(); // 서버에서 [{id,text}, ...]
+      const data = await getProductCustomTextsApi({ contentType: "PRODUCT" }); // 서버에서 [{id,text}, ...]
       setPhrases(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error("자주 쓰는 문구 조회 실패:", e);

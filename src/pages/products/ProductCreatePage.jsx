@@ -17,7 +17,7 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
-import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
 import { getProductCustomTextsApi } from "@/common/api/customText.api"; //자주 쓰는 문구 목록불러오기 API
 import useProductVisionAi from "@/hooks/useProductVisionAi";
 
@@ -78,9 +78,7 @@ const ProductCreatePage = () => {
   useEffect(() => {
     const loadPhrases = async () => {
       try {
-        const data = await getProductCustomTextsApi();
-        console.log("자주 쓰는 문구 조회 결과 👉", data);
-
+        const data = await getProductCustomTextsApi({ contentType: "PRODUCT" });
         setPhrases(data); //서버 데이터로 교체
       } catch (e) {
         console.error("자주 쓰는 문구 불러오기 실패", e);
@@ -92,7 +90,7 @@ const ProductCreatePage = () => {
 
   //등록 후 재조회용 함수
   const reloadPhrases = useCallback(async () => {
-    const updated = await getProductCustomTextsApi();
+    const updated = await getProductCustomTextsApi({ contentType: "PRODUCT" });
     setPhrases(updated);
   }, []);
 
