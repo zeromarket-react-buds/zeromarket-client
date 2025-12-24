@@ -40,7 +40,7 @@ const LongProductCard = ({
         <div className="flex w-full flex-row items-center justify-between">
           <div className="text-brand-mediumgray">{tradeTypeLabel}</div>
           {isHidden ? (
-            <Badge>숨기기</Badge>
+            <Badge>숨김</Badge>
           ) : tradeStatus === "취소" ? (
             <Badge variant="red">거래취소</Badge>
           ) : tradeStatus ? (

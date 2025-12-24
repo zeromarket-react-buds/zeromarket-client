@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import {
   updateProductApi,
@@ -19,6 +19,15 @@ import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
+import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
+import useProductVisionAi from "@/hooks/useProductVisionAi";
+import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import {
+  getProductCustomTextsApi,
+  createProductCustomTextApi,
+  // updateProductCustomTextApi,
+  // deleteProductCustomTextApi,
+} from "@/common/api/customText.api";
 
 // 입력 데이터 (DTO 매칭)
 const INITIAL_FORM = {
@@ -34,6 +43,8 @@ const INITIAL_FORM = {
   delivery: false,
   sellingArea: "",
   location: null,
+  environmentScore: null,
+  aiWriteEnabled: false,
 };
 
 //안전성위해 외부분리,한번만 생성
@@ -44,7 +55,6 @@ const handleBeforeUnload = (e) => {
 
 const ProductEditPage = () => {
   const [form, setForm] = useState(INITIAL_FORM);
-  const formRef = useRef(form);
   const [images, setImages] = useState([]);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const routerLocation = useLocation();
@@ -55,9 +65,57 @@ const ProductEditPage = () => {
   const navigate = useNavigate();
   const { setHeader } = useHeader();
 
+  //자주쓰는 문구 모달 open 상태
+  const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
+
+  //자주 쓰는 문구 목록 state
+  const [phrases, setPhrases] = useState([]);
+
+  // 자주 쓰는 문구 목록 조회 함수
+  const reloadPhrases = useCallback(async () => {
+    try {
+      const data = await getProductCustomTextsApi(); // 서버에서 [{id,text}, ...]
+      setPhrases(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("자주 쓰는 문구 조회 실패:", e);
+      // UX 선택: 조용히 실패하거나 alert
+      // alert("자주 쓰는 문구를 불러오지 못했습니다.");
+    }
+  }, []);
+
+  // 자주쓰는 문구 모달 열릴 때 목록 로드
   useEffect(() => {
-    formRef.current = form;
-  }, [form]);
+    if (isPhraseModalOpen) {
+      reloadPhrases();
+    }
+  }, [isPhraseModalOpen, reloadPhrases]);
+
+  // 문구를 상품설명 textarea에 “추가” 적용하는 함수
+  const handleApplyPhrase = useCallback((text) => {
+    setForm((prev) => ({
+      ...prev,
+      productDescription: prev.productDescription
+        ? prev.productDescription + "\n" + text
+        : text,
+    }));
+  }, []);
+
+  // vision/aiDraft/mainImage 관련은 훅으로 이동
+  const {
+    mainImage,
+
+    vision,
+    visionLoading,
+    visionError,
+
+    aiWriteEnabled,
+    setAiWriteEnabled,
+
+    handleVisionResult,
+    handleVisionReset,
+    handleVisionLoading,
+    handleVisionError,
+  } = useProductVisionAi({ images, form, setForm });
 
   //인증상태확인
   useEffect(() => {
@@ -115,6 +173,10 @@ const ProductEditPage = () => {
           //       locationName: data.sellingArea,
           //     }
           //   : null,
+          environmentScore:
+            typeof data.environmentScore !== "undefined"
+              ? data.environmentScore
+              : null,
         }));
 
         setImages(
@@ -137,6 +199,7 @@ const ProductEditPage = () => {
     fetchDetail();
   }, [id, user, isAuthenticated, authLoading]);
 
+  // 직거래 위치 선택 후 복귀 처리
   useEffect(() => {
     if (routerLocation.state?.selectedLocation) {
       const newLocation = routerLocation.state.selectedLocation;
@@ -159,12 +222,6 @@ const ProductEditPage = () => {
       title: "상품 수정",
       showBack: true,
       rightActions: [
-        {
-          key: "save",
-          label: "임시 저장",
-          // onClick: handleSave,
-          className: "text-gray-500 font-semibold text-sm cursor-pointer",
-        },
         <AuthStatusIcon
           isAuthenticated={isAuthenticated}
           navigate={navigate}
@@ -309,6 +366,10 @@ const ProductEditPage = () => {
         // location: form.location,
         images: finalImages,
         // environmentScore: form.environmentScore ,
+
+        aiCaption: vision?.caption?.trim() ? vision.caption.trim() : null,
+        aiTags: JSON.stringify(Array.isArray(vision?.tags) ? vision.tags : []),
+        environmentScore: form.environmentScore ?? null,
       };
 
       // delete payload.location;
@@ -340,6 +401,7 @@ const ProductEditPage = () => {
       </Container>
     );
   }
+
   if (error) {
     return (
       <Container>
@@ -349,6 +411,7 @@ const ProductEditPage = () => {
       </Container>
     );
   }
+
   return (
     <Container>
       {submitLoading && <div>로딩중...</div>}
@@ -361,7 +424,10 @@ const ProductEditPage = () => {
 
           {/* AI로 작성하기 - 2,3차 개발*/}
           <div>
-            <AiWriteSection />
+            <AiWriteSection
+              value={aiWriteEnabled}
+              onChange={setAiWriteEnabled}
+            />
           </div>
 
           {/* 상품 이미지 */}
@@ -410,8 +476,22 @@ const ProductEditPage = () => {
             <ProductDescriptionEditor
               value={form.productDescription}
               onChange={(d) => setForm({ ...form, productDescription: d })}
+              // 자주 쓰는 문구 모달 열기 핸들러 연결
+              onOpenPhraseModal={() => setIsPhraseModalOpen(true)}
             />
           </div>
+
+          {/* 자주 쓰는 문구 모달 */}
+          <FrequentPhraseModal
+            open={isPhraseModalOpen}
+            onClose={() => setIsPhraseModalOpen(false)}
+            phrases={phrases}
+            onApplyPhrase={handleApplyPhrase}
+            onReloadPhrases={reloadPhrases}
+            // 아래는 모달에서 "등록" API를 직접 쓰는 구조라면 넘겨줘도 되고,
+            // 모달이 자체적으로 API 호출한다면 빼도 됨
+            //onCreatePhrase={createProductCustomTextApi}
+          />
 
           {/* 상품 상태 */}
           <div>
@@ -435,13 +515,27 @@ const ProductEditPage = () => {
               images={images}
               isEdit={true}
               productId={id}
+              routeState={routerLocation.state}
               onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
             />
           </div>
 
+          {/* Vision 브릿지 */}
+          <ProductVisionBridge
+            file={mainImage?.file}
+            onLoading={handleVisionLoading}
+            onResult={handleVisionResult}
+            onError={handleVisionError}
+            onReset={handleVisionReset}
+          />
+
           {/* 환경 점수 - 2,3차 개발*/}
           <div>
-            <EcoScoreSection />
+            <EcoScoreSection
+              score={form.environmentScore}
+              loading={visionLoading}
+              error={visionError}
+            />
           </div>
         </div>
 
@@ -456,4 +550,5 @@ const ProductEditPage = () => {
     </Container>
   );
 };
+
 export default ProductEditPage;

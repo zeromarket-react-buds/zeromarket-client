@@ -1,12 +1,16 @@
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-const ProductImageCarousel = ({ images }) => {
+const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
   const validImages = Array.isArray(images)
     ? images.filter((img) => img && img.imageUrl)
     : [];
 
   const total = validImages.length;
+
+  const isNotForSale = salesStatus?.name == "SOLD_OUT";
+  const showOverlay = isHidden || isNotForSale;
+  const overlayText = isHidden ? "숨김 처리된 상품" : salesStatus?.description;
 
   const extendedImages =
     total > 1
@@ -101,6 +105,16 @@ const ProductImageCarousel = ({ images }) => {
       onTouchMove={handleMove}
       onTouchEnd={handleEnd}
     >
+      {showOverlay && (
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none">
+          <div className="bg-black/20 backdrop-blur-[2px] border border-white/30 px-6 py-3 rounded-sm">
+            <span className="text-white text-2xl font-bold tracking-tight drop-shadow-lg">
+              {overlayText}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 이미지 슬라이드, 이미지 에러났을때 뜰 대체이미지 */}
       <div
         className={`whitespace-nowrap h-full ${
@@ -111,19 +125,20 @@ const ProductImageCarousel = ({ images }) => {
         {extendedImages.map((img, idx) => {
           if (!img || !img.imageUrl) return null;
           return (
-            <img
-              key={idx}
-              src={img.imageUrl}
-              // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
-              className=" w-full h-full object-cover inline-block"
-              draggable={false}
-            />
+            <div key={idx} className="relative w-full h-full inline-block ">
+              <img
+                src={img.imageUrl}
+                // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
+                className=" w-full h-full object-cover"
+                draggable={false}
+              />
+            </div>
           );
         })}
       </div>
       {/* 이미지 2개부터 좌우 버튼표시 */}
       {total > 1 && (
-        <div>
+        <div className="z-30">
           <div
             className="absolute left-3 top-1/2 -translate-y-1/2 
             text-white size-20 text-4xl cursor-pointer

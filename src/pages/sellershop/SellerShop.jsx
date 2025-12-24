@@ -128,30 +128,54 @@ const SellerShopPage = () => {
   }, [sellerId]);
 
   // '판매상품 목록' 조회 요청 함수
-  const fetchProductsBySeller = useCallback(async () => {
-    if (!hasNext || loading) return;
-    setLoading(true);
+  const fetchProductsBySeller = useCallback(
+    async (isFirstLoad = false) => {
+      if (isFirstLoad && (!hasNext || loading)) return;
+      setLoading(true);
 
-    try {
-      const data = await getProductsBySeller({
-        sellerId,
-        cursorProductId: cursor.cursorProductId,
-        cursorCreatedAt: cursor.cursorCreatedAt,
-      });
-      console.log(data);
+      try {
+        const data = await getProductsBySeller({
+          sellerId,
+          cursorProductId: isFirstLoad ? null : cursor.cursorProductId,
+          cursorCreatedAt: isFirstLoad ? null : cursor.cursorCreatedAt,
+          includeHidden: isMe,
+          // cursorProductId: cursor.cursorProductId,
+          // cursorCreatedAt: cursor.cursorCreatedAt,
+          // includeHidden: isMe,
+        });
 
-      setProducts((prev) => [...prev, ...data.items]);
-      setCursor({
-        cursorProductId: data.nextCursorProductId,
-        cursorCreatedAt: data.nextCursorCreatedAt,
-      });
-      setHasNext(data.hasNext);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [sellerId, cursor, hasNext, loading]); // cursor, hasNext, loading
+        if (isFirstLoad) {
+          setProducts(data.items);
+        } else {
+          setProducts((prev) => [...prev, ...data.items]);
+        }
+
+        // console.log(data);
+
+        // setProducts((prev) => [...prev, ...data.items]);
+        setCursor({
+          cursorProductId: data.nextCursorProductId,
+          cursorCreatedAt: data.nextCursorCreatedAt,
+        });
+        setHasNext(data.hasNext);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sellerId, cursor, hasNext, loading, isMe]
+  ); // cursor, hasNext, loading
+
+  // //첫페이지 로딩위한 별도의 useEffect
+  // useEffect(() => {
+  //   if (sellerId) {
+  //     fetchProductsBySeller(true);
+  //     fetchMemberProfile();
+  //     fetchReviewsSummary();
+  //     fetchBlockedSellerState();
+  //   }
+  // }, [sellerId]);
 
   // 차단한 사람인지 체크
   const fetchBlockedSellerState = useCallback(async () => {
@@ -175,19 +199,30 @@ const SellerShopPage = () => {
 
   // 초기 fetch
   useEffect(() => {
-    setProducts([]);
-    setCursor({
-      cursorProductId: null,
-      cursorCreatedAt: null,
-    });
-    setHasNext(true);
-    setReviewSummary({});
+    if (!sellerId) return;
 
-    fetchProductsBySeller();
-    fetchReviewsSummary();
-    fetchMemberProfile();
-    fetchBlockedSellerState(); // 차단한 상태
-  }, [sellerId, fetchBlockedSellerState]);
+    const initFetch = async () => {
+      setProducts([]);
+      setHasNext(true);
+      setCursor({
+        cursorProductId: null,
+        cursorCreatedAt: null,
+      });
+
+      await fetchMemberProfile();
+      await fetchBlockedSellerState();
+      await fetchReviewsSummary();
+      //isMe가 확정될 때까지 fetch를 잠시 미룸
+      if (isAuthenticated !== undefined) {
+        fetchProductsBySeller(true);
+      }
+    };
+    initFetch();
+    // fetchProductsBySeller();
+    // fetchReviewsSummary();
+    // fetchMemberProfile();
+    // fetchBlockedSellerState(); // 차단한 상태
+  }, [sellerId, isMe, isAuthenticated]);
   // 무한 스크롤이면서 첫 로딩도 호출해야 하므로, -> 더 안전하게 동작(??)
 
   // IntersectionObserver (첫 호출 완료 후 활성화)
@@ -281,11 +316,11 @@ const SellerShopPage = () => {
   return (
     <>
       <Container>
-        <div className="px-6 max-w-full mx-auto">
+        <div className="px-6 max-w-full mx-auto cursor-default">
           {/* ---------- 판매자 프로필 ---------- */}
-          <div className="flex items-center justify-between py-6">
+          <div className="flex items-center justify-between pb-6 px-4">
             <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="w-15 h-15 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                 {profile.profileImage ? (
                   <img
                     src={profile.profileImage}
@@ -296,12 +331,14 @@ const SellerShopPage = () => {
                   <UserRound className="text-gray-400 size-10" />
                 )}
               </div>
-              <span className="text-2xl">{profile.nickname}</span>
+              <span className="text-2xl font-bold ml-2">
+                {profile.nickname}
+              </span>
             </div>
 
             <button onClick={handleToggleLikeSeller} className="cursor-pointer">
               <Heart
-                className="size-7 cursor-pointer text-brand-green"
+                className="size-9 cursor-pointer text-brand-green"
                 fill={profile.liked ? "red" : "none"}
                 stroke={profile.liked ? "red" : "currentColor"}
               />
@@ -311,22 +348,22 @@ const SellerShopPage = () => {
           {/* 차단한 셀러샵인 경우 알려주는 부분 */}
           {isSellerBlocked && (
             <div className="-mt-2 mb-4 pl-2 text-brand-red font-semibold">
-              회원님께서 차단한 셀러샵입니다
+              회원님의 차단 설정에 따라 표시된 셀러샵입니다
             </div>
           )}
 
           {/* ---------- 점수 ---------- */}
-          <div className="border rounded-2xl p-4 mb-5">
-            <div className="flex justify-between mb-2">
+          <div className="border rounded-3xl p-4 mb-6 px-10 cursor-default select-none">
+            <div className="flex justify-between items-center mb-2 ">
               <span>신뢰점수</span>
               <span className="text-brand-green font-bold text-xl">
                 {profile.trustScore}
               </span>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center text-md ">
               <span>환경점수</span>
-              <span className="text-brand-green font-bold text-xl">
+              <span className="text-brand-green font-semibold text-xl">
                 {profile.environmentScoreTotal
                   ? profile.environmentScoreTotal?.toLocaleString()
                   : 0}
@@ -336,8 +373,8 @@ const SellerShopPage = () => {
 
           {/* ---------- 한줄 소개 ---------- */}
           <div className="mb-6">
-            <h2 className="mb-3 text-[16px]">한줄 소개</h2>
-            <div className="h-12 border rounded-2xl p-4 text-gray-700 text-[16px]">
+            <h2 className="mb-4 text-lg font-semibold pl-2">한줄 소개</h2>
+            <div className="flex  items-center border  rounded-3xl p-6 ">
               {profile.description}
             </div>
           </div>
@@ -347,6 +384,13 @@ const SellerShopPage = () => {
             <div>로딩 중...</div>
           ) : (
             <div>
+              {reviewSummary.rating4 && (
+                <SectionItem
+                  title="이런 점이 좋았어요"
+                  data={reviewSummary.rating4}
+                  memberId={sellerId}
+                />
+              )}
               {reviewSummary.rating5 && (
                 <SectionItem
                   title="이런 점이 최고예요"
@@ -355,16 +399,8 @@ const SellerShopPage = () => {
                 />
               )}
 
-              {reviewSummary.rating4 && (
-                <SectionItem
-                  title="이런 점이 좋았어요"
-                  data={reviewSummary.rating4}
-                  memberId={sellerId}
-                />
-              )}
-
-              <p className="text-gray-400 text-[14px] -mt-1">
-                후기는 최신순으로 3건만 보입니다
+              <p className="text-brand-mediumgray text-sm ">
+                후기는 최근 작성된 3건이 표시됩니다
               </p>
             </div>
           )}
@@ -372,9 +408,7 @@ const SellerShopPage = () => {
           {/* ---------- 판매 상품 ---------- */}
 
           <div className="mt-8 mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              판매 상품
-            </h3>
+            <h2 className="mb-4 text-lg font-semibold pl-2">판매 상품</h2>
 
             <div>
               <ProductCard
@@ -386,7 +420,11 @@ const SellerShopPage = () => {
               {loading && <p>로딩중...</p>}
 
               {/* 데이터 끝 */}
-              {!hasNext && <p className="text-center mt-10">마지막입니다.</p>}
+              {!hasNext && (
+                <p className="text-center mt-10 text-brand-darkgray">
+                  모든 상품을 확인하셨습니다.
+                </p>
+              )}
 
               {/* 무한 스크롤 적용 - loadMoreRef */}
               <div ref={loadMoreRef} style={{ height: "10px" }} />

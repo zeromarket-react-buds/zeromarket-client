@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import { getProductDetailApi } from "@/common/api/product.api";
@@ -33,6 +33,7 @@ const ProductDetailPage = () => {
   const [detail, setDetail] = useState(null);
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const isFetched = useRef(false);
 
   const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
@@ -56,6 +57,7 @@ const ProductDetailPage = () => {
 
   /** 수정됨: apiClient 기반으로 상세조회 */
   const fetchProductDetail = async () => {
+    setLoading(true);
     try {
       // TODO: memberId 여기서 안넣고 서버에서 해결해도 됨..
       const data = await getProductDetailApi(id, user?.memberId); //user?.memberId 전달
@@ -119,14 +121,17 @@ const ProductDetailPage = () => {
   };
 
   useEffect(() => {
+    if (user === undefined) return;
+    if (isFetched.current === id) return;
     // 1) AuthContext 로딩 중이면 실행 금지
     // if (!user) return; // Context 초기 상태일 때는 아무것도 안 함
 
     // 2) 로그인 여부가 결정될 때까지 기다림 (user === null이면 요청 금지)
     // if (user === null) return;
     const memberId = user ? user.memberId : null; // 로그인 여부 상관없이 처리
-
     fetchProductDetail(memberId);
+
+    isFetched.current = id; // 호출한 상품의 ID기록
     // fetchSimilarProducts();
   }, [id, user]);
 
@@ -274,7 +279,11 @@ const ProductDetailPage = () => {
         <div className="relative">
           <div>
             {/* 상품 이미지 */}
-            <ProductImageCarousel images={sortedImages} />
+            <ProductImageCarousel
+              images={sortedImages}
+              salesStatus={detail.salesStatus}
+              isHidden={isProductHidden}
+            />
             {/*detail.wished, wishCount값 들어오는지 ui,콘솔 확인용*/}
             {/* {detail && (
               <Heart

@@ -1,4 +1,5 @@
 import { UserRound, Heart, Pen, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Container from "@/components/Container";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -61,6 +62,15 @@ export default function MyPage() {
   useEffect(() => {
     fetchMyPage();
   }, [loading]);
+
+  const goMyShop = () => {
+    if (!user?.memberId) {
+      alert("사용자 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    navigate(`/sellershop/${user.memberId}`);
+  };
 
   // 찜 개수 불러오기 API
   const fetchWishCount = async () => {
@@ -152,7 +162,15 @@ export default function MyPage() {
         </div>
         <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>
-
+      <section className=" mb-6 px-2">
+        <Button
+          className="w-full h-12 rounded-xl text-lg font-medium"
+          variant="green"
+          onClick={goMyShop}
+        >
+          마이샵으로
+        </Button>
+      </section>
       {/* 점수 카드 */}
       <section className="border rounded-2xl p-4 mb-2">
         <div className="flex justify-between mb-2 text-[16px]">
@@ -168,11 +186,9 @@ export default function MyPage() {
           </span>
         </div>
       </section>
-
       <p className="text-sm text-brand-mediumgray text-right mb-6">
         <Link to="/me/envgradeguide">환경점수는 어떻게 사용할 수 있나요?</Link>
       </p>
-
       {/* 한줄 소개 */}
       <section className="mb-6">
         <h2 className="font-semibold mb-2">한 줄 소개</h2>
@@ -180,7 +196,6 @@ export default function MyPage() {
           {user?.introduction || "한 줄 소개가 비어있어요."}
         </div>
       </section>
-
       {/* 메뉴 리스트 */}
       <section className="border rounded-2xl p-4 mb-6">
         <ul className="space-y-4 text-gray-800 ">
@@ -204,7 +219,6 @@ export default function MyPage() {
           </li>
         </ul>
       </section>
-
       {/* 찜 & 후기 */}
       <section className="border rounded-2xl p-4 flex justify-around ">
         <Link
@@ -242,7 +256,6 @@ export default function MyPage() {
           </Link>
         </div>
       </section>
-
       {/*  로그아웃 / 탈퇴 */}
       <section className="border rounded-2xl p-4 mt-6">
         <ul className="space-y-4 text-gray-800">

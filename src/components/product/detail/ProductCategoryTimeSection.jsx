@@ -3,19 +3,21 @@ import { useNavigate } from "react-router-dom";
 
 const ProductCategoryTimeSection = ({ detail }) => {
   const navigate = useNavigate();
+
+  const goCategorySearch = () => {
+    const categoryId = detail.level3Id; // 3depth id. URL+서버요청용
+    const categoryName = detail.categoryDepth3; // 3depth name. 화면표시용
+
+    navigate(`/search?keyword=&sort=popularity&categoryId=${categoryId}`, {
+      state: { categoryName },
+    });
+  };
+
   return (
     <div className="flex justify-between items-center my-3">
       <span
         className=" text-gray-600 text-base hover:underline flex items-center cursor-pointer"
-        onClick={() =>
-          navigate(
-            `/search?keyword=&sort=popularity` +
-              `&level1Id=${detail.level1Id}` +
-              `&level2Id=${detail.level2Id}` +
-              `&level3Id=${detail.level3Id}` +
-              `&categoryName=${detail.categoryDepth3}`
-          )
-        }
+        onClick={goCategorySearch}
       >
         <span>{detail.categoryDepth1} </span>
         <span className="text- font-semibold">&nbsp;〉</span>

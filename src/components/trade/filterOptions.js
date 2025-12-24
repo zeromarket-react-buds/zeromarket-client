@@ -3,7 +3,7 @@ export const statusOptions = [
   { label: "예약중", value: "PENDING" },
   { label: "거래완료", value: "COMPLETED" },
   { label: "거래취소", value: "CANCELED" },
-  { label: "숨기기", value: "isHidden" },
+  { label: "숨김", value: "isHidden" },
 ];
 
 // value를 label 매핑
