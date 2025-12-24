@@ -36,9 +36,6 @@ const AreaFilterSection = ({ area, setArea, areaRef }) => {
           </Button>
         )}
       </div>
-      <Button type="button" variant="ivory">
-        현재 내 위치 사용하기
-      </Button>
     </div>
   );
 };
