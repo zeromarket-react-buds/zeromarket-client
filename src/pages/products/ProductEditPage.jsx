@@ -65,7 +65,7 @@ const ProductEditPage = () => {
   const navigate = useNavigate();
   const { setHeader } = useHeader();
 
-  //쓰는 문구 모달 open 상태
+  //자주쓰는 문구 모달 open 상태
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
 
   //자주 쓰는 문구 목록 state
@@ -83,7 +83,7 @@ const ProductEditPage = () => {
     }
   }, []);
 
-  // 모달 열릴 때 목록 로드 (최소 동작)
+  // 자주쓰는 문구 모달 열릴 때 목록 로드
   useEffect(() => {
     if (isPhraseModalOpen) {
       reloadPhrases();
