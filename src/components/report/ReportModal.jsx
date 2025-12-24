@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { GreenRadio } from "../ui/greenradio";
-import { CircleX } from "lucide-react";
+import { X } from "lucide-react";
 import { reportReasonApi } from "@/common/api/report.api";
 import { Button } from "../ui/button";
+import { useModal } from "@/hooks/useModal";
+
 const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
   const [mode, setMode] = useState("DEFAULT");
   const [etcText, setEtcText] = useState("");
   const [reasons, setReasons] = useState([]);
   const [selectedReasonId, setSelectedReasonId] = useState(null);
-
+  const { alert, confirm } = useModal();
   const ETC_REASON_ID = targetType === "PRODUCT" ? 12 : 7;
 
   useEffect(() => {
@@ -38,37 +40,41 @@ const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
 
   if (!isOpen) return null;
 
-  const handleOverlayClick = () => {
+  const handleCloseAttempt = async () => {
     if (mode === "ETC" && etcText.trim()) {
-      const confirmExit = window.confirm(
-        "이 창을 나가면 입력하신 내용이 저장되지 않습니다.\n닫으시겠습니까?"
-      );
+      const confirmExit = await confirm({
+        description:
+          "이 창을 나가면 입력하신 내용이 저장되지 않습니다.\n닫으시겠습니까?",
+        confirmText: "창 나가기",
+        variant: "destructive",
+      });
       if (!confirmExit) return;
     }
     onclose();
-    setMode("DEFAULT");
-    setEtcText("");
-    setSelectedReasonId(null);
+    resetState();
   };
 
   const handleContentClick = (e) => {
     e.stopPropagation();
   };
 
-  const reasonClick = (reasonId, label) => {
+  const reasonClick = async (reasonId, label) => {
     if (reasonId === ETC_REASON_ID) {
       setMode("ETC");
       return;
     }
     setSelectedReasonId(reasonId);
-    const ok = window.confirm(
-      `신고 사유로 "${label}" 를 선택하셨습니다.\n제출하시겠습니까?`
-    );
+    const ok = await confirm({
+      description: `신고 사유로 "${label}" 를 선택하셨습니다.  신고를 접수하시겠습니까?`,
+    });
     if (!ok) return;
 
-    onSubmit({ reasonId, reasonText: null });
+    await onSubmit({ reasonId, reasonText: null });
     console.log("신고접수:", label);
     onclose();
+    resetState();
+  };
+  const resetState = () => {
     setMode("DEFAULT");
     setEtcText("");
     setSelectedReasonId(null);
@@ -77,18 +83,20 @@ const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
   return (
     <div
       className="fixed inset-0 bg-black/50 z-60 flex items-center justify-center"
-      onClick={handleOverlayClick}
+      onClick={handleCloseAttempt}
     >
       <div
         className="bg-white rounded-2xl p-3 w-sm shadow-xl select-none"
         onClick={handleContentClick}
       >
         <div className="mb-2">
-          <div className="flex justify-end mb-3">
-            <CircleX
-              className="cursor-pointer bg-brand-green rounded-full text-white"
-              onClick={onclose}
-            />
+          <div className="flex justify-end mb-3 ">
+            <div
+              className="rounded-full bg-brand-green p-0.5 text-white cursor-pointer "
+              onClick={handleCloseAttempt}
+            >
+              <X className="stroke-3 size-5 " />
+            </div>
           </div>
           <div className="text-brand-green text-2xl  px-5 font-semibold">
             해당 게시글이 문제가 있나요?
@@ -128,16 +136,26 @@ const ReportModal = ({ isOpen, onclose, onSubmit, targetType }) => {
               className="border border-brand-green rounded-lg w-full h-60 p-3 text-sm overflow-x-auto"
               value={etcText}
               onChange={(e) => setEtcText(e.target.value)}
+              maxLength={200}
             />
+            <div className="text-xs text-brand-mediumgray text-right px-2">
+              {etcText.length} / 200
+            </div>
+
             <button
-              className="w-full bg-brand-green text-white p-3 text-lg rounded-lg mt-3"
-              onClick={() => {
+              className="w-full bg-brand-green text-white p-3 text-lg rounded-lg mt-2"
+              onClick={async () => {
                 const text = etcText.trim();
-                if (!text) return alert("사유를 입력해주세요.");
-                onSubmit({
+                if (!text) {
+                  await alert({ description: "사유를 입력해주세요." });
+                  return;
+                }
+                await onSubmit({
                   reasonId: ETC_REASON_ID,
                   reasonText: text,
                 });
+                onclose();
+                resetState();
               }}
             >
               제출하기

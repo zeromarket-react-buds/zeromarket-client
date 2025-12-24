@@ -335,14 +335,18 @@ const SellerShopPage = () => {
                 {profile.nickname}
               </span>
             </div>
-
-            <button onClick={handleToggleLikeSeller} className="cursor-pointer">
-              <Heart
-                className="size-9 cursor-pointer text-brand-green"
-                fill={profile.liked ? "red" : "none"}
-                stroke={profile.liked ? "red" : "currentColor"}
-              />
-            </button>
+            {!isMe && (
+              <button
+                onClick={handleToggleLikeSeller}
+                className="cursor-pointer"
+              >
+                <Heart
+                  className="size-9 cursor-pointer text-brand-green"
+                  fill={profile.liked ? "red" : "none"}
+                  stroke={profile.liked ? "red" : "currentColor"}
+                />
+              </button>
+            )}
           </div>
 
           {/* 차단한 셀러샵인 경우 알려주는 부분 */}

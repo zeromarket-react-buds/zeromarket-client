@@ -1,5 +1,5 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
-
+import { useModal } from "@/hooks/useModal";
 /**
  * @description 쓰기 전용 지도 컴포넌트: 상품 등록/수정 페이지에서 사용됩니다.
  * 핀 이동 가능하며, 초기 로딩 시 현재 위치로 이동합니다.
@@ -13,7 +13,7 @@ const MapSelector = forwardRef(
     const containerRef = useRef(null);
     const mapRef = useRef(null);
     const selectMarkerRef = useRef(null);
-    const myLatLngRef = useRef(null);
+    const { alert } = useModal();
 
     // Geolocation 요청 로직 분리함수
     const moveAndSelectPosition = (latlng) => {
@@ -38,15 +38,19 @@ const MapSelector = forwardRef(
               const myLatLng = new kakao.maps.LatLng(lat, lng);
               moveAndSelectPosition(myLatLng);
             },
-            (error) => {
+            async (error) => {
               console.error("Geolocation failed:", error);
-              alert(
-                "현재 위치를 가져올 수 없습니다. 지도를 직접 움직여 주세요."
-              );
+              await alert({
+                description:
+                  "현재 위치를 가져올 수 없습니다. 지도를 직접 움직여 주세요.",
+              });
             }
           );
         } else {
-          alert("현재 브라우저는 위치 정보를 지원하지 않습니다.");
+          alert({
+            description: "현재 브라우저는 위치 정보를 지원하지 않습니다.",
+            variant: "destructive",
+          });
         }
       },
     }));
