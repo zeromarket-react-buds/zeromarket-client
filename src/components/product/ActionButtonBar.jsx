@@ -14,6 +14,7 @@ const ActionButtonBar = ({
   onSubmit,
   productId,
   isHidden,
+  salesStatus,
   onHide,
   onUnhide,
   loading,
@@ -35,13 +36,19 @@ const ActionButtonBar = ({
   //상품 숨기기
   const requestHide = async () => {
     if (handleNotLoggedIn()) return;
+    if (salesStatus?.name === "RESERVED") {
+      alert(
+        "예약 중인 상품은 숨길 수 없습니다 상태를 변경 후 다시 시도해주세요."
+      );
+      return;
+    }
+
     if (!window.confirm("상품을 숨김 처리하시겠습니까?")) {
       console.log("상품 숨기기 취소됨");
       return;
     }
     try {
       await ProductHiddenApi(productId, true);
-
       alert("상품이 숨김 처리 되었습니다.");
       // navigate("/");
       if (onHide) onHide();
@@ -145,6 +152,10 @@ const ActionButtonBar = ({
 
   // 바로가기 버튼 클릭
   const handleTradeButtonClick = async () => {
+    if (salesStatus?.name === "RESERVED") {
+      alert("현재 예약 중인 상품입니다.");
+      return;
+    }
     navigate(`/purchase/${productId}`);
   };
 
@@ -173,8 +184,13 @@ const ActionButtonBar = ({
           </Button>
           <Button
             variant="green"
-            className="flex-1 py-5 "
+            className={`flex-1 py-5 ${
+              salesStatus?.name === "RESERVED"
+                ? "opacity-100 cursor-not-allowed grayscale "
+                : ""
+            } `}
             onClick={handleTradeButtonClick}
+            disabled={salesStatus?.name === "RESERVED"}
             // onClick={() => handleButtonClick("바로 구매")}
           >
             바로 구매

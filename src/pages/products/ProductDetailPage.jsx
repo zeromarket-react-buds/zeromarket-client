@@ -345,6 +345,7 @@ const ProductDetailPage = () => {
               onToggleWish={toggleWish}
               productId={detail.productId}
               isHidden={isProductHidden}
+              salesStatus={detail.salesStatus}
               onHide={handleStatusUpdateSuccess}
               onUnhide={handleStatusUpdateSuccess}
             />
