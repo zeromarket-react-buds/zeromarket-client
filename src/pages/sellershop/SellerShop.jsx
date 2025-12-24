@@ -441,6 +441,7 @@ const SellerShopPage = () => {
             reportTargetType="MEMBER"
             onAfterBlock={fetchBlockedSellerState}
             anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
           />
         )}
       </Container>

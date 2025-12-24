@@ -385,6 +385,7 @@ const ChatRoomPage = () => {
         targetMemberId={yourInfo?.memberId}
         reportTargetType="MEMBER"
         anchorEl={anchorEl}
+        setAnchorEl={setAnchorEl}
       />
     </Container>
   );
