@@ -279,15 +279,12 @@ const TradeDetailPage = () => {
             </div>
           </div>
 
-          <div
-            className="flex flex-row gap-10 pt-2 pb-5 items-center"
-            onClick={() => navigate(`/products/${productId}`)}
-          >
+          <div className="flex flex-row gap-10 pt-2 pb-5 items-center">
             <div className="overflow-hidden">
               <img
                 src={thumbnailUrl}
-                className="object-cover w-[100px] h-[70px] rounded-2xl"
-                alt=""
+                className="object-cover w-[100px] h-[70px] rounded-2xl cursor-pointer"
+                onClick={() => navigate(`/products/${productId}`)}
               />
             </div>
             <div className="flex flex-col gap-2">
