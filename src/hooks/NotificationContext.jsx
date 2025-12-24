@@ -114,8 +114,12 @@ export function NotificationProvider({ children }) {
   }, [user?.memberId, refreshUnreadCount]);
 
   // 구독 useEffect: settings 의존성 제거 → 토글 바꿔도 재구독 안 함
+  const notiSubRef = useRef(null);
   useEffect(() => {
     if (!user?.memberId) return;
+
+    // 이미 구독 중이면 재구독 금지
+    if (notiSubRef.current) return;
 
     const stomp = createChatClient({ debug: true });
     const dest = `/sub/notification/${user.memberId}`;
@@ -154,7 +158,7 @@ export function NotificationProvider({ children }) {
       }
 
       if (payload.refType === "PRODUCT") {
-        if (!s.chatNotify) return;
+        if (!s.keywordNotify) return;
 
         if (document.visibilityState === "visible") {
           return;
@@ -177,14 +181,17 @@ export function NotificationProvider({ children }) {
       // if (payload.type === "EVENT" && s.eventNotify) { ... }
     });
 
+    notiSubRef.current = unsubscribe;
+
     stomp.activate();
 
     return () => {
       try {
-        unsubscribe?.();
+        notiSubRef.current?.();
       } catch {}
+      notiSubRef.current = null;
     };
-  }, [user?.memberId]); // settings, refreshUnreadCount 제거
+  }, [user?.memberId]);
 
   const value = useMemo(
     () => ({

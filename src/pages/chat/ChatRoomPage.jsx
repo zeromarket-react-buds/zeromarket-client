@@ -334,6 +334,11 @@ const ChatRoomPage = () => {
           onStatusChanged={fetchChatMessages}
         />
       </div>
+      {chatMessages.length <= 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-brand-mediumgray">대화 중인 채팅이 없습니다.</p>
+        </div>
+      )}
       <div className="p-4 flex flex-col space-y-4">
         {/* <div className="text-sm text-gray-500 text-center">날짜</div>
         {chatMessages.length > 0 &&
@@ -344,6 +349,7 @@ const ChatRoomPage = () => {
               message={msg}
             />
           ))} */}
+
         {Object.entries(grouped).map(([dateLabel, messages]) => (
           <div key={dateLabel} className="flex flex-col space-y-4">
             {/* 날짜 가운데 정렬 */}
