@@ -143,12 +143,6 @@ const ProductCreatePage = () => {
       title: "상품 등록",
       showBack: true,
       rightActions: [
-        {
-          key: "save",
-          label: "임시 저장",
-          // onClick: handleSave,
-          className: "text-gray-500 font-semibold text-sm cursor-pointer",
-        },
         <AuthStatusIcon
           isAuthenticated={isAuthenticated}
           navigate={navigate}
