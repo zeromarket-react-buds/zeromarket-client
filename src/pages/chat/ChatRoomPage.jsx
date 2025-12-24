@@ -94,15 +94,6 @@ const ChatRoomPage = () => {
   const fetchChatMessages = useCallback(async () => {
     const data = await chatMessagesApi(chatRoomId);
     setChatInfo(data);
-    setHeader({
-      title: data.sellerNickname,
-      // 옵션
-      titleAlign: "left",
-      isSticky: true,
-      // showBack: true,
-      // hideRight: false,
-      // rightActions: [...]
-    });
     setChatMessages(data.chatMessages);
     settingChatParticipantInfo(data);
     if (data.yourLastReadMessageId) {
@@ -110,7 +101,7 @@ const ChatRoomPage = () => {
     } else {
       setYourLastReadMessageId(0);
     }
-  }, [chatRoomId, setHeader, user?.memberId]);
+  }, [chatRoomId, user?.memberId]);
 
   const clientRef = useRef(null);
   const subRef = useRef(null);
@@ -271,6 +262,16 @@ const ChatRoomPage = () => {
       window.removeEventListener("focus", tryRead);
     };
   }, [chatRoomId, user, lastMessageId, markAsRead]);
+
+  useEffect(() => {
+    if (yourInfo && yourInfo.nickName) {
+      setHeader({
+        title: yourInfo.nickName,
+        titleAlign: "left",
+        isSticky: true,
+      });
+    }
+  }, [yourInfo, setHeader]);
 
   const grouped = groupMessagesByDate(chatMessages);
 
