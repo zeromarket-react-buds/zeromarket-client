@@ -14,7 +14,7 @@ const NicknameSection = ({
         value={nickname}
         onChange={onChange}
         placeholder="닉네임을 입력해주세요."
-        className="w-full border border-brand-green rounded-xl py-2 px-6 text-base"
+        className="w-full border rounded-xl py-2 px-6 text-base"
       />
 
       <div className="mt-1 pl-2 text-xs">

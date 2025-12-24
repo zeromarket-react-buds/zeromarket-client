@@ -12,7 +12,7 @@ const IntroSection = ({
         value={intro ?? ""}
         onChange={onChange}
         rows={3}
-        className="w-full border border-brand-green rounded-xl py-2 px-5 text-base resize-none"
+        className="w-full border rounded-xl py-2 px-5 text-base resize-none"
       />
       <div className="pl-2 text-xs">
         <div className=" text-brand-mediumgray">
