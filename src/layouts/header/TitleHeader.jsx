@@ -140,7 +140,6 @@ const TitleHeader = ({
     >
       <header className="grid grid-cols-[1fr_auto_1fr] items-center mb-6">
         {/* 왼쪽: 뒤로가기 */}
-          <div className="flex items-center gap-1 min-w-12">
         <div className="flex items-center justify-start min-w-[80px]">
           {!hideLeft && (
             <>
