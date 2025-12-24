@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { chatRoomIdApi } from "@/common/api/chat.api";
 import { useAuth } from "@/hooks/AuthContext";
 import { ProductHiddenApi, deleteProductApi } from "@/common/api/product.api";
+import { useModal } from "@/hooks/useModal";
 
 const ActionButtonBar = ({
   role,
@@ -22,11 +23,12 @@ const ActionButtonBar = ({
   const { user, isAuthenticated } = useAuth(); // 로긴상태,사용자정보 가져오기
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
   const navigate = useNavigate();
+  const { alert, confirm } = useModal();
 
   //미로긴 사용자 버튼 클릭시 경고메세지
-  const handleNotLoggedIn = () => {
+  const handleNotLoggedIn = async () => {
     if (!isAuthenticated) {
-      alert("로그인 후 이용 가능합니다.");
+      await alert("로그인 후 이용 가능합니다.");
       navigate("/login");
       return true;
     }
@@ -35,58 +37,63 @@ const ActionButtonBar = ({
 
   //상품 숨기기
   const requestHide = async () => {
-    if (handleNotLoggedIn()) return;
+    if (await handleNotLoggedIn()) return;
     if (salesStatus?.name === "RESERVED") {
-      alert(
-        "예약 중인 상품은 숨길 수 없습니다 상태를 변경 후 다시 시도해주세요."
-      );
+      await alert({
+        description:
+          "예약 중인 상품은 숨길 수 없습니다 거래 상태를 확인 후 다시 시도해주세요.",
+      });
       return;
     }
+    const isConfirmed = await confirm({
+      description: "상품을 숨김 처리하시겠습니까?",
+    });
+    if (!isConfirmed) return;
 
-    if (!window.confirm("상품을 숨김 처리하시겠습니까?")) {
-      console.log("상품 숨기기 취소됨");
-      return;
-    }
     try {
       await ProductHiddenApi(productId, true);
-      alert("상품이 숨김 처리 되었습니다.");
-      // navigate("/");
+      await alert({ description: "상품이 숨김 처리 되었습니다." });
       if (onHide) onHide();
     } catch (error) {
       console.error("숨김 처리 오류", error);
-      alert("숨김 처리 중 오류가 발생했습니다.");
+      await alert({ description: "숨김 처리 중 오류가 발생했습니다." });
     }
   };
 
   //상품 숨기기 해제
   const requestUnhide = async () => {
-    if (handleNotLoggedIn()) return;
-    if (!window.confirm("상품 숨김을 해제하시겠습니까?")) {
+    if (await handleNotLoggedIn()) return;
+    if (!(await confirm({ description: "상품 숨김을 해제하시겠습니까?" }))) {
       console.log("상품 숨김해제가 취소됨");
       return; // 취소누르면return,확인누르면밑으로
     }
     try {
       await ProductHiddenApi(productId, false);
-      alert("숨김이 해제되었습니다.");
+      await alert({ description: "숨김이 해제되었습니다." });
       if (onUnhide) onUnhide();
     } catch (error) {
       console.error("숨김 해제 오류", error);
-      alert("숨김 해제 중 오류가 발생했습니다.");
+      await alert({ description: "숨김 해제 중 오류가 발생했습니다." });
     }
   };
 
   //상품 삭제하기(soft)
   const requestDelete = async () => {
-    if (handleNotLoggedIn()) return;
-    if (!window.confirm("정말로 상품을 삭제하시겠습니까?")) return;
+    if (await handleNotLoggedIn()) return;
+    if (salesStatus?.name === "RESERVED") {
+      await alert({ description: "현재 예약 중인 상품입니다." });
+      return;
+    }
+    if (!(await confirm({ description: "정말로 상품을 삭제하시겠습니까?" })))
+      return;
     try {
       await deleteProductApi(productId);
-      alert("상품이 삭제되었습니다.");
+      await alert({ description: "상품이 삭제되었습니다." });
       // window.location.href = "/";
       navigate(-1);
     } catch (error) {
       console.error("상품 삭제 오류:", error);
-      alert("삭제 중 오류가 발생했습니다.");
+      await alert({ description: "삭제 중 오류가 발생했습니다." });
     }
   };
 
@@ -105,8 +112,8 @@ const ActionButtonBar = ({
     }
   };
 
-  const handleButtonClick = (action) => {
-    if (handleNotLoggedIn()) return;
+  const handleButtonClick = async (action) => {
+    if (await handleNotLoggedIn()) return;
 
     if (action === "채팅하기") {
       enterChatRoom();
@@ -116,7 +123,7 @@ const ActionButtonBar = ({
     let mention = "";
 
     if (action === "끌어 올리기") {
-      if (window.confirm("이 상품을 끌어올리시겠습니까?")) {
+      if (await confirm({ description: "이 상품을 끌어올리시겠습니까?" })) {
         console.log("끌어 올리기 실행됨");
       }
       return;
@@ -150,10 +157,10 @@ const ActionButtonBar = ({
     navigate(`/products/edit/${productId}`);
   };
 
-  // 바로가기 버튼 클릭
+  // 바로구매 버튼 클릭
   const handleTradeButtonClick = async () => {
     if (salesStatus?.name === "RESERVED") {
-      alert("현재 예약 중인 상품입니다.");
+      await alert({ description: "현재 예약 중인 상품입니다." });
       return;
     }
     navigate(`/purchase/${productId}`);
@@ -185,12 +192,12 @@ const ActionButtonBar = ({
           <Button
             variant="green"
             className={`flex-1 py-5 ${
-              salesStatus?.name === "RESERVED"
+              salesStatus?.name !== "FOR_SALE"
                 ? "opacity-100 cursor-not-allowed grayscale "
                 : ""
             } `}
             onClick={handleTradeButtonClick}
-            disabled={salesStatus?.name === "RESERVED"}
+            disabled={salesStatus?.name !== "FOR_SALE"}
             // onClick={() => handleButtonClick("바로 구매")}
           >
             바로 구매
@@ -228,8 +235,13 @@ const ActionButtonBar = ({
           </Button>
           <Button
             variant="green"
-            className="flex-1 py-5 "
+            className={`flex-1 py-5 ${
+              salesStatus?.name === "RESERVED"
+                ? "opacity-100 cursor-not-allowed grayscale "
+                : ""
+            } `}
             onClick={requestDelete}
+            disabled={salesStatus?.name === "RESERVED"}
           >
             상품삭제
           </Button>
@@ -237,7 +249,7 @@ const ActionButtonBar = ({
       )}
 
       {/* 3. 끌올 , 숨기기 , 상품수정 , 상품삭제 - 판매자(2차)*/}
-      {role === "SELLER2" && (
+      {/* {role === "SELLER2" && (
         <div className="flex gap-1 px-3 pt-6 py-6">
           <Button
             variant="ivory"
@@ -246,13 +258,23 @@ const ActionButtonBar = ({
           >
             끌어 올리기
           </Button>
-          <Button
-            variant="ivory"
-            className="flex-1 py-5 "
-            onClick={() => handleButtonClick("숨기기")}
-          >
-            숨기기
-          </Button>
+          {isHidden ? (
+            <Button
+              onClick={requestUnhide}
+              variant="ivory"
+              className="flex-1 py-5"
+            >
+              숨기기 해제
+            </Button>
+          ) : (
+            <Button
+              onClick={requestHide}
+              variant="ivory"
+              className="flex-1 py-5"
+            >
+              숨기기
+            </Button>
+          )}
           <Button
             variant="ivory"
             className="flex-1 py-5 "
@@ -262,24 +284,33 @@ const ActionButtonBar = ({
           </Button>
           <Button
             variant="green"
-            className="flex-1 py-5 "
-            onClick={() => handleButtonClick("상품삭제")}
+            className={`flex-1 py-5 ${
+              salesStatus?.name === "RESERVED"
+                ? "opacity-100 cursor-not-allowed grayscale "
+                : ""
+            } `}
+            onClick={requestDelete}
+            disabled={salesStatus?.name === "RESERVED"}
           >
             상품삭제
           </Button>
         </div>
-      )}
+      )} */}
 
       {/* 4. 상품등록시 판매하기 버튼*/}
       {role === "WRITER" && (
         <div className="p-3 ">
           <Button
+            type="button"
             variant="green"
             className="w-full py-7 pt-7 text-lg mb-3 mt-6"
-            onClick={onSubmit}
+            onClick={(e) => {
+              e.preventDefault();
+              onSubmit(e);
+            }}
             disabled={loading}
           >
-            판매하기
+            {loading ? "등록 중.." : "판매하기"}
           </Button>
         </div>
       )}
