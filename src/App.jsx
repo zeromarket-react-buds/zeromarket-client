@@ -124,6 +124,9 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "상품 등록",
+                    showBack: true,
+                    showHome: false,
+                    hideRight: true,
                   },
                 },
                 footer: {
@@ -142,6 +145,7 @@ const router = createBrowserRouter([
                   props: {
                     title: "만날 장소 선택",
                     showBack: true,
+                    showHome: false,
                     hideRight: true,
                   },
                 },
@@ -158,6 +162,9 @@ const router = createBrowserRouter([
                   component: "TitleHeader",
                   props: {
                     title: "",
+                    showBack: true,
+                    showHome: true,
+                    hideRight: false,
                   },
                 },
                 footer: {
@@ -173,8 +180,12 @@ const router = createBrowserRouter([
               layout: {
                 header: {
                   component: "TitleHeader",
+
                   props: {
                     title: "상품 수정",
+                    showBack: true,
+                    hideRight: true,
+                    hideRight: true,
                   },
                 },
                 footer: {
@@ -806,16 +817,6 @@ const router = createBrowserRouter([
               component: "TitleHeader",
               props: {
                 title: "샵",
-                rightSlot: (
-                  <MoreVertical
-                    size={24}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      // 셀러샵에서 커스텀 이벤트 발생
-                      window.dispatchEvent(new CustomEvent("seller-menu-open"));
-                    }}
-                  />
-                ),
               },
             },
             footer: {

@@ -138,40 +138,47 @@ const TitleHeader = ({
     <Container
       className={isSticky ? `sticky top-0 z-40 bg-white` : `relative z-20`}
     >
-      <header
-        className={`flex items-center justify-between mb-6 ${
-          titleAlign === "left" ? "pr-2" : ""
-        }`}
-      >
+      <header className="grid grid-cols-[1fr_auto_1fr] items-center mb-6">
         {/* 왼쪽: 뒤로가기 */}
-        {hideLeft ? (
-          <div className="w-6" />
-        ) : showBack ? (
           <div className="flex items-center gap-1 min-w-12">
-            <button onClick={handleBackClick}>
-              <ChevronLeft size={24} />
-            </button>
-            {showHome && (
-              <button className="ml-3" onClick={() => navigate("/")}>
-                <Home size={22} />
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="w-6" />
-        )}
+        <div className="flex items-center justify-start min-w-[80px]">
+          {!hideLeft && (
+            <>
+              {showBack && (
+                <button
+                  className="p-1 -ml-1 cursor-pointer"
+                  onClick={handleBackClick}
+                >
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+              {showHome && (
+                <button
+                  className="ml-2 p-1 cursor-pointer"
+                  onClick={() => navigate("/")}
+                >
+                  <Home size={22} />
+                </button>
+              )}
+            </>
+          )}
+        </div>
 
         {/* 중앙: 타이틀 */}
-        <h1
-          className={`text-xl font-bold ${
-            titleAlign === "left" ? "flex-1 text-left pl-2" : ""
+        <div
+          className={`flex items-center ${
+            titleAlign === "left" ? "justify-start" : "justify-center"
           }`}
         >
-          {title}
-        </h1>
+          <h1 className="text-xl font-bold truncate max-w-[200px]">
+            {title || ""}
+          </h1>
+        </div>
 
         {/* 오른쪽 영역 */}
-        <div className="min-w-[48px] flex justify-end">{renderRight()}</div>
+        <div className="min-w-[80px] flex items-center justify-end">
+          {renderRight()}
+        </div>
       </header>
     </Container>
   );
