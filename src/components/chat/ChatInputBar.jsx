@@ -26,6 +26,12 @@ const ChatInputBar = ({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="메시지 보내기"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
         />
 
         <div
