@@ -274,18 +274,27 @@ const ChatRoomPage = () => {
 
   const grouped = groupMessagesByDate(chatMessages);
 
+  const notiReadOnceRef = useRef(new Set());
   useEffect(() => {
-    if (!chatRoomId) return;
+    if (!chatRoomId || !user) return;
+
+    // 이미 이 채팅방에서 처리했으면 skip
+    if (notiReadOnceRef.current.has(chatRoomId)) return;
+    notiReadOnceRef.current.add(chatRoomId);
 
     (async () => {
       try {
-        await notificationApi.markChatRoomAsRead(chatRoomId);
-        await refreshUnreadCount();
+        const updated = await notificationApi.markNotificationChatRoomAsRead(
+          chatRoomId
+        );
+        if (updated > 0) await refreshUnreadCount();
       } catch (e) {
-        console.error("markChatRoomAsRead failed", e);
+        console.error("markNotificationChatRoomAsRead failed", e);
+        // 실패했으면 다시 시도 가능하도록 롤백
+        notiReadOnceRef.current.delete(chatRoomId);
       }
     })();
-  }, [chatRoomId, refreshUnreadCount]);
+  }, [chatRoomId, user?.memberId, refreshUnreadCount]);
 
   const listRef = useRef(null);
   const bottomRef = useRef(null);

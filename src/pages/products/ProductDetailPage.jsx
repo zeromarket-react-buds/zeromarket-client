@@ -17,6 +17,8 @@ import ProductImageCarousel from "@/components/product/detail/ProductImageCarous
 import ProductDescriptionSection from "@/components/product/detail/ProductDescriptionSection";
 import ProductStatusSection from "@/components/product/detail/ProductStatusSection";
 import ReportModal from "@/components/report/ReportModal";
+import { notificationApi } from "@/common/api/notification.api";
+import { useNotification } from "@/hooks/NotificationContext";
 
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
@@ -34,6 +36,7 @@ const ProductDetailPage = () => {
   const { setHeader } = useHeader();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const isFetched = useRef(false);
+  const { refreshUnreadCount } = useNotification();
 
   const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
@@ -192,6 +195,30 @@ const ProductDetailPage = () => {
       ],
     });
   }, [handleShare]);
+
+  const readOnceRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!user?.memberId || !detail?.productId) return;
+
+    const key = `PRODUCT:${detail.productId}`;
+    if (readOnceRef.current.has(key)) return;
+    readOnceRef.current.add(key);
+
+    (async () => {
+      try {
+        const updated = await notificationApi.markReadByRef({
+          refType: "PRODUCT",
+          refId: Number(detail.productId),
+          notificationType: "KEYWORD_MATCH", // 선택
+        });
+        if (updated && updated > 0) refreshUnreadCount();
+      } catch (e) {
+        readOnceRef.current.delete(key);
+        console.error(e);
+      }
+    })();
+  }, [user?.memberId, detail, refreshUnreadCount]);
 
   if (loading)
     return (

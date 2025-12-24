@@ -153,6 +153,24 @@ export function NotificationProvider({ children }) {
         return;
       }
 
+      if (payload.refType === "PRODUCT") {
+        if (!s.chatNotify) return;
+
+        if (document.visibilityState === "visible") {
+          return;
+        }
+
+        showBrowserNotification({
+          title: "새 상품 등록 🎁",
+          body: payload.body || "새 상품이 등록되었습니다.",
+          onClick: () => {
+            if (payload.refId)
+              window.location.href = `/products/${payload.refId}`;
+          },
+        });
+        return;
+      }
+
       // TODO: keyword/notice/event도 payload.type 등으로 분기하면 동일하게:
       // if (payload.type === "KEYWORD" && s.keywordNotify) { ... }
       // if (payload.type === "NOTICE" && s.noticeNotify) { ... }
