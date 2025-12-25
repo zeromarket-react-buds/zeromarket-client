@@ -29,10 +29,10 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
 
   //  찜 목록 추가/삭제 함수 (백엔드 연동 버전)
   const handleHeartClick = async (clickedProductId) => {
-    // ⭐ 1. 비로그인 가드 (API 호출 자체를 막음)
+    //비로그인 가드 (API 호출 자체를 막음)
     if (!isAuthenticated) {
-      alert("로그인이 필요합니다."); // 👉 나중에 로그인 모달/토스트로 교체 가능
-      return; // ⭐⭐⭐ 이 return이 제일 중요
+      alert("로그인이 필요합니다."); // 나중에 로그인 모달/토스트로 교체 가능
+      return;
     }
 
     // 로그인 상태에서만 찜. 백엔드 토글 API 호출 (onToggleLikeInProductList 가 fetch 실행함)
