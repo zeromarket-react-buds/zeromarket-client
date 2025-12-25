@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
+import { useAuthHelper } from "@/hooks/useAuthHelper";
 import {
   updateProductApi,
   getProductDetailApi,
@@ -19,7 +20,6 @@ import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { useHeader } from "@/hooks/HeaderContext";
-import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import useProductVisionAi from "@/hooks/useProductVisionAi";
 import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
@@ -65,6 +65,7 @@ const ProductEditPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { setHeader } = useHeader();
+  const { ensureLogin } = useAuthHelper();
   const { alert, confirm } = useModal();
 
   //자주쓰는 문구 모달 open 상태
@@ -169,12 +170,7 @@ const ProductEditPage = () => {
             : data.locationDto
             ? { ...data.locationDto, locationName: data.sellingArea }
             : null,
-          // location: data.locationDto
-          //   ? {
-          //       ...data.locationDto,
-          //       locationName: data.sellingArea,
-          //     }
-          //   : null,
+
           environmentScore:
             typeof data.environmentScore !== "undefined"
               ? data.environmentScore
@@ -220,20 +216,6 @@ const ProductEditPage = () => {
   }, [routerLocation.state, navigate, routerLocation.pathname]);
 
   useEffect(() => {
-    if (authLoading) return;
-    setHeader({
-      title: "상품 수정",
-      showBack: true,
-      rightActions: [
-        <AuthStatusIcon
-          isAuthenticated={isAuthenticated}
-          navigate={navigate}
-        />,
-      ],
-    });
-  }, [isAuthenticated, navigate, authLoading, setHeader]);
-
-  useEffect(() => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
@@ -242,6 +224,8 @@ const ProductEditPage = () => {
   const handleSubmit = useCallback(
     async (e) => {
       if (e && e.preventDefault) e.preventDefault();
+
+      if (!(await ensureLogin())) return;
 
       if (!form.productTitle.trim()) {
         await alert({ description: "상품명을 입력해주세요." });
@@ -369,12 +353,15 @@ const ProductEditPage = () => {
         }
       } catch (error) {
         console.error(error);
-        await alert({ description: "상품 수정 실패: 서버 또는 네트워크 오류" });
+        await alert({
+          description:
+            "상품 수정 등록 중 오류가 발생했습니다.\n다시 시도해주세요.",
+        });
       } finally {
         setSubmitLoading(false);
       }
     },
-    [form, images, navigate, id, vision, alert, confirm]
+    [form, images, navigate, id, vision, alert, confirm, ensureLogin]
   );
 
   if (pageLoading) {

@@ -1,5 +1,9 @@
 import React, { Suspense, lazy } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import RootLayout from "@/layouts/RootLayout";
 import { useState } from "react";
 import Boards from "@/pages/Boards";
@@ -838,6 +842,8 @@ const router = createBrowserRouter([
           },
         },
       },
+      // 404페이지는 루트로
+      { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
 ]);
@@ -847,14 +853,14 @@ const App = function () {
 
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
-      <AuthProvider>
-        <NotificationProvider>
-          <ModalProvider>
+      <ModalProvider>
+        <AuthProvider>
+          <NotificationProvider>
             <GlobalToast />
             <RouterProvider router={router} />
-          </ModalProvider>
-        </NotificationProvider>
-      </AuthProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ModalProvider>
     </Suspense>
   );
 };

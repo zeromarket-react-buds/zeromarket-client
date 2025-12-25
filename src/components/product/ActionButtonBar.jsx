@@ -4,6 +4,7 @@ import { useLikeToast } from "@/components/GlobalToast";
 import { useNavigate } from "react-router-dom";
 import { chatRoomIdApi } from "@/common/api/chat.api";
 import { useAuth } from "@/hooks/AuthContext";
+import { useAuthHelper } from "@/hooks/useAuthHelper";
 import { ProductHiddenApi, deleteProductApi } from "@/common/api/product.api";
 import { useModal } from "@/hooks/useModal";
 
@@ -23,21 +24,12 @@ const ActionButtonBar = ({
   const { user, isAuthenticated } = useAuth(); // 로긴상태,사용자정보 가져오기
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
   const navigate = useNavigate();
+  const { ensureLogin } = useAuthHelper();
   const { alert, confirm } = useModal();
-
-  //미로긴 사용자 버튼 클릭시 경고메세지
-  const handleNotLoggedIn = async () => {
-    if (!isAuthenticated) {
-      await alert({ description: "로그인 후 이용 가능합니다." });
-      navigate("/login");
-      return true;
-    }
-    return false;
-  };
 
   //상품 숨기기
   const requestHide = async () => {
-    if (await handleNotLoggedIn()) return;
+    if (!(await ensureLogin())) return;
     if (salesStatus?.name === "RESERVED") {
       await alert({
         description:
@@ -62,7 +54,7 @@ const ActionButtonBar = ({
 
   //상품 숨기기 해제
   const requestUnhide = async () => {
-    if (await handleNotLoggedIn()) return;
+    if (!(await ensureLogin())) return;
     if (!(await confirm({ description: "상품 숨김을 해제하시겠습니까?" }))) {
       console.log("상품 숨김해제가 취소됨");
       return; // 취소누르면return,확인누르면밑으로
@@ -79,7 +71,7 @@ const ActionButtonBar = ({
 
   //상품 삭제하기(soft)
   const requestDelete = async () => {
-    if (await handleNotLoggedIn()) return;
+    if (!(await ensureLogin())) return;
     if (salesStatus?.name === "RESERVED") {
       await alert({ description: "현재 예약 중인 상품입니다." });
       return;
@@ -99,7 +91,9 @@ const ActionButtonBar = ({
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = async () => {
-    if (await handleNotLoggedIn()) return; //로그인 여부 검사해서 미로그인시 리턴(실행중지)
+    if (!(await ensureLogin())) return;
+
+    //로그인 여부 검사해서 미로그인시 리턴(실행중지)
     if (onToggleWish) {
       const isAdded = await onToggleWish(productId); //토글 결과값 받아오기
 
@@ -109,7 +103,7 @@ const ActionButtonBar = ({
   };
 
   const handleButtonClick = async (action) => {
-    if (await handleNotLoggedIn()) return;
+    if (!(await ensureLogin())) return;
 
     if (action === "채팅하기") {
       enterChatRoom();
@@ -134,7 +128,9 @@ const ActionButtonBar = ({
   };
 
   // 상품수정
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
+    if (!(await ensureLogin())) return;
+
     if (!productId) {
       console.warn("productId가 없습니다. 수정 페이지로 이동할 수 없습니다.");
       return;
@@ -144,7 +140,8 @@ const ActionButtonBar = ({
 
   // 바로구매 버튼 클릭
   const handleTradeButtonClick = async () => {
-    if (await handleNotLoggedIn()) return;
+    if (!(await ensureLogin())) return;
+
     if (salesStatus?.name === "RESERVED") {
       await alert({ description: "현재 예약 중인 상품입니다." });
       return;
