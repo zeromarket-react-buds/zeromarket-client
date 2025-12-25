@@ -145,18 +145,6 @@ const ProductDetailPage = () => {
     // fetchSimilarProducts();
   }, [id, user]);
 
-  useEffect(() => {
-    if (detail) {
-      console.log(" 상세상품 detail:", detail);
-      console.log("salesStatus:", detail.salesStatus);
-      console.log(" liked:", detail.liked);
-      console.log("wishCount:", detail.wishCount);
-
-      console.log("현재 detail.liked 값:", detail.liked);
-      console.log("현재 wishCount 값:", detail.wishCount);
-    }
-  }, [detail]);
-
   const handleShare = useCallback(async () => {
     // const { headerState } = useHeader();
     // const detail = headerState?.detail;
