@@ -159,6 +159,7 @@ const ActionButtonBar = ({
 
   // 바로구매 버튼 클릭
   const handleTradeButtonClick = async () => {
+    if (await handleNotLoggedIn()) return;
     if (salesStatus?.name === "RESERVED") {
       await alert({ description: "현재 예약 중인 상품입니다." });
       return;
