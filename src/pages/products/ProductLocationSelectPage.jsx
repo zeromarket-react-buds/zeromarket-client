@@ -130,7 +130,7 @@ const ProductLocationSelectPage = () => {
             onClick={() => mapRef.current?.moveToMyLocation()}
             className="map-control-btn"
           >
-            <Crosshair variant="outline" size={30} />
+            <Crosshair size={24} />
           </div>
         </div>
 

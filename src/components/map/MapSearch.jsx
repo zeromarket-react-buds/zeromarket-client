@@ -274,7 +274,7 @@ const MapSearch = forwardRef(({ center, onSearchBoundaryChange }, ref) => {
           onClick={handleMoveToMyLocation}
           className="map-control-btn pointer-events-auto"
         >
-          <Crosshair size={24} className="text-brand-darkgray" />
+          <Crosshair size={24} />
         </button>
       </div>
 

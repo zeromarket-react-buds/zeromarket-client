@@ -211,7 +211,7 @@ html {
   }
 
   .map-control-btn {
-    @apply flex items-center justify-center bg-white rounded-full shadow-xl cursor-pointer pointer-events-auto;
+    @apply flex items-center justify-center bg-white rounded-full shadow-xl cursor-pointer pointer-events-auto text-brand-darkgray;
     width: 60px;
     height: 60px;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
