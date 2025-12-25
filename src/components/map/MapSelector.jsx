@@ -28,7 +28,7 @@ const MapSelector = forwardRef(
     };
 
     useImperativeHandle(ref, () => ({
-      moveToMyLocation: () => {
+      moveToMyLocation: async () => {
         if (!mapRef.current) return;
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
@@ -47,7 +47,7 @@ const MapSelector = forwardRef(
             }
           );
         } else {
-          alert({
+          await alert({
             description: "현재 브라우저는 위치 정보를 지원하지 않습니다.",
             variant: "destructive",
           });

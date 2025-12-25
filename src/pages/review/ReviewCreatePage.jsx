@@ -6,6 +6,7 @@ import { getTradeInfoForReviewApi } from "@/common/api/trade.api";
 import { createReviewApi } from "@/common/api/review.api";
 import { ApiError } from "@/common/error";
 import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
 
 const ratingOptions = [
   { rating: 5, label: "최고예요", icon: <Laugh className="w-6 h-6" /> },
@@ -30,6 +31,7 @@ const ReviewCreatePage = () => {
   const [tradeInfo, setTradeInfo] = useState({});
   const [selectedRating, setSelectedRating] = useState(null);
   const [content, setContent] = useState("");
+  const { alert } = useModal();
 
   useEffect(() => {
     const getTradeInfo = async () => {
@@ -50,7 +52,7 @@ const ReviewCreatePage = () => {
     e.preventDefault();
 
     if (!selectedRating || !content.trim()) {
-      alert("평가와 내용을 입력해주세요.");
+      await alert({ description: "평가와 내용을 입력해주세요." });
       return;
     }
     try {
@@ -71,7 +73,7 @@ const ReviewCreatePage = () => {
     } catch (error) {
       if (error instanceof ApiError) {
         console.error(error.code);
-        alert(error.message);
+        await alert({ description: error.message });
       }
 
       navigate(-1);

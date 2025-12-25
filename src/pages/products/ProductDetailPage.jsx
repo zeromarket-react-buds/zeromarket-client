@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/AuthContext";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import { getProductDetailApi } from "@/common/api/product.api";
 import { createReportApi } from "@/common/api/report.api";
-import { UserRound, Share2 } from "lucide-react";
+import { Share2, LogIn, Heart } from "lucide-react";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductSellerInfo from "@/components/product/detail/ProductSellerInfo";
@@ -25,7 +25,6 @@ import { useModal } from "@/hooks/useModal";
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
-import { Heart } from "lucide-react"; //찜 데이터 콘솔 확인용
 
 const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -87,12 +86,6 @@ const ProductDetailPage = () => {
           setError("서버 연결 실패");
           onsole.error("상세 페이지 에러:", err);
         }
-        // if (status === 404 || status === 410) {
-        //   setError("상품이 삭제되었거나 존재하지 않습니다.");
-        //   return;
-        // }
-        // setError("상품 정보를 불러오는 중 오류가 발생했습니다.");
-        // console.error("상품 상세 페이지 불러오기 실패 : ", err);
       } finally {
         setLoading(false);
       }
@@ -146,15 +139,11 @@ const ProductDetailPage = () => {
   }, [id, user]);
 
   const handleShare = useCallback(async () => {
-    // const { headerState } = useHeader();
-    // const detail = headerState?.detail;
     if (navigator.share) {
       try {
         await navigator.share({
           title: detail?.productTitle || "제로마켓 상품",
           text: detail?.productDescription || "제로마켓 상품을 확인해보세요!",
-          // title: "제로마켓 상품",
-          // text: "제로마켓 상품을 확인해보세요!",
           url: window.location.href,
         });
       } catch (err) {
@@ -181,16 +170,18 @@ const ProductDetailPage = () => {
             <Share2 size={22} />
           </button>
           <button>
-            <Link to="/me">
-              {user?.profileImage ? (
+            {user?.profileImage ? (
+              <Link to="/me">
                 <img
                   src={user?.profileImage}
                   className="w-8 h-8 rounded-full"
                 />
-              ) : (
-                <UserRound className="w-8 h-8 bg-brand-green rounded-full text-brand-ivory" />
-              )}
-            </Link>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <LogIn className="w-7 h-7 " />
+              </Link>
+            )}
           </button>
         </div>
       ),
@@ -365,7 +356,6 @@ const ProductDetailPage = () => {
             />
           </div>
 
-          {/* 로그인 여부와 상품 작성자 여부 따라 버튼 다르게 렌더링 */}
           {/*ActionButtonBar 내부는 그대로 wished 써도 됨(prop 이름일 뿐, 실제 상태는 liked)*/}
           <div className="sticky bottom-0 bg-white border-t z-20">
             <ActionButtonBar

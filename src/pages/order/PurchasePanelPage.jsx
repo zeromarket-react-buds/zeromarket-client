@@ -5,6 +5,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { CheckCircle, MapPin, ChevronUp, ChevronDown } from "lucide-react";
+import { useModal } from "@/hooks/useModal";
 
 const PriceDetail = ({
   sellPrice,
@@ -80,6 +81,8 @@ const PurchasePanelPage = () => {
   const paymentFee = Math.max(0, Math.floor(product.sellPrice * feeRate));
   const totalAmount = product.sellPrice; // 수수료 미반영 (상품 금액만)
 
+  const { alert } = useModal();
+
   useEffect(() => {
     if (!tradeType) {
       if (product.delivery) {
@@ -107,9 +110,9 @@ const PurchasePanelPage = () => {
     });
   };
 
-  const goPayment = () => {
+  const goPayment = async () => {
     if (!tradeType) {
-      alert("거래 방식을 선택해주세요.");
+      await alert({ description: "거래 방식을 선택해주세요." });
       return;
     }
 

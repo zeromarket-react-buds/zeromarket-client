@@ -29,11 +29,17 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
 
   //  찜 목록 추가/삭제 함수 (백엔드 연동 버전)
   const handleHeartClick = async (clickedProductId) => {
-    //  백엔드 토글 API 호출 (onToggleLike가 fetch 실행함)
+    //비로그인 가드 (API 호출 자체를 막음)
+    if (!isAuthenticated) {
+      alert("로그인이 필요합니다."); // 나중에 로그인 모달/토스트로 교체 가능
+      return;
+    }
+
+    // 로그인 상태에서만 찜. 백엔드 토글 API 호출 (onToggleLikeInProductList 가 fetch 실행함)
     const newState = await onToggleLikeInProductList(clickedProductId);
     // true/false 반환 토스트 출력, 부모함수 호출
 
-    //  토스트는 API 결과(newLiked)를 기준으로 실행해야 정확함
+    // 토스트는 API 결과(newState)를 기준으로 출력
     if (newState) showLikeAddedToast();
     else showLikeRemovedToast();
   };
@@ -79,8 +85,8 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                       <Heart
                         className="size-6 mx-1 cursor-pointer"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleHeartClick(p.productId);
+                          e.stopPropagation(); //상세이동 방지
+                          handleHeartClick(p.productId); //로그인가드
                         }}
                         fill={p.liked ? "red" : "none"}
                         stroke={p.liked ? "red" : "currentColor"}

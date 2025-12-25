@@ -28,7 +28,7 @@ const ActionButtonBar = ({
   //미로긴 사용자 버튼 클릭시 경고메세지
   const handleNotLoggedIn = async () => {
     if (!isAuthenticated) {
-      await alert("로그인 후 이용 가능합니다.");
+      await alert({ description: "로그인 후 이용 가능합니다." });
       navigate("/login");
       return true;
     }
@@ -99,13 +99,9 @@ const ActionButtonBar = ({
 
   // 찜 목록 추가/삭제 함수
   const handleHeartClick = async () => {
-    //if (!handleNotLoggedIn()) return; //로그인 여부 검사해서 미로그인시 리턴(실행중지)
-    if (!isAuthenticated) {
-      goLogin(); // 로그인 유도 함수
-      return;
-    }
+    if (await handleNotLoggedIn()) return; //로그인 여부 검사해서 미로그인시 리턴(실행중지)
     if (onToggleWish) {
-      const isAdded = await onToggleWish(productId); // ⭐ 토글 결과값 받아오기
+      const isAdded = await onToggleWish(productId); //토글 결과값 받아오기
 
       if (isAdded) showLikeAddedToast(); // 찜 추가
       else showLikeRemovedToast(); // 찜 제거
@@ -120,20 +116,9 @@ const ActionButtonBar = ({
       return;
     }
 
-    let mention = "";
-
     if (action === "끌어 올리기") {
       if (await confirm({ description: "이 상품을 끌어올리시겠습니까?" })) {
         console.log("끌어 올리기 실행됨");
-      }
-      return;
-    }
-
-    if (mention) {
-      if (window.confirm(mention)) {
-        console.log(`${action} 실행됨`);
-      } else {
-        console.log(`${action} 취소됨`);
       }
       return;
     }
@@ -159,6 +144,7 @@ const ActionButtonBar = ({
 
   // 바로구매 버튼 클릭
   const handleTradeButtonClick = async () => {
+    if (await handleNotLoggedIn()) return;
     if (salesStatus?.name === "RESERVED") {
       await alert({ description: "현재 예약 중인 상품입니다." });
       return;

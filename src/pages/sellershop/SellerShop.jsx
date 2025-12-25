@@ -19,7 +19,7 @@ import MenuActionsContainer from "@/components/MenuActionsContainer";
 
 const SellerShopPage = () => {
   const navigate = useNavigate();
-  const { alert } = useModal();
+  const { alert, confirm } = useModal();
   const { sellerId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const currentMemberId = user?.memberId;
@@ -250,9 +250,10 @@ const SellerShopPage = () => {
     //로긴체크
     if (!isAuthenticated) {
       if (
-        window.confirm(
-          "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?"
-        )
+        await confirm({
+          description:
+            "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?",
+        })
       ) {
         //현 셀러샵페이지로 돌아올수있게 redirect 경로 포함
         navigate(`/login?redirect=${window.location.pathname}`);
@@ -275,7 +276,7 @@ const SellerShopPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert("좋아요 변경 실패");
+      await alert({ description: "좋아요 변경 실패" });
     }
   };
 
@@ -284,9 +285,10 @@ const SellerShopPage = () => {
     //로긴체크
     if (!isAuthenticated) {
       if (
-        window.confirm(
-          "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?"
-        )
+        await confirm({
+          description:
+            "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?",
+        })
       ) {
         //현 셀러샵페이지로 돌아올수있게 redirect 경로 포함
         navigate(`/login?redirect=${window.location.pathname}`);

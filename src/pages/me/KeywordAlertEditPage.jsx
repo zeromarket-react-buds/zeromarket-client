@@ -7,11 +7,13 @@ import { useAuth } from "@/hooks/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { getKeywordApi, updateKeywordsApi } from "@/common/api/keyword.api";
 import { useHeader } from "@/hooks/HeaderContext";
+import { useModal } from "@/hooks/useModal";
 
 const KeywordAlertEditPage = () => {
   const navigate = useNavigate();
   const { loading } = useAuth();
   const { alertId } = useParams();
+  const { alert, confirm } = useModal();
 
   const [keywordState, setKeywordState] = useState("");
   const [priceMinState, setPriceMinState] = useState("");
@@ -37,27 +39,27 @@ const KeywordAlertEditPage = () => {
 
     console.log("변환된 값:", priceMin, priceMax);
     if (!keyword) {
-      alert("키워드를 입력해주세요.");
+      await alert({ description: "키워드를 입력해주세요." });
       return;
     }
     if (priceMin && !priceMax) {
-      alert("최대가격을 입력해주세요.");
+      await alert({ description: "최대가격을 입력해주세요." });
       return;
     }
     if (!priceMin && priceMax) {
-      alert("최소가격을 입력해주세요.");
+      await alert({ description: "최소가격을 입력해주세요." });
       return;
     }
     if (priceMin && priceMax && priceMin >= priceMax) {
-      alert("최대 가격은 최소 가격보다 커야 합니다.");
+      await alert({ description: "최대 가격은 최소 가격보다 커야 합니다." });
       return;
     }
 
-    if (!confirm("수정하시겠습니까?")) {
+    if (!(await confirm({ description: "수정하시겠습니까?" }))) {
       return;
     }
     await updateKeywordsApi({ alertId, keyword, priceMin, priceMax });
-    alert("수정되었습니다.");
+    await alert({ description: "수정되었습니다." });
     fetchKeywordAlert();
   }, [keywordState, priceMinState, priceMaxState]);
 
