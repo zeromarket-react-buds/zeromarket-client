@@ -22,7 +22,7 @@ const DefaultFooter = () => {
 
             {/* 가운데: LINKS */}
             <div className="flex flex-col gap-2 md:justify-self-center">
-              <div className="flex flex-col gap-3 text-[8pt] text-gray-500">
+              <div className="flex flex-col gap-3 text-[10pt] text-gray-500">
                 <a
                   href="https://github.com/zeromarket-react-buds"
                   target="_blank"
