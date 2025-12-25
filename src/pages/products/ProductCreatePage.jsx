@@ -385,9 +385,9 @@ const ProductCreatePage = () => {
               open={isPhraseModalOpen}
               onClose={() => setIsPhraseModalOpen(false)}
               phrases={phrases}
-              setPhrases={setPhrases}
               onApplyPhrase={handleApplyPhrase}
               onReloadPhrases={reloadPhrases}
+              contentType="PRODUCT"
             />
 
             {/* 상품 상태 */}
