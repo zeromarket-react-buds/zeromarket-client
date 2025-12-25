@@ -6,7 +6,7 @@ import iconJoin from "@/assets/ico_join.svg";
 import iconCart from "@/assets/ico_cart.svg";
 import iconSearch from "@/assets/ico_search.svg";
 import { useAuth } from "@/hooks/AuthContext";
-import { Bell, UserRound } from "lucide-react";
+import { Bell, UserRound, LogIn, UserRoundPlus } from "lucide-react";
 import BellWithBadge from "@/components/BellWithBadge";
 import { useNotification } from "@/hooks/NotificationContext";
 
@@ -16,22 +16,24 @@ const DefaultHeader = () => {
 
   return (
     <Container>
-      <header className="border-b border-gray-200 py-4">
-        <div className="flex space-x-16 justify-between h-[60px] px-4">
-          <Link to="/" className="h-[50px] shrink-0">
+      <header className="border-b border-gray-200 pt-2 pb-6">
+        <div className="flex space-x-16 justify-between h-20 px-4">
+          <Link to="/" className="h-20 shrink-0">
             <img src={logo} className="h-full" alt="logo" />
           </Link>
           {!isAuthenticated ? (
             <div className="flex flex-row items-center">
               <div className="flex text-sm font-bold">
-                <Link to="/login" className="px-3 py-2">
-                  <span className="w-10">로그인</span>
+                <Link to="/login" className="px-3 py-2" title="로그인">
+                  <LogIn className="w-8 h-8  text-brand-green" />
+                  {/* <span className="w-10">로그인</span> */}
                 </Link>
               </div>
 
               <div className="flex text-sm font-bold">
-                <Link to="/join" className="px-3 py-2">
-                  <span className="w-13">회원가입</span>
+                <Link to="/join" className="px-3 py-2" title="회원가입">
+                  <UserRoundPlus className="w-8 h-8  text-brand-green" />
+                  {/* <span className="w-13">회원가입</span> */}
                 </Link>
               </div>
             </div>
