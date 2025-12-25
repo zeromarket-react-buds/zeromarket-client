@@ -245,10 +245,10 @@ function LoginPage() {
               카카오톡으로 로그인
             </button>
 
-            <button className="w-full flex items-center justify-center border rounded-md py-2 cursor-pointer">
+            {/* <button className="w-full flex items-center justify-center border rounded-md py-2 cursor-pointer">
               <div className="w-4 h-4 bg-green-500 rounded-full mr-2" />
               네이버로 로그인
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

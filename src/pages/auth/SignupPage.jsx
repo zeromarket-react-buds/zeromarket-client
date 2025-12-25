@@ -332,12 +332,12 @@ const SignupPage = () => {
               </div>
               <div>카카오톡으로 회원가입</div>
             </button>
-            <button className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer">
+            {/* <button className="w-full border rounded-md p-2 flex justify-center items-center gap-5 cursor-pointer">
               <div className="bg-green-500 w-10 h-10 rounded-md flex justify-center items-center text-2xl font-bold">
                 N
               </div>
               <div>네이버로 회원가입</div>
-            </button>
+            </button> */}
           </div>
           <div className="text-sm text-gray-500 leading-relaxed">
             가입 시 이용약관 및 개인정보 처리방침에 동의하는 것으로 간주됩니다.
