@@ -1,16 +1,30 @@
-﻿import { Outlet, useParams, useNavigate } from "react-router-dom";
+import { Outlet, useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProductDetailApi } from "@/common/api/product.api";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function PurchaseLayout() {
   const { productId } = useParams(); // purchase/:productId
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      const redirect = encodeURIComponent(
+        `${location.pathname}${location.search}`
+      );
+      navigate(`/login?redirect=${redirect}`, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
     let cancelled = false;
 
     const fetchProduct = async () => {
@@ -46,7 +60,15 @@ export default function PurchaseLayout() {
     return () => {
       cancelled = true;
     };
-  }, [productId, navigate]);
+  }, [productId, navigate, authLoading, isAuthenticated]);
+
+  if (authLoading || !isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto p-4">
+        <p className="text-sm text-gray-500">로그인 상태를 확인 중입니다...</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
