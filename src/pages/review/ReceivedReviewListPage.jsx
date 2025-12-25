@@ -63,11 +63,15 @@ export default function ReceivedReviewListPage() {
       const data = await getReceivedReviewsByRatingApi(payload);
 
       setList((prev) => [...prev, ...(data.reviewList || [])]);
-      setTotalCount(
-        Number.isFinite(data?.totalCount)
-          ? Number(data.totalCount)
-          : (prev) => (prev || 0) + (data.reviewList?.length || 0)
-      );
+
+      // '총 개수 미표시와 더보기 호출 오류' 관련
+      // const nextCount = Number.isFinite(data?.totalCount)
+      //   ? Number(data.totalCount)
+      //   : data.reviewList?.length || 0;
+      // setTotalCount((prev) =>
+      //   Number.isFinite(data?.totalCount) ? nextCount : prev + nextCount
+      // );
+
       setHasNext(Boolean(data.hasNext));
       setCursor({
         cursorReviewId: data.cursorReviewId ?? null,
