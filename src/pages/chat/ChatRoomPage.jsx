@@ -51,7 +51,7 @@ const ChatRoomPage = () => {
 
   // 상대가 어디까지 읽었는지(메시지 옆 "읽음" 표시용)
   const [yourLastReadMessageId, setYourLastReadMessageId] = useState(0);
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false); // 점 3개 메뉴 오픈
   const [anchorEl, setAnchorEl] = useState(null);
@@ -417,6 +417,7 @@ const ChatRoomPage = () => {
         phrases={phrases}
         onApplyPhrase={handleApplyPhrase} // 문구 적용 함수
         onReloadPhrases={fetchChatPhrases} // 문구 재조회 함수
+        contentType="CHAT"
       />
 
       {/* 점 세 개 메뉴*/}

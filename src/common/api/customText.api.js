@@ -30,7 +30,7 @@ export const deleteProductCustomTextApi = async (id) => {
 // 자주 쓰는 문구 수정
 export const updateProductCustomTextApi = async (id, text) => {
   await apiClient(`/api/product/custom-texts/${id}`, {
-    method: "PATCH",
+    method: "PUT",
     //body: JSON.stringify({ text }),// 이미 apiClient내부에서 JSON.stringify(body) 처리하므로 수정
     body: { text },
   });

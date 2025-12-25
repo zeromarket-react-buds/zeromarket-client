@@ -13,6 +13,7 @@ const FrequentPhraseModal = ({
   //setPhrases,//수정: setPhrases 제거 (모달이 부모 상태 직접 수정)  //문구목록 상태
   onApplyPhrase, //부모 textarea에 반영용 함수
   onReloadPhrases, //등록 후 재조회용 함수
+  contentType, //PRODUCT | CHAT
 }) => {
   if (!open) return null;
 
@@ -57,7 +58,7 @@ const FrequentPhraseModal = ({
     try {
       setLoading(true);
 
-      await createProductCustomTextApi("PRODUCT", newText.trim());
+      await createProductCustomTextApi(contentType, newText.trim());
 
       // ☆등록 성공 → 부모에서 다시 조회
       await onReloadPhrases();
