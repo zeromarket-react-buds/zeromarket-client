@@ -34,7 +34,7 @@ export default function WithdrawWarnPage() {
         </p>
       </section>
 
-      <div className="bg-white flex flex-col items-center fixed left-0 right-0 bottom-0 px-4 p-3 space-y-3">
+      <div className="bg-white flex flex-col items-center px-4 p-3 space-y-3 mt-6">
         <button
           onClick={goNext}
           className="w-[600px] bg-brand-green text-white font-semibold py-3 rounded-lg"

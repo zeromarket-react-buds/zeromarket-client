@@ -18,8 +18,8 @@ export default function WithdrawReasonPage() {
   const [reasonId, setReasonId] = useState("");
   const [detail, setDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const isOther = Number(reasonId) === 5;
   const { alert } = useModal();
+  const isOther = Number(reasonId) === 6;
 
   useEffect(() => {
     if (!isOther && detail) {
@@ -87,13 +87,15 @@ export default function WithdrawReasonPage() {
             ))}
           </select>
 
-          <textarea
-            value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-            placeholder="추가로 알려주실 내용이 있다면 적어주세요(선택)"
-            className="w-full border rounded-lg px-3 py-3 min-h-[120px]"
-            disabled={submitting || !isOther}
-          />
+          {isOther && (
+            <textarea
+              value={detail}
+              onChange={(e) => setDetail(e.target.value)}
+              placeholder="추가로 알려주실 내용이 있다면 적어주세요(선택)"
+              className="w-full border rounded-lg px-3 py-3 min-h-[120px]"
+              disabled={submitting}
+            />
+          )}
         </div>
 
         <p className="text-sm text-gray-700">
@@ -102,7 +104,7 @@ export default function WithdrawReasonPage() {
         </p>
       </section>
 
-      <div className="bg-white fixed flex flex-col items-center left-0 right-0 bottom-0 px-4 p-3 space-y-3">
+      <div className="bg-white flex flex-col items-center px-4 p-3 space-y-3 mt-6">
         <button
           onClick={handleSubmit}
           className="w-[600px] bg-brand-green text-white font-semibold py-3 rounded-lg disabled:opacity-60"
