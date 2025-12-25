@@ -79,56 +79,60 @@ const BlockUserLIstPage = () => {
 
   return (
     <Container className="-mt-5">
-      <div className="flex flex-col gap-6 mx-6">
-        <div className="flex justify-center items-end">
-          <span className=" text-brand-green font-semibold">
+      {isEmpty ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <span className="text-brand-green font-semibold">
             {data?.nickname ?? ""}
           </span>
-          님은 현재
-          {isEmpty ? (
-            <span className="pl-1">차단한 유저가 없습니다.</span>
-          ) : (
-            <>
-              <span className="pl-4 pr-1 text-brand-green text-2xl font-semibold">
-                {data?.blockedUserCount ?? list.length}
-              </span>
-              명을 차단 중입니다.
-            </>
-          )}
+          님은 현재 차단한 유저가 없습니다.
         </div>
-        {(data?.list ?? []).map((d) => (
-          <div
-            key={d.blockId}
-            className="flex flex-col gap-3"
-            onClick={() => navigate(`/sellershop/${d.blockedUserId}`)}
-          >
-            <div className="flex justify-between border border-brand-mediumgray rounded-2xl items-center px-6 py-2">
-              <div className="flex flex-row gap-6 items-center">
-                {d?.profileImage ? (
-                  <img
-                    src={d.profileImage}
-                    className="w-10 h-10 rounded-full"
-                  />
-                ) : (
-                  <User className="w-10 h-10 rounded-full p-1 bg-brand-green text-brand-ivory" />
-                )}
-
-                <div className="text-lg line-clamp-1">
-                  {d.blockedUserNickname}
-                </div>
-              </div>
-              <Button
-                variant="green"
-                type="button"
-                className="rounded-2xl text-end"
-                onClick={(e) => submitUnBlock(e, d.blockId)}
-              >
-                차단해제
-              </Button>
-            </div>
+      ) : (
+        <div className="flex flex-col gap-6 mx-6">
+          <div className="flex justify-center items-end">
+            <span className="text-brand-green font-semibold">
+              {data?.nickname ?? ""}
+            </span>
+            님은 현재
+            <span className="pl-4 pr-1 text-brand-green text-2xl font-semibold">
+              {data?.blockedUserCount ?? list.length}
+            </span>
+            명을 차단 중입니다.
           </div>
-        ))}
-      </div>
+
+          {list.map((d) => (
+            <div
+              key={d.blockId}
+              className="flex flex-col gap-3"
+              onClick={() => navigate(`/sellershop/${d.blockedUserId}`)}
+            >
+              <div className="flex justify-between border border-brand-mediumgray rounded-2xl items-center px-6 py-2">
+                <div className="flex flex-row gap-6 items-center">
+                  {d?.profileImage ? (
+                    <img
+                      src={d.profileImage}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <User className="w-10 h-10 rounded-full p-1 bg-brand-green text-brand-ivory" />
+                  )}
+
+                  <div className="text-lg line-clamp-1">
+                    {d.blockedUserNickname}
+                  </div>
+                </div>
+                <Button
+                  variant="green"
+                  type="button"
+                  className="rounded-2xl text-end"
+                  onClick={(e) => submitUnBlock(e, d.blockId)}
+                >
+                  차단해제
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </Container>
   );
 };

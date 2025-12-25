@@ -1,18 +1,20 @@
 import { apiClient } from "@/common/client";
 
 //상품 등록용 자주 쓰는 문구 목록 조회
-export const getProductCustomTextsApi = async () => {
+export const getProductCustomTextsApi = async ({ contentType }) => {
   const { data } = await apiClient("/api/product/custom-texts", {
+    params: { contentType }, // PRODUCT | CHAT
     method: "GET",
   });
   return data;
 };
 
 //자주 쓰는 문구 등록
-export const createProductCustomTextApi = async (text) => {
+export const createProductCustomTextApi = async (contentType, text) => {
   await apiClient("/api/product/custom-texts", {
     method: "POST",
     body: {
+      contentType, // PRODUCT | CHAT
       text,
     },
   });

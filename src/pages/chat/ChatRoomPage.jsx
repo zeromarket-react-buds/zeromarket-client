@@ -12,6 +12,8 @@ import { createChatClient } from "@/lib/chatStompClient";
 import MenuActionsContainer from "@/components/MenuActionsContainer";
 import { useNotification } from "@/hooks/NotificationContext";
 import { notificationApi } from "@/common/api/notification.api";
+import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
+import { getProductCustomTextsApi } from "@/common/api/customText.api";
 
 const ChatRoomPage = () => {
   const { chatRoomId } = useParams();
@@ -19,6 +21,34 @@ const ChatRoomPage = () => {
   const [myInfo, setMyInfo] = useState({});
   const [yourInfo, setYourInfo] = useState({});
   const [chatMessages, setChatMessages] = useState([]);
+
+  const [text, setText] = useState(""); //채팅 입력창
+  const [phraseModalOpen, setPhraseModalOpen] = useState(false); // 자주 쓰는 문구 모달
+
+  // 자주 쓰는 문구 목록
+  const [phrases, setPhrases] = useState([]);
+
+  //자주 쓰는 문구 핸들러
+  // CHAT 기준 문구 재조회 함수
+  const fetchChatPhrases = useCallback(async () => {
+    const data = await getProductCustomTextsApi({
+      contentType: "CHAT",
+    });
+    setPhrases(data);
+  }, []);
+
+  //  모달 열릴 때 문구 조회
+  useEffect(() => {
+    if (!phraseModalOpen) return;
+    fetchChatPhrases();
+  }, [phraseModalOpen, fetchChatPhrases]);
+
+  // 문구 선택 → 입력창 반영
+  const handleApplyPhrase = useCallback((phraseText) => {
+    setText((prev) => (prev ? prev + "\n" + phraseText : phraseText));
+    setPhraseModalOpen(false);
+  }, []);
+
   // 상대가 어디까지 읽었는지(메시지 옆 "읽음" 표시용)
   const [yourLastReadMessageId, setYourLastReadMessageId] = useState(0);
   const { user, loading } = useAuth();
@@ -94,15 +124,6 @@ const ChatRoomPage = () => {
   const fetchChatMessages = useCallback(async () => {
     const data = await chatMessagesApi(chatRoomId);
     setChatInfo(data);
-    setHeader({
-      title: data.sellerNickname,
-      // 옵션
-      titleAlign: "left",
-      isSticky: true,
-      // showBack: true,
-      // hideRight: false,
-      // rightActions: [...]
-    });
     setChatMessages(data.chatMessages);
     settingChatParticipantInfo(data);
     if (data.yourLastReadMessageId) {
@@ -110,7 +131,7 @@ const ChatRoomPage = () => {
     } else {
       setYourLastReadMessageId(0);
     }
-  }, [chatRoomId, setHeader, user?.memberId]);
+  }, [chatRoomId, user?.memberId]);
 
   const clientRef = useRef(null);
   const subRef = useRef(null);
@@ -119,7 +140,7 @@ const ChatRoomPage = () => {
   const lastReadSentRef = useRef(0);
 
   const [connected, setConnected] = useState(false);
-  const [text, setText] = useState("");
+  //const [text, setText] = useState("");
 
   // 마지막 메시지 id
   const lastMessageId = useMemo(() => {
@@ -272,6 +293,16 @@ const ChatRoomPage = () => {
     };
   }, [chatRoomId, user, lastMessageId, markAsRead]);
 
+  useEffect(() => {
+    if (yourInfo && yourInfo.nickName) {
+      setHeader({
+        title: yourInfo.nickName,
+        titleAlign: "left",
+        isSticky: true,
+      });
+    }
+  }, [yourInfo, setHeader]);
+
   const grouped = groupMessagesByDate(chatMessages);
 
   const notiReadOnceRef = useRef(new Set());
@@ -328,10 +359,10 @@ const ChatRoomPage = () => {
 
   return (
     <Container className="flex flex-col flex-1 min-h-screen">
-      <div className="sticky top-[64px] bg-white z-50 ">
+      <div className="sticky top-[64px] bg-white z-50">
         <ChatProductInfoBar
           {...productProps}
-          onStatusChanged={fetchChatMessages}
+          onStatusChanged={fetchChatMessages} // 상품 상태 변경시 채팅정보 재조회
         />
       </div>
       {chatMessages.length <= 0 && (
@@ -375,8 +406,18 @@ const ChatRoomPage = () => {
           setText={setText}
           sendMessage={sendMessage}
           connected={connected}
+          onOpenPhraseModal={() => setPhraseModalOpen(true)}
         />
       </div>
+
+      {/* 자주 쓰는 문구 모달 */}
+      <FrequentPhraseModal
+        open={phraseModalOpen}
+        onClose={() => setPhraseModalOpen(false)}
+        phrases={phrases}
+        onApplyPhrase={handleApplyPhrase} // 문구 적용 함수
+        onReloadPhrases={fetchChatPhrases} // 문구 재조회 함수
+      />
 
       {/* 점 세 개 메뉴*/}
       <MenuActionsContainer
@@ -385,6 +426,7 @@ const ChatRoomPage = () => {
         targetMemberId={yourInfo?.memberId}
         reportTargetType="MEMBER"
         anchorEl={anchorEl}
+        setAnchorEl={setAnchorEl}
       />
     </Container>
   );

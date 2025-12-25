@@ -17,7 +17,7 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
-import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
 import { getProductCustomTextsApi } from "@/common/api/customText.api"; //자주 쓰는 문구 목록불러오기 API
 import useProductVisionAi from "@/hooks/useProductVisionAi";
 import { useModal } from "@/hooks/useModal";
@@ -80,9 +80,7 @@ const ProductCreatePage = () => {
   useEffect(() => {
     const loadPhrases = async () => {
       try {
-        const data = await getProductCustomTextsApi();
-        console.log("자주 쓰는 문구 조회 결과 👉", data);
-
+        const data = await getProductCustomTextsApi({ contentType: "PRODUCT" });
         setPhrases(data); //서버 데이터로 교체
       } catch (e) {
         console.error("자주 쓰는 문구 불러오기 실패", e);
@@ -94,7 +92,7 @@ const ProductCreatePage = () => {
 
   //등록 후 재조회용 함수
   const reloadPhrases = useCallback(async () => {
-    const updated = await getProductCustomTextsApi();
+    const updated = await getProductCustomTextsApi({ contentType: "PRODUCT" });
     setPhrases(updated);
   }, []);
 
@@ -316,123 +314,125 @@ const ProductCreatePage = () => {
   }
 
   return (
-    <Container>
-      {submitLoading && <div>로딩중...</div>}
-      <div className="max-w-full mx-auto bg-gray-0  -mb-4 ">
-        <div className="px-6">
-          <div className="border-b py-4">
-            <span className="text-lg font-semibold pl-5">상품 정보</span>
-          </div>
+    <div className="-mt-9">
+      <Container>
+        {submitLoading && <div>로딩중...</div>}
+        <div className="max-w-full mx-auto bg-gray-0  -mb-4 ">
+          <div className="px-6">
+            <div className="border-b py-4">
+              <span className="text-lg font-semibold pl-5">상품 정보</span>
+            </div>
 
-          {/* AI로 작성하기 - 2,3차 개발*/}
-          <div>
-            <AiWriteSection
-              value={aiWriteEnabled}
-              onChange={setAiWriteEnabled}
+            {/* AI로 작성하기 - 2,3차 개발*/}
+            <div>
+              <AiWriteSection
+                value={aiWriteEnabled}
+                onChange={setAiWriteEnabled}
+              />
+            </div>
+
+            {/* 상품 이미지 */}
+            <div>
+              <ProductImageUploader images={images} setImages={setImages} />
+            </div>
+
+            {/* 상품명 */}
+            <div>
+              <ProductTitleInput
+                value={form.productTitle}
+                onChange={(t) => setForm({ ...form, productTitle: t })}
+              />
+            </div>
+
+            {/* 카테고리 */}
+            <div>
+              <CategorySelector
+                value={{
+                  depth1: form.categoryDepth1,
+                  depth2: form.categoryDepth2,
+                  depth3: form.categoryDepth3,
+                }}
+                onChange={(depth1, depth2, depth3) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    categoryDepth1: depth1 ? Number(depth1) : null,
+                    categoryDepth2: depth2 ? Number(depth2) : null,
+                    categoryDepth3: depth3 ? Number(depth3) : null,
+                  }))
+                }
+              />
+            </div>
+
+            {/* 판매 가격 */}
+            <div>
+              <ProductPriceInput
+                value={form.sellPrice}
+                onChange={(p) => setForm({ ...form, sellPrice: p })}
+              />
+            </div>
+
+            {/* 상품 설명 */}
+            <div>
+              <ProductDescriptionEditor
+                value={form.productDescription}
+                onChange={(d) => setForm({ ...form, productDescription: d })}
+                onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
+              />
+            </div>
+
+            {/*자주 쓰는 문구 모달: reloadPhrases(등록) */}
+            <FrequentPhraseModal
+              open={isPhraseModalOpen}
+              onClose={() => setIsPhraseModalOpen(false)}
+              phrases={phrases}
+              setPhrases={setPhrases}
+              onApplyPhrase={handleApplyPhrase}
+              onReloadPhrases={reloadPhrases}
             />
-          </div>
 
-          {/* 상품 이미지 */}
-          <div>
-            <ProductImageUploader images={images} setImages={setImages} />
-          </div>
+            {/* 상품 상태 */}
+            <div>
+              <ProductConditionSelector
+                value={form.productStatus}
+                onChange={(s) => setForm({ ...form, productStatus: s })}
+              />
+            </div>
 
-          {/* 상품명 */}
-          <div>
-            <ProductTitleInput
-              value={form.productTitle}
-              onChange={(t) => setForm({ ...form, productTitle: t })}
+            {/* 거래 방법*/}
+            <div>
+              <TradeMethodSelector
+                value={form}
+                images={images}
+                onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
+              />
+            </div>
+
+            {/* Vision 브릿지 */}
+            <ProductVisionBridge
+              file={mainImage?.file}
+              onLoading={handleVisionLoading}
+              onResult={handleVisionResult}
+              onError={handleVisionError}
+              onReset={handleVisionReset}
             />
+
+            {/* 환경 점수 - 2,3차 개발*/}
+            <div>
+              <EcoScoreSection score={form.environmentScore} />
+            </div>
           </div>
 
-          {/* 카테고리 */}
-          <div>
-            <CategorySelector
-              value={{
-                depth1: form.categoryDepth1,
-                depth2: form.categoryDepth2,
-                depth3: form.categoryDepth3,
-              }}
-              onChange={(depth1, depth2, depth3) =>
-                setForm((prev) => ({
-                  ...prev,
-                  categoryDepth1: depth1 ? Number(depth1) : null,
-                  categoryDepth2: depth2 ? Number(depth2) : null,
-                  categoryDepth3: depth3 ? Number(depth3) : null,
-                }))
-              }
+          {/* 하단 버튼 */}
+          <div className="sticky bottom-0  bg-white border-t z-40 ">
+            <ActionButtonBar
+              role="WRITER"
+              onSubmit={handleSubmit}
+              loading={submitLoading}
             />
-          </div>
-
-          {/* 판매 가격 */}
-          <div>
-            <ProductPriceInput
-              value={form.sellPrice}
-              onChange={(p) => setForm({ ...form, sellPrice: p })}
-            />
-          </div>
-
-          {/* 상품 설명 */}
-          <div>
-            <ProductDescriptionEditor
-              value={form.productDescription}
-              onChange={(d) => setForm({ ...form, productDescription: d })}
-              onOpenPhraseModal={() => setIsPhraseModalOpen(true)} // 자주 쓰는 문구 모달 열기
-            />
-          </div>
-
-          {/*자주 쓰는 문구 모달: reloadPhrases(등록) */}
-          <FrequentPhraseModal
-            open={isPhraseModalOpen}
-            onClose={() => setIsPhraseModalOpen(false)}
-            phrases={phrases}
-            setPhrases={setPhrases}
-            onApplyPhrase={handleApplyPhrase}
-            onReloadPhrases={reloadPhrases}
-          />
-
-          {/* 상품 상태 */}
-          <div>
-            <ProductConditionSelector
-              value={form.productStatus}
-              onChange={(s) => setForm({ ...form, productStatus: s })}
-            />
-          </div>
-
-          {/* 거래 방법*/}
-          <div>
-            <TradeMethodSelector
-              value={form}
-              images={images}
-              onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
-            />
-          </div>
-
-          {/* Vision 브릿지 */}
-          <ProductVisionBridge
-            file={mainImage?.file}
-            onLoading={handleVisionLoading}
-            onResult={handleVisionResult}
-            onError={handleVisionError}
-            onReset={handleVisionReset}
-          />
-
-          {/* 환경 점수 - 2,3차 개발*/}
-          <div>
-            <EcoScoreSection score={form.environmentScore} />
           </div>
         </div>
-
-        {/* 하단 버튼 */}
-        <div className="sticky bottom-0  bg-white border-t z-40 ">
-          <ActionButtonBar
-            role="WRITER"
-            onSubmit={handleSubmit}
-            loading={submitLoading}
-          />
-        </div>
-      </div>
-    </Container>
+      </Container>
+    </div>
   );
 };
 

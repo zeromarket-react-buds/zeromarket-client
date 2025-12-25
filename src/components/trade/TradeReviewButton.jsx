@@ -9,16 +9,12 @@ const TradeReviewButton = ({ tradeId, reviewStatus }) => {
 
   if (!reviewStatus) return null;
 
-  const myReviewId = reviewStatus.myReviewId ?? null;
-  const partnerReviewId = reviewStatus.partnerReviewId ?? null;
+  const myReviewId = reviewStatus.myReviewId;
+  const partnerReviewId = reviewStatus.partnerReviewId;
 
-  // 서버가 내려주는 exists 플래그가 가끔 틀릴 수 있으니, id가 있으면 그걸 우선 신뢰
-  const hasMy = Boolean(myReviewId) || Boolean(reviewStatus.myReviewExists);
-  const hasPartner =
-    Boolean(partnerReviewId) || Boolean(reviewStatus.partnerReviewExists);
-
-  // 내가 이미 쓴 경우에는 canWrite가 true로 오더라도 화면에서는 못 쓰게 막는게 안전
-  const canWrite = Boolean(reviewStatus.canWriteReview) && !hasMy;
+  // 서버에서 계산된 리뷰 존재 여부 그대로 사용
+  const hasMy = reviewStatus.myReviewExists;
+  const hasPartner = reviewStatus.partnerReviewExists;
 
   // 후기 작성 페이지 이동
   const goWriteReview = (e) => {
@@ -30,7 +26,7 @@ const TradeReviewButton = ({ tradeId, reviewStatus }) => {
   const goMyReviewDetail = async (e) => {
     e.stopPropagation();
 
-    // 기존엔 조용히 return해서 "왜 안되지?"가 됨 → 원인 즉시 보이게 처리
+    // 기존엔 조용히 return해서 원인을 모름. 원인 즉시 보이게 처리
     if (!myReviewId) {
       await alert({
         description:
@@ -61,7 +57,7 @@ const TradeReviewButton = ({ tradeId, reviewStatus }) => {
   const baseBtnClass = "inline-flex flex-1 justify-center py-5 mt-4";
 
   // 나도 안 썼고 상대도 안 쓴 상태
-  if (canWrite && !hasMy && !hasPartner) {
+  if (!hasMy && !hasPartner) {
     return (
       <div className="flex flex-col gap-2 mt-2">
         <Button

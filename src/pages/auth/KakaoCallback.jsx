@@ -5,33 +5,42 @@ import Container from "@/components/Container";
 
 const KakaoCallback = () => {
   const navigate = useNavigate();
-  const { oauthLogin } = useAuth();
+  const { oauthLogin, linkKakaoAccount, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
+    const redirectUri =
+      import.meta.env.VITE_KAKAO_REDIRECT_URI ||
+      `${window.location.origin}/oauth/kakao/callback`;
 
     if (!code) {
       console.log("code 없음");
+      navigate("/login");
       return;
     }
 
-    const runOauthLogin = async () => {
+    const runOauth = async () => {
       try {
-        await oauthLogin(code);
-        console.log("카카오 로그인 성공");
-        navigate("/");
+        if (isAuthenticated) {
+          await linkKakaoAccount(code, redirectUri);
+          alert("카카오 계정이 연동되었습니다.");
+          navigate("/me");
+        } else {
+          await oauthLogin(code);
+          navigate("/");
+        }
       } catch (e) {
-        console.error("카카오 로그인 실패", e);
+        console.error("카카오 처리 실패", e);
         navigate("/login");
       }
     };
 
-    runOauthLogin();
-  }, []);
+    runOauth();
+  }, [isAuthenticated, linkKakaoAccount, navigate, oauthLogin]);
 
   return (
     <Container>
-      <div>로그인 처리 중...</div>
+      <div>카카오 인증 처리 중...</div>
     </Container>
   );
 };

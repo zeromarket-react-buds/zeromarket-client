@@ -22,7 +22,7 @@ import { useHeader } from "@/hooks/HeaderContext";
 import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import useProductVisionAi from "@/hooks/useProductVisionAi";
-import FrequentPhraseModal from "@/components/product/create/frequent-phrase/FrequentPhraseModal";
+import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
 import {
   getProductCustomTextsApi,
   createProductCustomTextApi,
@@ -76,7 +76,7 @@ const ProductEditPage = () => {
   // 자주 쓰는 문구 목록 조회 함수
   const reloadPhrases = useCallback(async () => {
     try {
-      const data = await getProductCustomTextsApi(); // 서버에서 [{id,text}, ...]
+      const data = await getProductCustomTextsApi({ contentType: "PRODUCT" }); // 서버에서 [{id,text}, ...]
       setPhrases(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error("자주 쓰는 문구 조회 실패:", e);
@@ -396,134 +396,136 @@ const ProductEditPage = () => {
   }
 
   return (
-    <Container>
-      {submitLoading && <div>로딩중...</div>}
+    <div className="-mt-9">
+      <Container>
+        {submitLoading && <div>로딩중...</div>}
 
-      <div className="max-w-full mx-auto bg-gray-0 -mb-4 ">
-        <div className="px-6">
-          <div className="border-b py-4">
-            <span className="text-lg font-semibold pl-5">상품 정보</span>
-          </div>
+        <div className="max-w-full mx-auto bg-gray-0 -mb-4 ">
+          <div className="px-6">
+            <div className="border-b py-4">
+              <span className="text-lg font-semibold pl-5">상품 정보</span>
+            </div>
 
-          {/* AI로 작성하기 - 2,3차 개발*/}
-          <div>
-            <AiWriteSection
-              value={aiWriteEnabled}
-              onChange={setAiWriteEnabled}
+            {/* AI로 작성하기 - 2,3차 개발*/}
+            <div>
+              <AiWriteSection
+                value={aiWriteEnabled}
+                onChange={setAiWriteEnabled}
+              />
+            </div>
+
+            {/* 상품 이미지 */}
+            <div>
+              <ProductImageUploader images={images} setImages={setImages} />
+            </div>
+
+            {/* 상품명 */}
+            <div>
+              <ProductTitleInput
+                value={form.productTitle}
+                onChange={(t) => setForm({ ...form, productTitle: t })}
+              />
+            </div>
+
+            {/* 카테고리 */}
+            <div>
+              <CategorySelector
+                value={{
+                  depth1: form.categoryDepth1,
+                  depth2: form.categoryDepth2,
+                  depth3: form.categoryDepth3,
+                }}
+                onChange={(depth1, depth2, depth3) =>
+                  setForm((prev) => ({
+                    //truthy,falsy 체크
+                    ...prev,
+                    categoryDepth1: depth1 ? Number(depth1) : null,
+                    categoryDepth2: depth2 ? Number(depth2) : null,
+                    categoryDepth3: depth3 ? Number(depth3) : null,
+                  }))
+                }
+              />
+            </div>
+
+            {/* 판매 가격 */}
+            <div>
+              <ProductPriceInput
+                value={form.sellPrice}
+                onChange={(p) => setForm({ ...form, sellPrice: p })}
+              />
+            </div>
+
+            {/* 상품 설명 */}
+            <div>
+              <ProductDescriptionEditor
+                value={form.productDescription}
+                onChange={(d) => setForm({ ...form, productDescription: d })}
+                // 자주 쓰는 문구 모달 열기 핸들러 연결
+                onOpenPhraseModal={() => setIsPhraseModalOpen(true)}
+              />
+            </div>
+
+            {/* 자주 쓰는 문구 모달 */}
+            <FrequentPhraseModal
+              open={isPhraseModalOpen}
+              onClose={() => setIsPhraseModalOpen(false)}
+              phrases={phrases}
+              onApplyPhrase={handleApplyPhrase}
+              onReloadPhrases={reloadPhrases}
+              // 아래는 모달에서 "등록" API를 직접 쓰는 구조라면 넘겨줘도 되고,
+              // 모달이 자체적으로 API 호출한다면 빼도 됨
+              //onCreatePhrase={createProductCustomTextApi}
             />
-          </div>
 
-          {/* 상품 이미지 */}
-          <div>
-            <ProductImageUploader images={images} setImages={setImages} />
-          </div>
+            {/* 상품 상태 */}
+            <div>
+              <ProductConditionSelector
+                value={form.productStatus}
+                onChange={(s) => setForm({ ...form, productStatus: s })}
+              />
+            </div>
 
-          {/* 상품명 */}
-          <div>
-            <ProductTitleInput
-              value={form.productTitle}
-              onChange={(t) => setForm({ ...form, productTitle: t })}
+            {/* 거래 방법*/}
+            <div>
+              <TradeMethodSelector
+                value={form}
+                images={images}
+                isEdit={true}
+                productId={id}
+                routeState={routerLocation.state}
+                onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
+              />
+            </div>
+
+            {/* Vision 브릿지 */}
+            <ProductVisionBridge
+              file={mainImage?.file}
+              onLoading={handleVisionLoading}
+              onResult={handleVisionResult}
+              onError={handleVisionError}
+              onReset={handleVisionReset}
             />
+
+            {/* 환경 점수 - 2,3차 개발*/}
+            <div>
+              <EcoScoreSection
+                score={form.environmentScore}
+                loading={visionLoading}
+                error={visionError}
+              />
+            </div>
           </div>
 
-          {/* 카테고리 */}
-          <div>
-            <CategorySelector
-              value={{
-                depth1: form.categoryDepth1,
-                depth2: form.categoryDepth2,
-                depth3: form.categoryDepth3,
-              }}
-              onChange={(depth1, depth2, depth3) =>
-                setForm((prev) => ({
-                  //truthy,falsy 체크
-                  ...prev,
-                  categoryDepth1: depth1 ? Number(depth1) : null,
-                  categoryDepth2: depth2 ? Number(depth2) : null,
-                  categoryDepth3: depth3 ? Number(depth3) : null,
-                }))
-              }
-            />
-          </div>
-
-          {/* 판매 가격 */}
-          <div>
-            <ProductPriceInput
-              value={form.sellPrice}
-              onChange={(p) => setForm({ ...form, sellPrice: p })}
-            />
-          </div>
-
-          {/* 상품 설명 */}
-          <div>
-            <ProductDescriptionEditor
-              value={form.productDescription}
-              onChange={(d) => setForm({ ...form, productDescription: d })}
-              // 자주 쓰는 문구 모달 열기 핸들러 연결
-              onOpenPhraseModal={() => setIsPhraseModalOpen(true)}
-            />
-          </div>
-
-          {/* 자주 쓰는 문구 모달 */}
-          <FrequentPhraseModal
-            open={isPhraseModalOpen}
-            onClose={() => setIsPhraseModalOpen(false)}
-            phrases={phrases}
-            onApplyPhrase={handleApplyPhrase}
-            onReloadPhrases={reloadPhrases}
-            // 아래는 모달에서 "등록" API를 직접 쓰는 구조라면 넘겨줘도 되고,
-            // 모달이 자체적으로 API 호출한다면 빼도 됨
-            //onCreatePhrase={createProductCustomTextApi}
-          />
-
-          {/* 상품 상태 */}
-          <div>
-            <ProductConditionSelector
-              value={form.productStatus}
-              onChange={(s) => setForm({ ...form, productStatus: s })}
-            />
-          </div>
-
-          {/* 거래 방법*/}
-          <div>
-            <TradeMethodSelector
-              value={form}
-              images={images}
-              isEdit={true}
-              productId={id}
-              routeState={routerLocation.state}
-              onChange={(next) => setForm((prev) => ({ ...prev, ...next }))}
-            />
-          </div>
-
-          {/* Vision 브릿지 */}
-          <ProductVisionBridge
-            file={mainImage?.file}
-            onLoading={handleVisionLoading}
-            onResult={handleVisionResult}
-            onError={handleVisionError}
-            onReset={handleVisionReset}
-          />
-
-          {/* 환경 점수 - 2,3차 개발*/}
-          <div>
-            <EcoScoreSection
-              score={form.environmentScore}
-              loading={visionLoading}
-              error={visionError}
+          <div className="sticky bottom-0  bg-white border-t z-50 ">
+            <ActionButtonBar
+              role="EDITOR"
+              onSubmit={handleSubmit}
+              loading={submitLoading}
             />
           </div>
         </div>
-
-        <div className="sticky bottom-0  bg-white border-t z-50 ">
-          <ActionButtonBar
-            role="EDITOR"
-            onSubmit={handleSubmit}
-            loading={submitLoading}
-          />
-        </div>
-      </div>
-    </Container>
+      </Container>
+    </div>
   );
 };
 

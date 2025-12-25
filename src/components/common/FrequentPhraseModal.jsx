@@ -56,7 +56,7 @@ const FrequentPhraseModal = ({
     try {
       setLoading(true);
 
-      await createProductCustomTextApi(newText);
+      await createProductCustomTextApi("PRODUCT", newText.trim());
 
       // ☆등록 성공 → 부모에서 다시 조회
       await onReloadPhrases();

@@ -14,6 +14,7 @@ export default function MenuActionsContainer({
   menuOpen,
   setMenuOpen,
   anchorEl,
+  setAnchorEl,
 
   // 신고/차단 대상(상대방 memberId)
   targetMemberId,

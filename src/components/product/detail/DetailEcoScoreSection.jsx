@@ -9,9 +9,14 @@ const DetailEcoScoreSection = ({ detail }) => {
           <span>{detail.environmentScore}p</span>
         </span>
       </div>
-      <div className=" my-2 text-sm text-brand-darkgray border-b pb-3">
+      <div className=" my-2 text-sm text-brand-darkgray border-b pb-3 space-y-1">
         <div>환경을 생각하는 {detail.seller?.sellerNickName}님, </div>
-        <div> 이 물품을 구입하면 30mg 탄소절감이 됩니다! </div>
+        <div>
+          이 상품은 환경에 기여한 점수
+          <span className="font-bold"> {detail.environmentScore}점</span>의
+          물품으로,
+        </div>
+        <div> 새 제품 생산을 줄이는 데 큰 의미가 있는 선택이에요.</div>
       </div>
     </div>
   );
