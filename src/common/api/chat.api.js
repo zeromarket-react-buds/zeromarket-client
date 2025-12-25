@@ -64,7 +64,6 @@ const processTradePendingApi = async (productId, buyerId, callback) => {
     }
   } catch (error) {
     console.error(error);
-    alert(error.message);
   }
 };
 
@@ -89,7 +88,6 @@ const processTradeCompleteApi = async (productId, buyerId, callback) => {
     }
   } catch (error) {
     console.error(error);
-    alert(error.message);
   }
 };
 

@@ -3,6 +3,7 @@ import { useState } from "react"; // 문구카드 클릭시 상태전환 위해
 import { createProductCustomTextApi } from "@/common/api/customText.api";
 import { deleteProductCustomTextApi } from "@/common/api/customText.api";
 import { updateProductCustomTextApi } from "@/common/api/customText.api";
+import { useModal } from "@/hooks/useModal";
 
 //phrases, setPhrases, onApplyPhrase, props로 받아옴
 const FrequentPhraseModal = ({
@@ -34,7 +35,7 @@ const FrequentPhraseModal = ({
 
   //선택된 문구 ID 상태: 카드선택시 연두색으로
   const [selectedIds, setSelectedIds] = useState([]); //null에서 []로 다중선택 가능하게, 변수&상태명 s복수로 변경
-
+  const { alert } = useModal();
   // 문구 등록(Post) 클릭 핸들러: 문구 목록 불러오기시 작업했던거
   // const handleRegister = () => {
   //   if (!newText.trim()) return; //빈값 방지
@@ -64,7 +65,7 @@ const FrequentPhraseModal = ({
       setNewText("");
     } catch (e) {
       console.error("자주 쓰는 문구 등록 실패", e);
-      alert("문구 등록에 실패했습니다.");
+      await alert({ description: "문구 등록에 실패했습니다." });
     } finally {
       setLoading(false);
     }
@@ -203,7 +204,9 @@ const FrequentPhraseModal = ({
                           setEditText("");
                         } catch (e) {
                           console.error("문구 수정 실패", e);
-                          alert("문구 수정에 실패했습니다.");
+                          await alert({
+                            description: "문구 수정에 실패했습니다.",
+                          });
                         }
                       }}
                       className="p-1 rounded hover:bg-white"
@@ -243,7 +246,9 @@ const FrequentPhraseModal = ({
                             );
                           } catch (e) {
                             console.error("문구 삭제 실패", e);
-                            alert("문구 삭제에 실패했습니다.");
+                            await alert({
+                              description: "문구 삭제에 실패했습니다.",
+                            });
                           }
                         }}
                         className="p-1 hover:bg-gray-100 rounded"

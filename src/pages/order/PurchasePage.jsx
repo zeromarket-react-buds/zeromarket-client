@@ -12,6 +12,7 @@ import {
   getDefaultAddress,
   getMyAddresses,
 } from "@/common/api/address.api";
+import { useModal } from "@/hooks/useModal";
 
 const BottomPayButton = ({ disabled, label, onClick }) => (
   <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-center z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
@@ -102,9 +103,7 @@ const PriceSummary = ({ sellPrice, feeRate = 0 }) => {
     <div className="border rounded-lg p-4 text-sm space-y-2 bg-white">
       <div className="flex items-center justify-between font-semibold text-base">
         <span>최종 결제 금액</span>
-        <span className="text-green-700">
-          {totalAmount.toLocaleString()}원
-        </span>
+        <span className="text-green-700">{totalAmount.toLocaleString()}원</span>
       </div>
       <div className="border-t pt-3 space-y-1">
         <Row label="상품 금액" value={`${sellPrice.toLocaleString()}원`} bold />
@@ -131,9 +130,7 @@ const PaymentSection = () => {
     <div className="border rounded-lg p-4 space-y-3 bg-white">
       <div className="flex items-center justify-between text-sm font-semibold">
         <span>안심결제 선택</span>
-        <span className="text-xs text-gray-500">
-          오늘도 안전해서, 안심결제
-        </span>
+        <span className="text-xs text-gray-500">오늘도 안전해서, 안심결제</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {methods.map((m) => (
@@ -239,18 +236,25 @@ const PurchasePage = () => {
     },
   });
 
+  const { alert } = useModal();
+
   // 상품 상태 2차 검증
   const productStatusCode = product?.salesStatus.name;
 
   useEffect(() => {
     if (!product) return;
-    const BLOCKED_STATUS = ["RESERVED", "SOLD_OUT"];
-    const isForSale = productStatusCode === "FOR_SALE";
+    const checkForSale = async () => {
+      const BLOCKED_STATUS = ["RESERVED", "SOLD_OUT"];
+      const isForSale = productStatusCode === "FOR_SALE";
 
-    if (!isForSale || BLOCKED_STATUS.includes(productStatusCode)) {
-      alert("판매 중이 아닌 상품입니다. 상품 페이지로 이동합니다.");
-      navigate(`/products/${product.productId}`, { replace: true });
-    }
+      if (!isForSale || BLOCKED_STATUS.includes(productStatusCode)) {
+        await alert({
+          description: "판매 중이 아닌 상품입니다. 상품 페이지로 이동합니다.",
+        });
+        navigate(`/products/${product.productId}`, { replace: true });
+      }
+    };
+    checkForSale();
   }, [product, productStatusCode, navigate]);
 
   useEffect(() => {
@@ -340,12 +344,12 @@ const PurchasePage = () => {
     if (isSubmitting) return;
 
     if (!tradeType) {
-      alert("거래 방식을 선택해주세요.");
+      await alert({ description: "거래 방식을 선택해주세요." });
       return;
     }
 
     if (tradeType === "DELIVERY" && !address.addressId) {
-      alert("배송지를 선택해주세요.");
+      await alert({ description: "배송지를 선택해주세요." });
       return;
     }
 
@@ -370,11 +374,13 @@ const PurchasePage = () => {
       console.log(err.code);
 
       if (err.code === "TRADE_ALREADY_EXIST") {
-        alert("예약 중인 상품입니다.");
+        await alert({ description: "예약 중인 상품입니다." });
         navigate("/");
         return;
       }
-      alert("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+      await alert({
+        description: "결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.",
+      });
     } finally {
       setIsSubmitting(false);
     }

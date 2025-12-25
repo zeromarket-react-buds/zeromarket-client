@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getMyAddresses } from "@/common/api/address.api";
 import { useHeader } from "@/hooks/HeaderContext";
 import Container from "@/components/Container";
+import { useModal } from "@/hooks/useModal";
 
 const MAX = 5;
 
@@ -43,14 +44,15 @@ const AddressListPage = () => {
 
   const tradeType = searchParams.get("tradeType"); // DELIVERY | DIRECT
   const disabledAdd = addresses.length >= MAX;
+  const { alert } = useModal();
 
   const handleSelect = (addressId) => {
     setSelectedId(addressId);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedId) {
-      alert("선택한 배송지가 없습니다.");
+      await alert({ description: "선택한 배송지가 없습니다." });
       return;
     }
 
@@ -70,9 +72,9 @@ const AddressListPage = () => {
         {
           key: "edit-address",
           label: "수정",
-          onClick: () => {
+          onClick: async () => {
             if (!selectedId) {
-              alert("수정할 배송지를 선택해주세요.");
+              await alert({ description: "수정할 배송지를 선택해주세요." });
               return;
             }
             navigate(`${selectedId}/edit`);
@@ -112,9 +114,11 @@ const AddressListPage = () => {
 
       <div className="px-4 mb-4">
         <button
-          onClick={() => {
+          onClick={async () => {
             if (disabledAdd) {
-              alert("배송지는 최대 5개까지 등록할 수 있습니다.");
+              await alert({
+                description: "배송지는 최대 5개까지 등록할 수 있습니다.",
+              });
               return;
             }
             navigate(`new`);

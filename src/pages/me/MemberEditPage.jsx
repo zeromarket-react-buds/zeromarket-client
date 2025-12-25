@@ -109,18 +109,20 @@ const MemberEditPage = () => {
       {/* 프로필 영역 */}
       <section className="flex items-center gap-6 mb-10">
         <div className="relative">
-          <div className="w-14 h-14 rounded-full bg-brand-green flex items-center justify-center overflow-hidden">
-            {/* 프로필 이미지 */}
-            {profileImg ? (
+          {/* 프로필 이미지 */}
+          {profileImg ? (
+            <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
               <img
                 src={profileImg}
                 alt="profile"
                 className="w-full h-full object-cover"
               />
-            ) : (
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-brand-green flex items-center justify-center overflow-hidden">
               <UserRound className="text-brand-ivory size-10" />
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* 닉네임 */}
@@ -211,7 +213,7 @@ const MemberEditPage = () => {
             <Button
               onClick={async () => {
                 if (!isAuthenticated) {
-                  alert("로그인 후 연동 가능합니다.");
+                  await alert({ description: "로그인 후 연동 가능합니다." });
                   navigate("/login");
                   return;
                 }
@@ -229,7 +231,9 @@ const MemberEditPage = () => {
                 const REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
 
                 if (!KAKAO_CLIENT_ID) {
-                  alert("Kakao REST API 키가 설정되지 않았습니다.");
+                  await alert({
+                    description: "Kakao REST API 키가 설정되지 않았습니다.",
+                  });
                   return;
                 }
 

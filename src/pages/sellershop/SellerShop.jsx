@@ -275,7 +275,7 @@ const SellerShopPage = () => {
       }
     } catch (err) {
       console.error(err);
-      alert("좋아요 변경 실패");
+      await alert({ description: "좋아요 변경 실패" });
     }
   };
 

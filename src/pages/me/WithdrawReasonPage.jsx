@@ -2,6 +2,7 @@ import Container from "@/components/Container";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
 
 const REASONS = [
   { id: 2, label: "자주 사용하지 않음" },
@@ -18,6 +19,7 @@ export default function WithdrawReasonPage() {
   const [detail, setDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const isOther = Number(reasonId) === 5;
+  const { alert } = useModal();
 
   useEffect(() => {
     if (!isOther && detail) {
@@ -31,7 +33,7 @@ export default function WithdrawReasonPage() {
 
   const handleSubmit = async () => {
     if (!reasonId) {
-      window.alert("탈퇴 사유를 선택해주세요.");
+      await alert({ description: "탈퇴 사유를 선택해주세요." });
       return;
     }
 
@@ -41,14 +43,16 @@ export default function WithdrawReasonPage() {
         withdrawalReasonId: Number(reasonId),
         withdrawalReasonDetail: detail.trim() || undefined,
       });
-      window.alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+      await alert({
+        description: "탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.",
+      });
       navigate("/");
     } catch (error) {
       console.error("탈퇴 요청 실패:", error);
       const serverMessage =
         error?.message ||
         "탈퇴 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-      window.alert(serverMessage);
+      await alert({ description: serverMessage });
     } finally {
       setSubmitting(false);
     }
@@ -58,7 +62,9 @@ export default function WithdrawReasonPage() {
     <Container className="pb-10">
       <section className="space-y-4">
         <div>
-          <h2 className="text-xl font-extrabold mb-2">탈퇴 사유를 선택해주세요</h2>
+          <h2 className="text-xl font-extrabold mb-2">
+            탈퇴 사유를 선택해주세요
+          </h2>
           <p className="text-sm text-gray-700">
             선택하신 사유를 바탕으로 서비스 개선에 참고하며, 별도로 표시되지
             않습니다.

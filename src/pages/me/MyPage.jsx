@@ -65,9 +65,9 @@ export default function MyPage() {
     fetchMyPage();
   }, [loading]);
 
-  const goMyShop = () => {
+  const goMyShop = async () => {
     if (!user?.memberId) {
-      alert("사용자 정보를 찾을 수 없습니다.");
+      await alert({ description: "사용자 정보를 찾을 수 없습니다." });
       return;
     }
 
@@ -154,17 +154,20 @@ export default function MyPage() {
     <Container>
       {/* 프로필 */}
       <section className="flex items-center gap-6 mb-6">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-brand-green overflow-hidden">
-          {!profileImg ? (
-            <UserRound className="text-brand-ivory size-10" />
-          ) : (
+        {/* 프로필 이미지 */}
+        {profileImg ? (
+          <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
             <img
               src={profileImg}
               alt="profile"
               className="w-full h-full object-cover"
             />
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="w-14 h-14 rounded-full bg-brand-green flex items-center justify-center overflow-hidden">
+            <UserRound className="text-brand-ivory size-10" />
+          </div>
+        )}
         <div className="text-lg font-semibold">{user?.nickname}</div>
       </section>
       <section className=" mb-6 px-2">

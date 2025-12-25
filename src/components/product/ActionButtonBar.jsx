@@ -28,7 +28,7 @@ const ActionButtonBar = ({
   //미로긴 사용자 버튼 클릭시 경고메세지
   const handleNotLoggedIn = async () => {
     if (!isAuthenticated) {
-      await alert("로그인 후 이용 가능합니다.");
+      await alert({ description: "로그인 후 이용 가능합니다." });
       navigate("/login");
       return true;
     }

@@ -4,6 +4,7 @@ import {
   processTradeCompleteApi,
 } from "@/common/api/chat.api";
 import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
 
 const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
   const { productId, sellerId, buyerId, tradeStatus, salesStatus } =
@@ -12,14 +13,15 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
   console.log("productProps", productProps);
   const { user } = useAuth();
   const isMyProduct = user?.memberId === sellerId;
+  const { alert } = useModal();
 
   const handleChangeStatus = async (targetStatus) => {
     if (targetStatus === "PENDING") {
       if (!window.confirm("예약하시겠습니까?")) {
         return;
       }
-      await processTradePendingApi(productId, buyerId, () => {
-        alert("예약 완료되었습니다.");
+      await processTradePendingApi(productId, buyerId, async () => {
+        await alert({ description: "예약 완료되었습니다." });
         onStatusChanged();
       });
 
@@ -30,8 +32,8 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
       if (!window.confirm("거래완료하시겠습니까?")) {
         return;
       }
-      await processTradeCompleteApi(productId, buyerId, () => {
-        alert("거래 완료되었습니다.");
+      await processTradeCompleteApi(productId, buyerId, async () => {
+        await alert({ description: "거래 완료되었습니다." });
         onStatusChanged();
       });
 

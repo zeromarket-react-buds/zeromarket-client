@@ -6,6 +6,7 @@ import { checkDuplicateIdApi } from "@/common/api/auth.api";
 import { Eye, EyeOff } from "lucide-react";
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { toast } from "react-toastify";
+import { useModal } from "@/hooks/useModal";
 
 // 검증 시점
 // - 타이핑 중: "형식만" 검사
@@ -21,6 +22,8 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const { alert } = useModal();
+
   const initialForm = {
     loginId: "",
     password: "",
@@ -46,7 +49,7 @@ const SignupPage = () => {
     const isValid = await validateAll();
 
     if (!isValid) {
-      alert("입력 정보를 다시 확인해주세요.");
+      await alert({ description: "입력 정보를 다시 확인해주세요." });
       return;
     }
 
