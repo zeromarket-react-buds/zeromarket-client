@@ -20,11 +20,6 @@ const ProductList = () => {
   // 로그인 안된 상태에서도 테스트용 memberId=1 사용
   const memberId = isAuthenticated ? user.memberId : 1;
 
-  //찜하트 유지 안돼서 콘솔확인
-  useEffect(() => {
-    console.log(" [ProductList] 현재 로그인한 memberId =", memberId);
-  }, [memberId]);
-
   // 검색/sort 관련
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("popularity"); //popularity인기순/ latest인기순 정렬을 사용자 명시 선택시에만
@@ -92,7 +87,7 @@ const ProductList = () => {
 
       //찜색유지 안돼는 문제콘솔. memberId전달
       const data = await getProductListApi(query, memberId);
-      console.log("상품 목록 응답:", data);
+      // console.log("상품 목록 응답:", data);
 
       const fetched = data.content;
       const offset = data.offset;
