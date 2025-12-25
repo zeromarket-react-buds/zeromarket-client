@@ -21,7 +21,7 @@ export default function MyPage() {
   // 찜 개수 상태 추가
   const [wishCount, setWishCount] = useState(0);
   const navigate = useNavigate();
-  const { alert } = useModal();
+  const { alert, confirm } = useModal();
   const { user, loading, logout, isAuthenticated } = useAuth();
   const [profileImg, setProfileImg] = useState("");
   const [trustScore, setTrustScore] = useState(0.0);
@@ -125,7 +125,7 @@ export default function MyPage() {
   //location.pathname,추가 찜 후 MyPage로 다시 올 때마다 갱신됨!
 
   const handleLogout = async () => {
-    if (!window.confirm("로그아웃 하시겠습니까?")) {
+    if (!(await confirm({ description: "로그아웃 하시겠습니까?" }))) {
       return;
     }
     setIsLoggingOut(true); // 가드 잠깐 끄기

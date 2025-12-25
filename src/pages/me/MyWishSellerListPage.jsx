@@ -8,6 +8,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 
 import { apiClient } from "@/common/client";
 import { useAuth } from "@/hooks/AuthContext";
+import { useModal } from "@/hooks/useModal";
 
 const MyWishSellerListPage = () => {
   /// api/wish/sellers 는 로그인 유저 기준으로 동작
@@ -22,10 +23,10 @@ const MyWishSellerListPage = () => {
   const [error, setError] = useState(null);
 
   const { showLikeRemovedToast } = useLikeToast(); //글로벌토스트에서 찜삭제 메시지 함수 가져오기
-
+  const { alert, confirm } = useModal();
   // 셀러 찜 삭제
   const handleDelete = async (sellerId) => {
-    const ok = window.confirm("삭제하시겠습니까?");
+    const ok = await confirm({ description: "삭제하시겠습니까?" });
     if (!ok) return;
 
     try {

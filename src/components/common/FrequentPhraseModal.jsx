@@ -35,7 +35,7 @@ const FrequentPhraseModal = ({
 
   //선택된 문구 ID 상태: 카드선택시 연두색으로
   const [selectedIds, setSelectedIds] = useState([]); //null에서 []로 다중선택 가능하게, 변수&상태명 s복수로 변경
-  const { alert } = useModal();
+  const { alert, confirm } = useModal();
   // 문구 등록(Post) 클릭 핸들러: 문구 목록 불러오기시 작업했던거
   // const handleRegister = () => {
   //   if (!newText.trim()) return; //빈값 방지
@@ -229,8 +229,9 @@ const FrequentPhraseModal = ({
                       <button
                         onClick={async (e) => {
                           e.stopPropagation(); //연두색 버블링 방지
-                          const confirmed =
-                            window.confirm("이 문구를 삭제할까요?");
+                          const confirmed = await confirm({
+                            description: "이 문구를 삭제할까요?",
+                          });
                           if (!confirmed) return;
 
                           try {

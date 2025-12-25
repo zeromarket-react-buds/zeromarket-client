@@ -120,20 +120,9 @@ const ActionButtonBar = ({
       return;
     }
 
-    let mention = "";
-
     if (action === "끌어 올리기") {
       if (await confirm({ description: "이 상품을 끌어올리시겠습니까?" })) {
         console.log("끌어 올리기 실행됨");
-      }
-      return;
-    }
-
-    if (mention) {
-      if (window.confirm(mention)) {
-        console.log(`${action} 실행됨`);
-      } else {
-        console.log(`${action} 취소됨`);
       }
       return;
     }

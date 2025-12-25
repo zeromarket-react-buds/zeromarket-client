@@ -13,11 +13,11 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
   console.log("productProps", productProps);
   const { user } = useAuth();
   const isMyProduct = user?.memberId === sellerId;
-  const { alert } = useModal();
+  const { alert, confirm } = useModal();
 
   const handleChangeStatus = async (targetStatus) => {
     if (targetStatus === "PENDING") {
-      if (!window.confirm("예약하시겠습니까?")) {
+      if (!(await confirm({ description: "예약하시겠습니까?" }))) {
         return;
       }
       await processTradePendingApi(productId, buyerId, async () => {
@@ -29,7 +29,7 @@ const ChangeStatusButtons = ({ onStatusChanged, ...productProps }) => {
     }
 
     if (targetStatus === "COMPLETE") {
-      if (!window.confirm("거래완료하시겠습니까?")) {
+      if (!(await confirm({ description: "거래완료하시겠습니까?" }))) {
         return;
       }
       await processTradeCompleteApi(productId, buyerId, async () => {

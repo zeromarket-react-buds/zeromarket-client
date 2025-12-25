@@ -11,6 +11,7 @@ import {
   updateKeywordsApi,
   deleteKeywordsApi,
 } from "@/common/api/keyword.api";
+import { useModal } from "@/hooks/useModal";
 
 const Box = ({ children }) => (
   <div className="w-full border rounded-2xl p-8 min-h-[30vh]">{children}</div>
@@ -47,6 +48,7 @@ const KeywordAlertSettingPage = () => {
   const [recentKeywords, setRecentKeywords] = useState([]);
   const STORAGE_KEY = "recent_searches";
   const keywordRef = useRef("");
+  const { alert, confirm } = useModal();
 
   const getRecentKeywords = () => {
     const savedLocal = localStorage.getItem(STORAGE_KEY);
@@ -65,7 +67,7 @@ const KeywordAlertSettingPage = () => {
   const handleRegister = async (paramKeyword = "") => {
     const keyword = paramKeyword ? paramKeyword : keywordRef.current?.value;
     console.log("keywordRef", keyword);
-    if (!confirm(`키워드 알림을 등록하시겠습니까?`)) {
+    if (!(await confirm({ description: "키워드 알림을 등록하시겠습니까?" }))) {
       return;
     }
     const result = await createKeywordsApi({ keyword });
@@ -77,7 +79,9 @@ const KeywordAlertSettingPage = () => {
   };
 
   const handleDelete = async (alertId) => {
-    if (!confirm(`키워드 알림에서 삭제하시겠습니까?`)) {
+    if (
+      !(await confirm({ description: "키워드 알림에서 삭제하시겠습니까?" }))
+    ) {
       return;
     }
     const result = await deleteKeywordsApi(alertId);

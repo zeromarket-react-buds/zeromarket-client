@@ -13,7 +13,7 @@ const KeywordAlertEditPage = () => {
   const navigate = useNavigate();
   const { loading } = useAuth();
   const { alertId } = useParams();
-  const { alert } = useModal();
+  const { alert, confirm } = useModal();
 
   const [keywordState, setKeywordState] = useState("");
   const [priceMinState, setPriceMinState] = useState("");
@@ -55,7 +55,7 @@ const KeywordAlertEditPage = () => {
       return;
     }
 
-    if (!confirm("수정하시겠습니까?")) {
+    if (!(await confirm({ description: "수정하시겠습니까?" }))) {
       return;
     }
     await updateKeywordsApi({ alertId, keyword, priceMin, priceMax });
