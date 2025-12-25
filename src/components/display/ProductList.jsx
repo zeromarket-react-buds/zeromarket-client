@@ -8,12 +8,14 @@ import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
+import { useAuthHelper } from "@/hooks/useAuthHelper";
 
 const ProductList = () => {
   const { products, setProducts, onToggleLike } = useLikeToggle([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { ensureLogin } = useAuthHelper();
 
   //  로그인 사용자 정보
   const { user, isAuthenticated } = useAuth();
@@ -39,6 +41,7 @@ const ProductList = () => {
   // 찜 토글 후 UI 즉시 반영 함수
   //* ProductId를 clickedProductId로 분간 쉽게 변경
   const handleToggleWish = async (clickedProductId) => {
+    if (!(await ensureLogin())) return;
     //console.log(" handleToggleWish 호출됨", clickedProductId);
 
     // 백엔드 토글 API 수행 (true/false 반환)
@@ -200,8 +203,9 @@ const ProductList = () => {
   };
 
   // 글등록 페이지 이동
-  const goProductCreatePage = () => {
-    navigate(`/products`);
+  const goProductCreatePage = async () => {
+    if (!(await ensureLogin())) return;
+    navigate("/products");
   };
 
   return (

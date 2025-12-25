@@ -853,14 +853,14 @@ const App = function () {
 
   return (
     <Suspense fallback={<div className="p-6">로딩중…</div>}>
-      <AuthProvider>
-        <NotificationProvider>
-          <ModalProvider>
+      <ModalProvider>
+        <AuthProvider>
+          <NotificationProvider>
             <GlobalToast />
             <RouterProvider router={router} />
-          </ModalProvider>
-        </NotificationProvider>
-      </AuthProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ModalProvider>
     </Suspense>
   );
 };

@@ -9,6 +9,7 @@ import {
   withdrawApi,
 } from "@/common/api/auth.api";
 import { refreshAccessToken } from "@/common/token";
+import { useModal } from "@/hooks/useModal";
 
 /*
 전역으로 관리할 상태 
@@ -24,6 +25,7 @@ const AuthContext = createContext(null);
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { alert } = useModal();
 
   const isAuthenticated = !!user;
 
@@ -89,6 +91,24 @@ function AuthProvider({ children }) {
     setUser(userData);
   };
 
+  const checkSession = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      if (user) {
+        await alert({
+          description: "로그인 세션이 만료되었습니다. 다시 로그인해주세요.",
+        });
+      } else {
+        await alert({ description: "로그인 후 이용 가능합니다." });
+      }
+      localStorage.removeItem("accessToken");
+      setUser(null);
+      return false;
+    }
+    return true;
+  };
+
   // ✅ 회원탈퇴
   const withdraw = async (payload) => {
     await withdrawApi(payload);
@@ -121,6 +141,7 @@ function AuthProvider({ children }) {
         oauthLogin,
         linkKakaoAccount,
         unlinkKakaoAccount,
+        checkSession,
         logout,
         withdraw,
         loading,

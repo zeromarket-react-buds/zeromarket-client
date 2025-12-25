@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
+import { useAuthHelper } from "@/hooks/useAuthHelper";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductImageUploader from "@/components/product/create/ProductImageUploader";
@@ -13,8 +14,6 @@ import ProductTitleInput from "@/components/product/create/ProductTitleInput";
 import ProductPriceInput from "@/components/product/create/ProductPriceInput";
 import { uploadToSupabase } from "@/lib/supabaseUpload";
 import { createProductApi } from "@/common/api/product.api";
-import { useHeader } from "@/hooks/HeaderContext";
-import AuthStatusIcon from "@/components/AuthStatusIcon";
 import ProductVisionBridge from "@/components/product/create/ProductVisionBridge";
 import ProductDescriptionEditor from "@/components/product/create/ProductDescriptionEditor";
 import FrequentPhraseModal from "@/components/common/FrequentPhraseModal";
@@ -52,18 +51,12 @@ const ProductCreatePage = () => {
   });
   const [form, setForm] = useState(() => {
     return routerLocation.state?.form ?? INITIAL_FORM;
-    // if (routerLocation.state?.form) {
-    //   return routerLocation.state.form;
-    // }
-    // return INITIAL_FORM;
   });
-  // const [images, setImages] = useState([]);
   const navigate = useNavigate();
-  const { setHeader } = useHeader();
+  const { ensureLogin } = useAuthHelper();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
   const { alert, confirm } = useModal();
-  // const [selectedLocation, setSelectedLocation] = useState(null); // ProductLocationDto 객체 전체를 저장
 
   // 자주 쓰는 문구 모달
   const [isPhraseModalOpen, setIsPhraseModalOpen] = useState(false);
@@ -130,29 +123,12 @@ const ProductCreatePage = () => {
     }
   }, [routerLocation.state, navigate, routerLocation.pathname]);
 
+  //진입시 체크
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!isAuthenticated && !authLoading) {
-        await alert({ description: "로그인 후 상품을 등록할 수 있습니다." });
-        navigate("/login", { replace: true });
-      }
-    };
-    checkAuth();
-  }, [authLoading, isAuthenticated, navigate]);
-
-  useEffect(() => {
-    if (authLoading) return;
-    setHeader({
-      title: "상품 등록",
-      showBack: true,
-      rightActions: [
-        <AuthStatusIcon
-          isAuthenticated={isAuthenticated}
-          navigate={navigate}
-        />,
-      ],
-    });
-  }, [isAuthenticated, navigate, authLoading, setHeader]);
+    if (!authLoading) {
+      ensureLogin();
+    }
+  }, [authLoading, ensureLogin]);
 
   useEffect(() => {
     window.addEventListener("beforeunload", handleBeforeUnload); //"beforeunload"기존 정의 특수이벤
@@ -161,9 +137,12 @@ const ProductCreatePage = () => {
     };
   }, []);
 
+  //실행시 체크
   const handleSubmit = useCallback(
     async (e) => {
       if (e && e.preventDefault) e.preventDefault();
+
+      if (!(await ensureLogin())) return;
 
       if (!form.productTitle.trim()) {
         await alert({ description: "상품명을 입력해주세요." });
@@ -275,8 +254,6 @@ const ProductCreatePage = () => {
 
         if (response?.productId) {
           await alert({ description: "상품 등록이 완료되었습니다!" });
-          // console.log("상품 등록 성공 응답 데이터:", response); // 응답 데이터 확인용
-          // await alert(`상품 등록 완료! 상품ID: ${response.productId}`);
           navigate(`/products/${response.productId}`, { replace: true });
         } else {
           setError("서버 응답 형식이 올바르지 않습니다.");
@@ -290,7 +267,7 @@ const ProductCreatePage = () => {
         setSubmitLoading(false);
       }
     },
-    [form, images, navigate, vision, confirm, alert]
+    [form, images, vision, confirm, alert, navigate, ensureLogin]
   );
 
   // 자주 쓰는 문구 적용 핸들러

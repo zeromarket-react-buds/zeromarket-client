@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
+import { useAuthHelper } from "@/hooks/useAuthHelper";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import { getProductDetailApi } from "@/common/api/product.api";
 import { createReportApi } from "@/common/api/report.api";
@@ -24,7 +25,6 @@ import { useModal } from "@/hooks/useModal";
 
 import { products } from "@/data/product.js";
 import { useHeader } from "@/hooks/HeaderContext";
-import AuthStatusIcon from "@/components/AuthStatusIcon";
 
 const ProductDetailPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -35,10 +35,11 @@ const ProductDetailPage = () => {
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
   const { setHeader } = useHeader();
+  const { ensureLogin } = useAuthHelper();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const isFetched = useRef(false);
   const { refreshUnreadCount } = useNotification();
-  const { alert, confirm } = useModal();
+  const { alert } = useModal();
   const { onToggleLikeDetail } = useLikeToggle(); //상세 페이지용 onToggleLikeDetail 가져오기
 
   if (user === undefined) {
@@ -84,7 +85,7 @@ const ProductDetailPage = () => {
           navigate(-1);
         } else {
           setError("서버 연결 실패");
-          onsole.error("상세 페이지 에러:", err);
+          console.error("상세 페이지 에러:", err);
         }
       } finally {
         setLoading(false);
@@ -166,10 +167,10 @@ const ProductDetailPage = () => {
     setHeader({
       rightSlot: (
         <div className="flex items-center gap-3">
-          <button onClick={handleShare} className="cursor-pointer mr-3 ">
+          <div onClick={handleShare} className="cursor-pointer mr-3 ">
             <Share2 size={22} />
-          </button>
-          <button>
+          </div>
+          <div>
             {user?.profileImage ? (
               <Link to="/me">
                 <img
@@ -182,7 +183,7 @@ const ProductDetailPage = () => {
                 <LogIn className="w-7 h-7 " />
               </Link>
             )}
-          </button>
+          </div>
         </div>
       ),
     });
@@ -254,19 +255,10 @@ const ProductDetailPage = () => {
 
   //신고하기
   const handleOpenReportModal = async () => {
-    if (!isAuthenticated) {
-      const goLogin = await confirm({
-        description:
-          "신고 기능은 로그인 후 이용 가능합니다. 로그인 화면으로 이동하시겠습니까?",
-      });
-      if (goLogin) {
-        navigate("/login");
-      }
-      return;
-    }
+    if (!(await ensureLogin())) return;
     setIsReportModalOpen(true);
-    console.log("모달오픈");
   };
+
   const handleCloseReportModal = () => {
     setIsReportModalOpen(false);
   };
