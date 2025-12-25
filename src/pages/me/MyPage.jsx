@@ -28,6 +28,7 @@ export default function MyPage() {
   const [envScore, setEnvScore] = useState(0);
   const [receivedReviewCount, setReceivedReviewCount] = useState(0);
   const { setHeader } = useHeader();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // 추가됨: 현재 페이지 정보를 가져옴
   const location = useLocation();
@@ -48,6 +49,7 @@ export default function MyPage() {
   };
 
   useEffect(() => {
+    if (isLoggingOut) return; // 로그아웃은 예외 처리
     if (!isAuthenticated && !loading) {
       (async () => {
         await alert({
@@ -126,8 +128,11 @@ export default function MyPage() {
     if (!window.confirm("로그아웃 하시겠습니까?")) {
       return;
     }
+    setIsLoggingOut(true); // 가드 잠깐 끄기
     await logout();
-    alert("로그아웃되었습니다. 홈으로 이동합니다.");
+    await alert({
+      description: "로그아웃되었습니다. 홈으로 이동합니다.",
+    });
     navigate("/");
   };
 
