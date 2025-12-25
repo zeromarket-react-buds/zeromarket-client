@@ -97,17 +97,17 @@ export default function WithdrawReasonPage() {
         </p>
       </section>
 
-      <div className="fixed left-0 right-0 bottom-0 px-4 pb-6 space-y-3">
+      <div className="bg-white fixed flex flex-col items-center left-0 right-0 bottom-0 px-4 p-3 space-y-3">
         <button
           onClick={handleSubmit}
-          className="w-full bg-brand-green text-white font-semibold py-3 rounded-lg disabled:opacity-60"
+          className="w-[600px] bg-brand-green text-white font-semibold py-3 rounded-lg disabled:opacity-60"
           disabled={submitting}
         >
           탈퇴 요청하기
         </button>
         <button
           onClick={goBack}
-          className="w-full border border-gray-300 text-gray-800 font-semibold py-3 rounded-lg bg-gray-100"
+          className="w-[600px] border border-gray-300 text-gray-800 font-semibold py-3 rounded-lg bg-gray-100"
           disabled={submitting}
         >
           이전으로
