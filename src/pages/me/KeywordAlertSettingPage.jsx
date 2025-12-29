@@ -66,6 +66,11 @@ const KeywordAlertSettingPage = () => {
 
   const handleRegister = async (paramKeyword = "") => {
     const keyword = paramKeyword ? paramKeyword : keywordRef.current?.value;
+
+    if (!keyword) {
+      await alert({ description: "키워드를 입력해주세요." });
+      return;
+    }
     console.log("keywordRef", keyword);
     if (!(await confirm({ description: "키워드 알림을 등록하시겠습니까?" }))) {
       return;
