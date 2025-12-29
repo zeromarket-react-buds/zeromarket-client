@@ -252,7 +252,7 @@ const MemberEditPage = () => {
           </div>
 
           {/* 네이버 */}
-          <div className="flex justify-between items-center">
+          {/* <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/2/23/Naver_Logotype.svg"
@@ -265,7 +265,7 @@ const MemberEditPage = () => {
             <Button variant="green" className="px-4 py-1 text-sm">
               연동하기
             </Button>
-          </div>
+          </div> */}
         </div>
       </section>
     </Container>
