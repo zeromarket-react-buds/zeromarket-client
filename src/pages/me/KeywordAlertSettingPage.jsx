@@ -107,7 +107,7 @@ const KeywordAlertSettingPage = () => {
           />
           <div
             className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-sm text-brand-green h-full px-2 cursor-pointer"
-            onClick={handleRegister}
+            onClick={() => handleRegister()}
           >
             등록
           </div>
