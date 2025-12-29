@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 import Container from "@/components/Container";
@@ -8,8 +8,14 @@ const KakaoCallback = () => {
   const navigate = useNavigate();
   const { oauthLogin, linkKakaoAccount, isAuthenticated } = useAuth();
   const { alert } = useModal();
+  const handledRef = useRef(false);
 
+  // (첫 렌더(로그인 여부 false)와 이후 isAuthenticated 값이 바뀔 때마다 다시 실행될 수 있습니다.)
+  // useEffect가 한 번만 실행되도록 handledRef로 가드
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const code = new URL(window.location.href).searchParams.get("code");
     const redirectUri =
       import.meta.env.VITE_KAKAO_REDIRECT_URI ||
