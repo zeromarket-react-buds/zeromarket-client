@@ -93,7 +93,7 @@ const TitleHeader = ({
     if (rightButtonText) {
       return (
         <button
-          className="text-brand-green font-semibold"
+          className="text-brand-green font-semibold cursor-pointer"
           onClick={() => rightButtonEvent?.()}
         >
           {rightButtonText}
@@ -108,16 +108,19 @@ const TitleHeader = ({
           {rightSlot ? (
             <div className="flex items-center gap-2">
               {showBellWithRightSlot && (
-                <>
+                <span className="cursor-pointer">
                   <BellWithBadge unreadCount={unreadCount} />
-                </>
+                </span>
               )}
               {rightSlot}
             </div>
           ) : (
-            <>
-              <BellWithBadge unreadCount={unreadCount} />
-            </>
+            <span className="cursor-pointer">
+              <BellWithBadge
+                unreadCount={unreadCount}
+                className="cursor-pointer"
+              />
+            </span>
           )}
         </button>
       </div>
