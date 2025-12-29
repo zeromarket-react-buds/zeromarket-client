@@ -34,19 +34,28 @@ const SellerShopPage = () => {
       showBellWithRightSlot: true,
       rightSlot: isAuthenticated ? (
         isMe ? (
-          [<Settings key="settings" onClick={() => navigate("/me/settings")} />]
+          [
+            <span className="cursor-pointer">
+              <Settings
+                key="settings"
+                onClick={() => navigate("/me/settings")}
+              />
+            </span>,
+          ]
         ) : (
-          <MoreVertical
-            key="more"
-            size={24}
-            className="cursor-pointer"
-            onClick={(e) => {
-              const anchorEl = e.currentTarget;
-              window.dispatchEvent(
-                new CustomEvent("seller-menu-open", { detail: { anchorEl } })
-              );
-            }}
-          />
+          <span className="cursor-pointer">
+            <MoreVertical
+              key="more"
+              size={24}
+              className="cursor-pointer"
+              onClick={(e) => {
+                const anchorEl = e.currentTarget;
+                window.dispatchEvent(
+                  new CustomEvent("seller-menu-open", { detail: { anchorEl } })
+                );
+              }}
+            />
+          </span>
         )
       ) : null,
     });

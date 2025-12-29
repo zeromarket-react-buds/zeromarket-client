@@ -145,7 +145,9 @@ export default function MyPage() {
     setHeader({
       showBellWithRightSlot: true,
       rightSlot: [
-        <Settings onClick={() => navigate("/me/settings")}></Settings>,
+        <span className="cursor-pointer">
+          <Settings onClick={() => navigate("/me/settings")}></Settings>
+        </span>,
       ],
     });
   }, [setHeader]);

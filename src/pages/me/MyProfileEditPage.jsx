@@ -284,7 +284,7 @@ const MyProfileEditPage = () => {
           key: "save",
           label: "완료",
           onClick: handleSave,
-          className: "font-semibold text-lg",
+          className: "font-semibold text-lg cursor-pointer",
           disabled: isSaving,
         },
       ],
