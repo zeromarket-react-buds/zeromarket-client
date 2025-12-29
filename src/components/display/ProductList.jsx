@@ -2,7 +2,7 @@ import ProductCard from "@/components/display/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLikeToggle } from "@/hooks/useLikeToggle";
 import { getProductListApi } from "@/common/api/product.api";
 import ProductFilterModal from "@/components/display/ProductFilterModal";
@@ -19,8 +19,8 @@ const ProductList = () => {
 
   //  로그인 사용자 정보
   const { user, isAuthenticated } = useAuth();
-  // 로그인 안된 상태에서도 테스트용 memberId=1 사용
-  const memberId = isAuthenticated ? user.memberId : 1;
+  // 로그인 안한 사용자는 null 처리
+  const memberId = isAuthenticated ? user?.memberId : null;
 
   // 검색/sort 관련
   const [keyword, setKeyword] = useState("");
@@ -37,6 +37,9 @@ const ProductList = () => {
   // offset 관련
   const [offset, setOffset] = useState(null);
   const [hasNext, setHasNext] = useState(true);
+
+  //검색후 search 이동 관련. 이동 직전에 true로 설정하여 재조회(fetch)를 방지
+  const navigatingToSearchRef = useRef(false);
 
   // 찜 토글 후 UI 즉시 반영 함수
   //* ProductId를 clickedProductId로 분간 쉽게 변경
@@ -121,6 +124,9 @@ const ProductList = () => {
   };
   // 조회 조건(sort/filter/memberId) 변경시 목록 초기화 후 재조회
   useEffect(() => {
+    // 검색 페이지로 이동 중일 때는 마지막으로 한 번 더 재조회되는 것을 막기 위함
+    if (navigatingToSearchRef.current) return;
+
     setProducts([]);
     setOffset(null);
     fetchHomeProducts(null);
@@ -174,6 +180,10 @@ const ProductList = () => {
 
   // 모달에서 검색 버튼 눌렀을 때 검색 페이지로 이동
   const handleFilterApply = (payload) => {
+    // search로 이동 직전 useEffect에서 발생하는 마지막 재조회 방지용
+    navigatingToSearchRef.current = true;
+    setIsOpen(false); // 모달 닫히면서 useEffect가 재조회 타는 것도 같이 방지
+
     const params = new URLSearchParams();
     params.set("keyword", payload.keyword);
     if (payload.sort) params.set("sort", payload.sort);
