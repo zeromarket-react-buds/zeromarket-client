@@ -7,12 +7,12 @@ const BellWithBadge = ({ unreadCount, size = "M" }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative inline-block sle">
+    <div
+      className="relative inline-block sle"
+      onClick={() => navigate("/me/notifications")}
+    >
       {/* 1. 벨 아이콘 */}
-      <Bell
-        size={isLarge ? 28 : 24}
-        onClick={() => navigate("/me/notifications")}
-      />
+      <Bell size={isLarge ? 28 : 24} />
 
       {/* 2. 읽지 않은 알림 배지 */}
       {unreadCount >= 0 && (
