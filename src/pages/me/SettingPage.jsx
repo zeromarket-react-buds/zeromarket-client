@@ -100,7 +100,7 @@ const SettingPage = () => {
   return (
     <Container>
       {/* 방해 금지 */}
-      <Box>
+      {/* <Box>
         <div className="flex items-center justify-between">
           <p>방해 금지 시간 설정</p>
           <GreenToggle
@@ -108,7 +108,7 @@ const SettingPage = () => {
             onChange={(next) => setSetting("doNotDisturb", next)}
           />
         </div>
-      </Box>
+      </Box> */}
 
       {/* 채팅 */}
       <SectionLabel>채팅</SectionLabel>

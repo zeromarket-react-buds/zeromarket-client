@@ -39,7 +39,9 @@ const DefaultHeader = () => {
             </div>
           ) : (
             <div className="flex flex-row items-center gap-5">
-              <BellWithBadge size="L" unreadCount={unreadCount} />
+              <span className="cursor-pointer">
+                <BellWithBadge size="L" unreadCount={unreadCount} />
+              </span>
               <Link to="/me" className="">
                 {user?.profileImage ? (
                   <img
