@@ -10,12 +10,14 @@ import dayjs from "@/utils/time";
 import { Badge } from "../ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext"; // 본인상품 찜방지 작업
+import { useModal } from "@/hooks/useModal";
 
 //자식. 컴포넌트로 products, onToggleLike 전달받음
 const ProductCard = ({ products, onToggleLikeInProductList }) => {
   const { showLikeAddedToast, showLikeRemovedToast } = useLikeToast();
 
   const { user, isAuthenticated } = useAuth();
+  const { alert } = useModal();
 
   const navigate = useNavigate();
 
@@ -31,7 +33,9 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
   const handleHeartClick = async (clickedProductId) => {
     //비로그인 가드 (API 호출 자체를 막음)
     if (!isAuthenticated) {
-      alert("로그인이 필요합니다."); // 나중에 로그인 모달/토스트로 교체 가능
+      await alert({
+        description: "로그인이 필요합니다.",
+      });
       return;
     }
 
@@ -66,7 +70,7 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                   {/* 상품 섬네일 */}
                   <img
                     src={p.thumbnailUrl}
-                    className="relative rounded-xl w-full h-full object-cover "
+                    className="relative rounded-xl w-full h-full object-cover border border-brand-mediumgray"
                   />
                   <div className="flex absolute justify-between items-center bottom-0 w-full px-4 py-3">
                     <div className="flex flex-col gap-1 items-start">
@@ -83,7 +87,8 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                     {/* 본인 상품이면 하트 미노출 */}
                     {!isMyProduct && (
                       <Heart
-                        className="size-6 mx-1 cursor-pointer"
+                        className="size-7 mx-1 p-1 cursor-pointer bg-black/80
+                         rounded-full text-brand-ivory"
                         onClick={(e) => {
                           e.stopPropagation(); //상세이동 방지
                           handleHeartClick(p.productId); //로그인가드
