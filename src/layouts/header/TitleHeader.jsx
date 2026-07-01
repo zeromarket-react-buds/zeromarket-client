@@ -36,7 +36,7 @@ const TitleHeader = ({
     window.dispatchEvent(
       new CustomEvent("seller-menu-open", {
         detail: { anchorEl }, // anchorEl은 실제 DOM 노드. 언제든 현재 위치를 다시 계산 가능
-      })
+      }),
     );
   };
 
@@ -108,14 +108,14 @@ const TitleHeader = ({
           {rightSlot ? (
             <div className="flex items-center gap-2">
               {showBellWithRightSlot && (
-                <span className="cursor-pointer">
+                <span className="cursor-pointer pt-2">
                   <BellWithBadge unreadCount={unreadCount} />
                 </span>
               )}
               {rightSlot}
             </div>
           ) : (
-            <span className="cursor-pointer">
+            <span className="cursor-pointer pt-2">
               <BellWithBadge
                 unreadCount={unreadCount}
                 className="cursor-pointer"
