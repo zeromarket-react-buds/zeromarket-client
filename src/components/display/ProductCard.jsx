@@ -87,7 +87,7 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
                     {/* 본인 상품이면 하트 미노출 */}
                     {!isMyProduct && (
                       <Heart
-                        className="size-7 mx-1 p-1 cursor-pointer bg-black/80
+                        className="size-7 p-1 cursor-pointer bg-black/80
                          rounded-full text-brand-ivory"
                         onClick={(e) => {
                           e.stopPropagation(); //상세이동 방지
