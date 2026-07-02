@@ -30,7 +30,7 @@ const getWeightedLength = (str) => {
 };
 
 const MyProfileEditPage = () => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { setUser, isAuthenticated, loading: authLoading } = useAuth();
   const { alert, confirm } = useModal();
   const navigate = useNavigate();
   const { showProfileUpdatedToast } = useProfileToast();
@@ -115,7 +115,7 @@ const MyProfileEditPage = () => {
 
     if (currentLength > maxNicknameLength) {
       setLengthError(
-        "닉네임은 글자당 한글 2, 영문/숫자 1을 기준으로 최대 20자까지 가능합니다."
+        "닉네임은 글자당 한글 2, 영문/숫자 1을 기준으로 최대 20자까지 가능합니다.",
       );
     } else {
       setLengthError("");
@@ -155,7 +155,7 @@ const MyProfileEditPage = () => {
 
     if (currentLength > maxIntroLength) {
       setIntroError(
-        `한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.`
+        `한줄 소개는 글자당 한글 2, 영문/숫자 1을 기준으로 최대 100자까지 가능합니다.`,
       );
     } else {
       setIntroError("");
@@ -253,6 +253,13 @@ const MyProfileEditPage = () => {
         nickname: trimmed,
         introduction: intro,
       });
+
+      setUser((prev) => ({
+        ...prev,
+        profileImage: profileImg,
+        nickname: trimmed,
+        introduction: intro,
+      }));
 
       // 저장 성공 시 초기값 갱신
       setInitialNickname(trimmed);
