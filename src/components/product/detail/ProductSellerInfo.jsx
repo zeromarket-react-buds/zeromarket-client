@@ -42,7 +42,7 @@ const ProductSellerInfo = ({ detail }) => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <UserRound className="size-15 text-brand-ivory " />
+                <UserRound className="p-2 size-15 text-brand-ivory " />
               )}
             </div>
             <span className="font-semibold text-brand-green text-2xl truncate max-w-[200px] block">
