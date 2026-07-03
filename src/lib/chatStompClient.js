@@ -234,3 +234,6 @@ export function createChatClient(options = {}) {
     },
   };
 }
+
+// 로그아웃 시 기존 STOMP 연결을 완전히 종료할 수 있도록 export
+export { deactivate as resetChatClient };
