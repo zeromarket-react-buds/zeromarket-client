@@ -322,15 +322,17 @@ const ProductDetailPage = () => {
             <ProductCategoryTimeSection detail={detail} />
             {/* 상품상태 */}
             <ProductStatusSection status={detail.productStatus} />
+
+            {/* 거래 정보 + 맵 */}
+            <ProductTradeInfoSection detail={detail} />
+
             {/* 상품설명 */}
             <ProductDescriptionSection
               description={detail.productDescription}
             />
+
             {/* 환경점수 - 2,3차 */}
             <DetailEcoScoreSection detail={detail} />
-
-            {/* 거래 정보 + 맵 */}
-            <ProductTradeInfoSection detail={detail} />
 
             {/* 신고하기 버튼 */}
             <div className="mb-5 mt-8 text-sm">
