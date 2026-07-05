@@ -23,6 +23,12 @@ export const ID_REGEX = /^[a-zA-Z0-9]{6,12}$/;
 export const PASSWORD_CONTAINS_LETTER_AND_NUMBER = /(?=.*[A-Za-z])(?=.*\d)/;
 
 /**
+ * 비밀번호 허용 문자
+ * - 영문, 숫자만 허용
+ */
+export const PASSWORD_ALLOWED = /^[A-Za-z0-9]+$/;
+
+/**
  * 비밀번호 강도 (중)
  * - 영문자 + 숫자 포함
  * - 8자 이상
@@ -215,7 +221,7 @@ export const formatPhoneNumber = (value) => {
   if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(
     7,
-    11
+    11,
   )}`;
 };
 
@@ -230,6 +236,6 @@ export const formatBusinessNumber = (value) => {
   if (numbers.length <= 5) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(
     5,
-    10
+    10,
   )}`;
 };

@@ -6,7 +6,7 @@ import { useAuthHelper } from "@/hooks/useAuthHelper";
 import { useLikeToggle } from "@/hooks/useLikeToggle"; //상세찜
 import { getProductDetailApi } from "@/common/api/product.api";
 import { createReportApi } from "@/common/api/report.api";
-import { Share2, LogIn, Heart } from "lucide-react";
+import { Share2, LogIn, Heart, UserRound } from "lucide-react";
 import Container from "@/components/Container";
 import ActionButtonBar from "@/components/product/ActionButtonBar";
 import ProductSellerInfo from "@/components/product/detail/ProductSellerInfo";
@@ -91,7 +91,7 @@ const ProductDetailPage = () => {
         setLoading(false);
       }
     },
-    [id, navigate, alert]
+    [id, navigate, alert],
   );
 
   // 찜 추가/삭제 (apiClient + onToggleLikeDetail 사용)
@@ -171,16 +171,23 @@ const ProductDetailPage = () => {
             <Share2 size={22} />
           </div>
           <div>
-            {user?.profileImage ? (
+            {isAuthenticated ? (
               <Link to="/me">
-                <img
-                  src={user?.profileImage}
-                  className="w-8 h-8 rounded-full"
-                />
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    className="w-8 h-8 rounded-full object-cover"
+                    alt="프로필"
+                  />
+                ) : (
+                  <div className="w-8 h-8 p-1 rounded-full bg-brand-green flex items-center justify-center overflow-hidden">
+                    <UserRound className="text-brand-ivory size-10" />
+                  </div>
+                )}
               </Link>
             ) : (
               <Link to="/login">
-                <LogIn className="w-7 h-7 " />
+                <LogIn className="w-7 h-7" />
               </Link>
             )}
           </div>
@@ -315,20 +322,22 @@ const ProductDetailPage = () => {
             <ProductCategoryTimeSection detail={detail} />
             {/* 상품상태 */}
             <ProductStatusSection status={detail.productStatus} />
-            {/* 상품설명 */}
-            <ProductDescriptionSection
-              description={detail.productDescription}
-            />
-            {/* 환경점수 - 2,3차 */}
-            <DetailEcoScoreSection detail={detail} />
 
             {/* 거래 정보 + 맵 */}
             <ProductTradeInfoSection detail={detail} />
 
+            {/* 상품설명 */}
+            <ProductDescriptionSection
+              description={detail.productDescription}
+            />
+
+            {/* 환경점수 - 2,3차 */}
+            <DetailEcoScoreSection detail={detail} />
+
             {/* 신고하기 버튼 */}
             <div className="mb-5 mt-8 text-sm">
               <button
-                className="cursor-pointer"
+                className="cursor-pointer text-brand-red font-bold"
                 onClick={handleOpenReportModal}
               >
                 신고하기

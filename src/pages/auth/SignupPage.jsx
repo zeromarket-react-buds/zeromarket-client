@@ -190,7 +190,7 @@ const SignupPage = () => {
               onClick={() => setShow((prev) => !prev)}
               className="absolute right-1 top-1"
             >
-              {show ? <EyeOff size={18} /> : <Eye size={18} />}
+              {show ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
           </div>
 

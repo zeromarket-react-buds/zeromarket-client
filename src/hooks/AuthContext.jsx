@@ -10,6 +10,7 @@ import {
 } from "@/common/api/auth.api";
 import { refreshAccessToken } from "@/common/token";
 import { useModal } from "@/hooks/useModal";
+import { resetChatClient } from "@/lib/chatStompClient";
 
 /*
 전역으로 관리할 상태 
@@ -70,8 +71,10 @@ function AuthProvider({ children }) {
   async function logout() {
     const data = await logoutApi();
 
-    localStorage.removeItem("accessToken");
+    // 계정 전환 시 이전 STOMP 연결/구독을 제거하여 이전 로그인 정보가 남는 현상을 방지
+    resetChatClient();
 
+    localStorage.removeItem("accessToken");
     setUser(null);
 
     console.log("로그아웃: ", data);
@@ -136,6 +139,7 @@ function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         isAuthenticated,
         login,
         oauthLogin,

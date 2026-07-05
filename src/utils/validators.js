@@ -1,6 +1,7 @@
 import {
   ID_REGEX,
   PASSWORD_CONTAINS_LETTER_AND_NUMBER,
+  PASSWORD_ALLOWED,
   PHONE_WITH_HYPHEN,
   EMAIL,
   NICKNAME,
@@ -42,12 +43,16 @@ export const validatePassword = (value) => {
     return createValidationResult(false, "비밀번호를 입력해주세요.");
   }
 
+  if (!PASSWORD_ALLOWED.test(value)) {
+    return createValidationResult(false, "영문과 숫자만 입력해주세요.");
+  }
+
   if (value.length < 8) {
     return createValidationResult(false, "8자 이상 입력해주세요.");
   }
 
-  if (!ID_REGEX.test(value)) {
-    return createValidationResult(false, "영문+숫자를 포함해주세요.");
+  if (!PASSWORD_CONTAINS_LETTER_AND_NUMBER.test(value)) {
+    return createValidationResult(false, "영문과 숫자를 포함해주세요.");
   }
 
   return createValidationResult(true, "사용 가능한 비밀번호입니다.");
@@ -112,7 +117,7 @@ export const validatePhone = (value) => {
   if (digits.length !== 10 && digits.length !== 11) {
     return createValidationResult(
       false,
-      "휴대폰 번호는 10자리 또는 11자리여야 합니다."
+      "휴대폰 번호는 10자리 또는 11자리여야 합니다.",
     );
   }
 
@@ -146,7 +151,7 @@ export const validateForm = (formData) => {
     password: validatePassword(formData.password),
     passwordConfirm: validatePasswordConfirm(
       formData.passwordConfirm,
-      formData.password
+      formData.password,
     ),
     name: validateName(formData.name),
     nickname: validateNickname(formData.nickname),

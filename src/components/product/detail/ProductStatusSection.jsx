@@ -1,8 +1,10 @@
 const ProductStatusSection = ({ status }) => {
   return (
-    <div className="flex justify-between items-center my-5 w-full border rounded-lg px-3 py-2 text-sm">
-      <span>상품상태</span>
-      <span>{status?.description}</span>
+    <div className=" my-5 text-sm  ">
+      <div className="flex justify-between mb-4">
+        <span className="font-semibold">상품상태</span>
+        <div>{status?.description}</div>
+      </div>
     </div>
   );
 };

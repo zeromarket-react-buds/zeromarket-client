@@ -130,26 +130,51 @@ html {
     font-family: "Roboto", sans-serif;
   }
 }
+
 .Toastify__toast-container {
-  width: fit-content;
+  /* 하단 가운데 토스트 컨테이너 */
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+
   min-width: 240px;
-  max-width: 1024px;
 }
+
 .Toastify__toast {
+  /* 토스트 하나 */
+  width: fit-content;
+  max-width: calc(100vw - 32px);
+
   border-radius: 50px;
   text-align: center;
   justify-content: center !important;
   padding: 0 40px;
   min-height: 40px;
-  background-color: black;
+
+  margin-bottom: 8px;
+
+  background-color: rgba(0, 0, 0, 0.8);
   color: white;
   font-size: 16px;
   font-weight: 500;
   line-height: 150%;
 }
+
 .Toastify__toast-icon {
   display: none;
   /* 토스트 앞에 못생긴 체크 아이콘 숨김 */
+}
+
+@media (max-width: 480px) {
+  /* 핸드폰 화면 */
+  .Toastify__toast-container--bottom-center {
+    width: calc(100vw - 32px);
+  }
+
+  .Toastify__toast {
+    width: 100%;
+    padding: 0 24px;
+  }
 }
 
 @layer components {

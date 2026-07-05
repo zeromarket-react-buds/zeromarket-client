@@ -60,7 +60,7 @@ const useFormValidation = (initialForm, checkDuplicateIdApi) => {
         return false;
       }
     },
-    [checkDuplicateIdApi, updateValidation]
+    [checkDuplicateIdApi, updateValidation],
   );
 
   // 필드별 검증 실행
@@ -93,7 +93,7 @@ const useFormValidation = (initialForm, checkDuplicateIdApi) => {
 
       updateValidation(field, result.isValid, result.message);
     },
-    [updateValidation]
+    [updateValidation],
   );
 
   // 폼 입력 핸들러
@@ -117,7 +117,7 @@ const useFormValidation = (initialForm, checkDuplicateIdApi) => {
         return updated;
       });
     },
-    [validateField]
+    [validateField],
   );
 
   // ✅ 아이디 debounce 중복검사
@@ -139,23 +139,23 @@ const useFormValidation = (initialForm, checkDuplicateIdApi) => {
 
   // 전체 폼 검증 (제출 시)
   const validateAll = useCallback(async () => {
+    // 전체 입력값을 한 번에 검증하고, 반환된 isValid로 제출 가능 여부를 판단
+    const { isValid, results } = validators.validateForm(form);
+
+    // 필드별 검증 결과를 화면 상태(validation)에 반영
+    Object.entries(results).forEach(([field, result]) => {
+      updateValidation(field, result.isValid, result.message);
+    });
+
+    // 하나라도 실패하면 중복 검사 API 없이 종료
+    if (!isValid) {
+      return false;
+    }
+
+    // 프론트쪽 검증 통과 후에만 로그인 ID 중복 검사 수행
     const loginIdValid = await validateLoginIdWithDuplicate(form.loginId);
-
-    validateField("password", form.password);
-    validateField("passwordConfirm", form.passwordConfirm, form.password);
-    validateField("name", form.name);
-    validateField("phone", form.phone);
-    validateField("nickname", form.nickname);
-    validateField("email", form.email);
-
-    const allValid =
-      loginIdValid &&
-      Object.entries(validation).every(
-        ([key, val]) => key === "loginId" || val.status !== "error"
-      );
-
-    return allValid;
-  }, [form, validation, validateLoginIdWithDuplicate, validateField]);
+    return loginIdValid;
+  }, [form, validateLoginIdWithDuplicate, updateValidation]);
 
   return {
     form,

@@ -26,6 +26,8 @@ const ChatMessage = memo(({ userInfo, message, yourLastReadMessageId }) => {
   // 내 메시지의 읽음 여부
   const isReadByOther = message.isMine && yourLastReadMessageId >= msgId;
 
+  const profileImage = userInfo?.profileImage;
+
   return (
     <>
       {" "}
@@ -43,7 +45,7 @@ const ChatMessage = memo(({ userInfo, message, yourLastReadMessageId }) => {
               className={clsx(
                 message.messageType === "SYSTEM"
                   ? "text-m text-brand-green font-bold"
-                  : "text-sm"
+                  : "text-sm",
               )}
             >
               {message.content}
@@ -57,8 +59,16 @@ const ChatMessage = memo(({ userInfo, message, yourLastReadMessageId }) => {
         </div>
       ) : (
         <div className="flex space-x-4">
-          <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-brand-ivory font-semibold">
-            <UserRound className="size-15" />
+          <div className="w-12 h-12 rounded-full bg-brand-green flex items-center justify-center overflow-hidden">
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="프로필 이미지"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <UserRound className="text-brand-ivory size-8" />
+            )}
           </div>
           <div
             className={`rounded-2xl border-2 p-3 border-brand-green min-w-1/3 max-w-1/2`}
@@ -67,7 +77,7 @@ const ChatMessage = memo(({ userInfo, message, yourLastReadMessageId }) => {
               className={clsx(
                 message.messageType === "SYSTEM"
                   ? "text-m text-brand-green font-bold"
-                  : "text-sm"
+                  : "text-sm",
               )}
             >
               {message.content}

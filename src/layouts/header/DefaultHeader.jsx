@@ -39,17 +39,20 @@ const DefaultHeader = () => {
             </div>
           ) : (
             <div className="flex flex-row items-center gap-5">
-              <span className="cursor-pointer">
+              <span className="cursor-pointer pt-1">
                 <BellWithBadge size="L" unreadCount={unreadCount} />
               </span>
-              <Link to="/me" className="">
+              <Link to="/me" className="block w-9 h-9 shrink-0">
                 {user?.profileImage ? (
                   <img
-                    src={user?.profileImage}
-                    className="w-9 h-9 rounded-full"
+                    src={user.profileImage}
+                    className="block w-full h-full rounded-full object-cover"
+                    alt="프로필"
                   />
                 ) : (
-                  <UserRound className="w-9 h-9 bg-brand-green rounded-full text-brand-ivory" />
+                  <div className="w-full h-full p-1 rounded-full bg-brand-green flex items-center justify-center">
+                    <UserRound className="text-brand-ivory size-7" />
+                  </div>
                 )}
               </Link>
             </div>

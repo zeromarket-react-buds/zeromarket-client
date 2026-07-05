@@ -56,7 +56,7 @@ const ToTheTop = () => {
       `,
         visible
           ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-3 pointer-events-none"
+          : "opacity-0 translate-y-3 pointer-events-none",
       )}
     >
       <svg
@@ -127,12 +127,57 @@ const RootLayout = function () {
     ? footerMap[footerConfig.component]
     : null;
 
-  //등록버튼 있는 페이지 라우트
-  const isProductListPage =
+  // 등록 버튼이 있는 페이지
+  const hasFloatingWriteButton =
     location.pathname === "/" || location.pathname.startsWith("/search");
 
-  //ToTheTop 버튼 위치 조건 (등록 버튼과 겹치지 않도록 TOP 버튼 위치 조정)
-  const topBottomClass = isProductListPage ? "bottom-24" : "bottom-6";
+  // 상품 상세처럼 하단 ActionButtonBar가 있는 페이지인지 확인
+  const hasBottomActionBar = location.pathname.startsWith("/products/");
+
+  // 푸터가 현재 화면에 보이는지 여부
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+
+  useEffect(() => {
+    // 페이지의 footer 요소 가져오기
+    const footer = document.querySelector("footer");
+
+    // footer가 없으면 푸터가 보이지 않는 상태로 처리
+    if (!footer) {
+      setIsFooterVisible(false);
+      return;
+    }
+
+    // 푸터가 화면에 보이는지 감지
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // 푸터가 화면에 들어오면 true, 아니면 false
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      {
+        // 푸터가 약 30% 이상 보이면 보이는 것으로 판단
+        threshold: 0.3,
+      },
+    );
+
+    // footer 감지 시작
+    observer.observe(footer);
+
+    // 페이지 이동 시 observer 해제
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
+  /* tothetop 버튼 위치 결정
+  1. 등록 버튼이 있는 페이지 -> 등록 버튼과 겹치지 않게 위로 이동
+  2. 푸터가 보일때 위치
+  3. 상품 상세 페이지 -> 하단 ActionButtonBar 위로 이동
+  4. 그 외 -> 기본 위치*/
+  const bottomClass = hasFloatingWriteButton
+    ? "bottom-24"
+    : isFooterVisible
+      ? "bottom-6"
+      : hasBottomActionBar
+        ? "bottom-32"
+        : "bottom-6";
 
   return (
     <HeaderProvider key={location.pathname}>
@@ -151,7 +196,12 @@ const RootLayout = function () {
 
         {FooterComponent && <FooterComponent {...(footerConfig.props || {})} />}
 
-        <div className={clsx("fixed right-6 z-45", topBottomClass)}>
+        <div
+          className={clsx(
+            "fixed right-6 z-45 transition-all duration-300 ease-in-out",
+            bottomClass,
+          )}
+        >
           <ToTheTop />
         </div>
       </div>
