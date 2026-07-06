@@ -11,6 +11,7 @@ const getProductListApi = async (query = {}) => {
   if (query.minPrice) params.minPrice = query.minPrice;
   if (query.maxPrice) params.maxPrice = query.maxPrice;
   if (query.area?.trim()) params.area = query.area.trim();
+  if (query.trade) params.trade = query.trade;
 
   const { data } = await apiClient("/api/products", {
     method: "GET",
@@ -23,7 +24,7 @@ const getProductListApi = async (query = {}) => {
 //맵화면경계
 const getProductsByMapBoundaryApi = async (
   boundaryQuery = {},
-  memberId = 0
+  memberId = 0,
 ) => {
   const params = {
     memberId,
@@ -192,7 +193,7 @@ const fetchLevel2Categories = async (parentId) => {
       `/api/categories/level2?parentId=${parentId}`,
       {
         method: "GET",
-      }
+      },
     );
 
     return response.data;
@@ -213,7 +214,7 @@ const fetchLevel3Categories = async (parentId) => {
       `/api/categories/level3?parentId=${parentId}`,
       {
         method: "GET",
-      }
+      },
     );
 
     return response.data;
