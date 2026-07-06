@@ -16,36 +16,50 @@ const LongProductCard = ({
     (tradeType?.name === "DELIVERY"
       ? "택배거래"
       : tradeType?.name === "DIRECT"
-      ? "직거래"
-      : "");
+        ? "직거래"
+        : "");
 
   return (
     <div className="flex flex-row gap-10 items-center">
-      <div className="overflow-hidden">
+      <div className="relative overflow-hidden shrink-0">
         <Link
           to={`/products/${productId}`}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          onClick={(e) => e.stopPropagation()}
         >
           <img
             src={thumbnailUrl}
             className="w-[140px] h-[100px] object-cover rounded-2xl"
           />
         </Link>
+
+        {/* 모바일에서만 표시 */}
+        {tradeStatus && (
+          <div className="absolute left-2.5 bottom-2.5 md:hidden">
+            {isHidden ? (
+              <Badge>숨김</Badge>
+            ) : tradeStatus === "취소" ? (
+              <Badge variant="red">거래취소</Badge>
+            ) : tradeStatus ? (
+              <Badge>{tradeStatus}</Badge>
+            ) : null}
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-1 flex-1">
         <div className="font-semibold line-clamp-1">{productTitle}</div>
         <div className="font-semibold">{sellPrice?.toLocaleString()}원</div>
         <div className="flex w-full flex-row items-center justify-between">
           <div className="text-brand-mediumgray">{tradeTypeLabel}</div>
-          {isHidden ? (
-            <Badge>숨김</Badge>
-          ) : tradeStatus === "취소" ? (
-            <Badge variant="red">거래취소</Badge>
-          ) : tradeStatus ? (
-            <Badge>{tradeStatus}</Badge>
-          ) : null}
+
+          <div className="hidden md:block">
+            {isHidden ? (
+              <Badge>숨김</Badge>
+            ) : tradeStatus === "취소" ? (
+              <Badge variant="red">거래취소</Badge>
+            ) : tradeStatus ? (
+              <Badge>{tradeStatus}</Badge>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
