@@ -25,6 +25,7 @@ const SearchPage = () => {
   const minPriceFromUrl = searchParams.get("minPrice");
   const maxPriceFromUrl = searchParams.get("maxPrice");
   const areaFromUrl = searchParams.get("area");
+  const tradeFromUrl = searchParams.getAll("trade");
 
   // 실제 서버 요청에 쓰이는 확정된 상태
   const [keyword, setKeyword] = useState(keywordFromUrl);
@@ -34,11 +35,30 @@ const SearchPage = () => {
   const [selectedLevel1Id, setSelectedLevel1Id] = useState(null);
   const [selectedLevel2Id, setSelectedLevel2Id] = useState(null);
   const [selectedLevel3Id, setSelectedLevel3Id] = useState(
-    categoryFromUrl ? Number(categoryFromUrl) : null
+    categoryFromUrl ? Number(categoryFromUrl) : null,
   );
   const [minPrice, setMinPrice] = useState(minPriceFromUrl ?? "");
   const [maxPrice, setMaxPrice] = useState(maxPriceFromUrl ?? "");
   const [area, setArea] = useState(areaFromUrl ?? "");
+  const [trade, setTrade] = useState({
+    delivery: tradeFromUrl.includes("DELIVERY"),
+    direct: tradeFromUrl.includes("DIRECT"),
+  });
+
+  // 거래방법 선택한 상태를 서버 요청용 배열로 변환
+  const getTradeParams = (trade) => {
+    const trades = [];
+
+    if (trade?.delivery) {
+      trades.push("DELIVERY");
+    }
+
+    if (trade?.direct) {
+      trades.push("DIRECT");
+    }
+
+    return trades;
+  };
 
   // offset 관련
   const [offset, setOffset] = useState(null);
@@ -72,6 +92,7 @@ const SearchPage = () => {
         minPrice,
         maxPrice,
         area,
+        trade: getTradeParams(trade),
       };
 
       const data = await getProductListApi(query);
@@ -90,7 +111,7 @@ const SearchPage = () => {
         // 불려와진 후
         const existingIds = new Set(prev.map((p) => p.productId));
         const duplicateRemove = fetched.filter(
-          (p) => !existingIds.has(p.productId)
+          (p) => !existingIds.has(p.productId),
         );
 
         return [...prev, ...duplicateRemove];
@@ -132,12 +153,14 @@ const SearchPage = () => {
     setMinPrice(s?.minPrice ?? minPriceFromUrl ?? "");
     setMaxPrice(s?.maxPrice ?? maxPriceFromUrl ?? "");
     setArea(s?.area ?? areaFromUrl ?? "");
+    setTrade(s?.trade ?? tradeFromUrl ?? "");
   }, [
     location.search,
     location.state,
     minPriceFromUrl,
     maxPriceFromUrl,
     areaFromUrl,
+    tradeFromUrl,
   ]);
 
   // 다시 그려지는 기준
@@ -155,6 +178,7 @@ const SearchPage = () => {
     minPrice,
     maxPrice,
     area,
+    trade,
   ]);
 
   // sort 관련 함수
@@ -199,7 +223,7 @@ const SearchPage = () => {
           // &&
           // v.minPrice === item.minPrice &&
           // v.maxPrice === item.maxPrice
-        )
+        ),
     );
 
     const next = [item, ...filtered].slice(0, RECENT_SEARCH_MAX_SIZE);
@@ -221,6 +245,13 @@ const SearchPage = () => {
     if (payload.area) {
       params.set("area", payload.area);
     }
+    if (payload.trade.delivery) {
+      params.append("trade", "DELIVERY");
+    }
+
+    if (payload.trade.direct) {
+      params.append("trade", "DIRECT");
+    }
 
     saveRecentSearch(payload.keyword, payload.minPrice, payload.maxPrice);
     navigate(`/search?${params.toString()}`, {
@@ -231,6 +262,7 @@ const SearchPage = () => {
         minPrice: payload.minPrice,
         maxPrice: payload.maxPrice,
         area: payload.area,
+        trade: payload.trade,
       },
     });
   };
@@ -327,6 +359,7 @@ const SearchPage = () => {
         <ProductFilterModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
+          defaultFilterOpen={true}
           keyword={keyword}
           setKeyword={setKeyword}
           sort={sort}
@@ -342,11 +375,14 @@ const SearchPage = () => {
           setMaxPrice={setMaxPrice}
           area={area}
           setArea={setArea}
+          trade={trade}
+          setTrade={setTrade}
           onApply={handleFilterApply}
         />
 
         <div className="text-2xl font-semibold">
-          "{displayKeyword}" 검색 결과
+          {displayKeyword ? `"${displayKeyword}" ` : ""}
+          검색 결과
         </div>
         <ProductCard
           products={products}
