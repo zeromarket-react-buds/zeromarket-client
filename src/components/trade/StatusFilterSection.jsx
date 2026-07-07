@@ -20,12 +20,12 @@ const StatusFilterSection = ({
       </div>
 
       <div>
-        <div className="flex gap-4">
+        <div className="grid grid-cols-2 gap-y-4 gap-x-6 px-3">
           {visibleStatusOptions.map((option) => (
             <Button
               key={option.value}
               type="button"
-              className="text-black font-normal"
+              className="justify-start text-black font-normal"
             >
               <GreenCheckBox
                 label={option.label}
