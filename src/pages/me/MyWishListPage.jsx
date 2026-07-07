@@ -1,5 +1,7 @@
 import Container from "@/components/Container";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
 import { useEffect, useState } from "react";
 
 // dayjs 추가
@@ -54,7 +56,7 @@ const MyWishListPage = () => {
 
       //  삭제 후 프론트에서 즉시 제거
       setWishItems((prev) =>
-        prev.filter((item) => item.productId !== productId)
+        prev.filter((item) => item.productId !== productId),
       );
       showLikeRemovedToast(); //글로벌토스트에서 가져온 삭제메시지 함수
     } catch (err) {
@@ -160,22 +162,28 @@ const MyWishListPage = () => {
               </button>
 
               {/* 이미지 */}
-              <div className="w-20 h-20 bg-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-25 h-25 relative bg-gray-300 rounded-lg flex items-center justify-center">
                 {item.thumbnailUrl ? (
-                  <img
-                    src={item.thumbnailUrl}
-                    alt="thumbnail"
-                    className="w-full h-full rounded-lg object-cover"
-                  />
+                  <>
+                    <img
+                      src={item.thumbnailUrl}
+                      alt="thumbnail"
+                      className="w-full h-full rounded-lg object-cover"
+                    />
+                    {/* 판매상태 뱃지 모바일 대응 */}
+                    <span className="absolute left-2.5 bottom-2.5 md:hidden">
+                      <Badge>{item.salesStatusKr ?? item.salesStatus}</Badge>
+                    </span>
+                  </>
                 ) : (
                   <span className="text-gray-700 text-sm">사진</span>
                 )}
               </div>
 
               {/* 텍스트 */}
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-center flex-1 min-w-0 pl-4">
                 <div>
-                  <p className="font-semibold text-sm line-clamp-1">
+                  <p className="font-semibold line-clamp-1 pr-8">
                     {item.productTitle}
                   </p>
 
@@ -183,20 +191,20 @@ const MyWishListPage = () => {
                     {item.sellPrice?.toLocaleString()}원
                   </p>
 
-                  {/* 거래정보 + 상품등록일 한 줄로 표시 (수정됨) */}
-                  <p className="text-xs text-gray-700 mt-1">
-                    {item.tradeTypeDisplay}
-                    {item.productCreatedAt && (
-                      <> · {dayjs(item.productCreatedAt).fromNow()}</>
-                    )}
-                  </p>
-                </div>
+                  {/* 거래정보 + 상품등록일 + 판매상태 전체 */}
+                  <div className="flex items-center justify-between gap-2 mt-1 text-sm text-gray-700">
+                    <p className="min-w-0 truncate">
+                      {item.tradeTypeDisplay?.replaceAll(" · ", " / ")}
+                      {item.productCreatedAt && (
+                        <> · {dayjs(item.productCreatedAt).fromNow()}</>
+                      )}
+                    </p>
 
-                {/* 판매 상태 뱃지 */}
-                <div className="flex justify-end mt-1">
-                  <span className="px-2 py-1 bg-brand-green text-white text-xs rounded-full">
-                    {item.salesStatusKr ?? item.salesStatus}
-                  </span>
+                    {/* 판매 상태 뱃지 (웹화면) */}
+                    <span className="shrink-0 px-2 py-1 bg-brand-green text-white text-sm rounded-full hidden md:block">
+                      {item.salesStatusKr ?? item.salesStatus}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

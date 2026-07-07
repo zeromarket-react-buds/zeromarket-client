@@ -37,7 +37,7 @@ const MyWishSellerListPage = () => {
 
       // 삭제 후 즉시 제거
       setSellerItems((prev) =>
-        prev.filter((item) => item.sellerId !== sellerId)
+        prev.filter((item) => item.sellerId !== sellerId),
       );
 
       showLikeRemovedToast(); //글로벌토스트에서 가져온 삭제메시지 함수
@@ -138,7 +138,7 @@ const MyWishSellerListPage = () => {
               </button>
 
               {/* 프로필 이미지 */}
-              <div className="w-14 h-14 bg-gray-300 rounded-full flex items-center justify-center">
+              <div className="w-14 h-14 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
                 {/* profileImage 필드명 */}
                 {item.profileImage ? (
                   <img
@@ -147,15 +147,15 @@ const MyWishSellerListPage = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <UserRound className="text-gray-400 w-7 h-7" />
+                  <UserRound className="text-gray-400 w-14 h-14" />
                 )}
               </div>
 
               {/* 셀러 정보 */}
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-center items-center flex-1">
                 <div>
                   {/* nickname 필드명 */}
-                  <p className="font-semibold text-sm text-gray-800">
+                  <p className="font-semibold font-bold text-gray-800">
                     {item.nickname}
                   </p>
                 </div>
