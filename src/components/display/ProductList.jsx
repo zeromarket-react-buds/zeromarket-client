@@ -33,6 +33,25 @@ const ProductList = () => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [area, setArea] = useState("");
+  const [trade, setTrade] = useState({
+    delivery: false,
+    direct: false,
+  });
+
+  // 거래방법 선택한 상태를 서버 요청용 배열로 변환
+  const getTradeParams = (trade) => {
+    const trades = [];
+
+    if (trade?.delivery) {
+      trades.push("DELIVERY");
+    }
+
+    if (trade?.direct) {
+      trades.push("DIRECT");
+    }
+
+    return trades;
+  };
 
   // offset 관련
   const [offset, setOffset] = useState(null);
@@ -68,7 +87,7 @@ const ProductList = () => {
           //위조건이 다르면
           return item; //리턴
         }
-      })
+      }),
     );
 
     return newState;
@@ -89,6 +108,7 @@ const ProductList = () => {
         minPrice,
         maxPrice,
         area,
+        trade: getTradeParams(trade),
       };
 
       //찜색유지 안돼는 문제콘솔. memberId전달
@@ -139,6 +159,7 @@ const ProductList = () => {
     minPrice,
     maxPrice,
     area,
+    trade,
     memberId,
   ]);
 
@@ -171,7 +192,7 @@ const ProductList = () => {
           // &&
           // v.minPrice === item.minPrice &&
           // v.maxPrice === item.maxPrice
-        )
+        ),
     );
 
     const next = [item, ...filtered].slice(0, RECENT_SEARCH_MAX_SIZE);
@@ -197,6 +218,13 @@ const ProductList = () => {
     if (payload.area) {
       params.set("area", payload.area);
     }
+    if (payload.trade.delivery) {
+      params.append("trade", "DELIVERY");
+    }
+
+    if (payload.trade.direct) {
+      params.append("trade", "DIRECT");
+    }
 
     saveRecentSearch(payload.keyword, payload.minPrice, payload.maxPrice);
 
@@ -208,6 +236,7 @@ const ProductList = () => {
         minPrice: payload.minPrice,
         maxPrice: payload.maxPrice,
         area: payload.area,
+        trade: payload.trade,
       },
     });
   };
@@ -295,6 +324,8 @@ const ProductList = () => {
         setMaxPrice={setMaxPrice}
         area={area}
         setArea={setArea}
+        trade={trade}
+        setTrade={setTrade}
         onApply={handleFilterApply}
       />
 

@@ -6,9 +6,11 @@ const SelectedFiltersSection = ({
   minPrice,
   maxPrice,
   area,
+  trade,
   clearCategory,
   clearPrice,
   clearArea,
+  clearTrade,
   handleClearAll,
 }) => {
   const hasCategory = categoryName && categoryName.trim().length > 0;
@@ -19,7 +21,9 @@ const SelectedFiltersSection = ({
 
   const hasArea = area && area.trim().length > 0;
 
-  const showSection = hasCategory || hasPrice || hasArea;
+  const hasTrade = trade?.delivery || trade?.direct;
+
+  const showSection = hasCategory || hasPrice || hasArea || hasTrade;
   if (!showSection) return null;
 
   const formatMin = () => {
@@ -35,6 +39,10 @@ const SelectedFiltersSection = ({
     }
     return Number(maxPrice).toLocaleString();
   };
+
+  const tradeLabel = [trade?.delivery && "택배거래", trade?.direct && "직거래"]
+    .filter(Boolean)
+    .join(" & ");
 
   return (
     <div className="my-0.5 flex flex-col mb-4">
@@ -84,6 +92,21 @@ const SelectedFiltersSection = ({
             className="items-center"
           >
             <span className="font-normal">{area}</span>
+            <span className="text-brand-mediumgray">
+              <XCircle />
+            </span>
+          </Button>
+        )}
+
+        {/* 거래방법 */}
+        {hasTrade && (
+          <Button
+            variant="line"
+            type="button"
+            onClick={clearTrade}
+            className="items-center"
+          >
+            <span className="font-normal">{tradeLabel}</span>
             <span className="text-brand-mediumgray">
               <XCircle />
             </span>

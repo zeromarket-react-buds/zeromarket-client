@@ -55,7 +55,7 @@ const ProductCard = ({ products, onToggleLikeInProductList }) => {
   //*const [products, setProducts] = useState([]);
   //ㄴ>useState함수: products변수의 변화를 감지해서 렌더링해준다
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-2 gap-1 md:gap-6">
       {products.map((p) => {
         // 본인 상품 여부 판단
         const isMyProduct = isAuthenticated && p.sellerId === user?.memberId;

@@ -156,7 +156,7 @@ const FrequentPhraseModal = ({
                     (prev) =>
                       prev.includes(phrase.id)
                         ? prev.filter((id) => id !== phrase.id) // 이미 선택 → 해제
-                        : [...prev, phrase.id] // 미선택 → 추가
+                        : [...prev, phrase.id], // 미선택 → 추가
                   );
                 }} // 연두색:선택된 문구 ID 설정
                 className={`flex items-center justify-between px-3 py-2 rounded-lg border
@@ -194,7 +194,7 @@ const FrequentPhraseModal = ({
                           // 수정 API 호출
                           await updateProductCustomTextApi(
                             phrase.id,
-                            editText.trim()
+                            editText.trim(),
                           );
 
                           // 부모에서 문구 목록 재조회
@@ -244,7 +244,7 @@ const FrequentPhraseModal = ({
 
                             // 선택된 문구 목록에서도 제거 (UX 안정성)
                             setSelectedIds((prev) =>
-                              prev.filter((id) => id !== phrase.id)
+                              prev.filter((id) => id !== phrase.id),
                             );
                           } catch (e) {
                             console.error("문구 삭제 실패", e);
@@ -263,19 +263,6 @@ const FrequentPhraseModal = ({
               </div>
             );
           })}
-        </div>
-
-        {/* 하단 추가하기 버튼 */}
-        <div className="px-4 py-3 border-t">
-          <button
-            onClick={handleAdd}
-            //disabled={!selectedId} 배열에서는 의미x
-            disabled={selectedIds.length === 0} //선택된 문구가 없으면 비활성화
-            className="w-full bg-[#1B6439] text-white py-2 rounded-lg
-             disabled:opacity-40"
-          >
-            추가하기
-          </button>
         </div>
       </div>
     </div>

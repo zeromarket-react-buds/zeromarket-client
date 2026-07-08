@@ -147,7 +147,7 @@ const TradeFilterModal = ({
       />
 
       {/* 모달창 */}
-      <div className="bg-white p-6 rounded-xl z-50 w-[35em]">
+      <div className="bg-white p-6 rounded-xl z-50 w-full max-w-[35em]">
         {/* 헤더 */}
         <div className="flex gap-3 justify-between items-center border-b border-brand-mediumgray mb-5 pt-0.5 pb-2">
           <div className="w-full text-base font-semibold">검색필터</div>
