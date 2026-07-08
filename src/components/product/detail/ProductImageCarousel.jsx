@@ -1,5 +1,6 @@
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
   const validImages = Array.isArray(images)
@@ -156,7 +157,7 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
               <img
                 src={img.imageUrl}
                 // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
-                className=" w-full h-full object-cover"
+                className=" w-full h-full object-cover cursor-pointer"
                 onClick={() => setIsZoomOpen(true)}
                 draggable={false}
               />
@@ -220,13 +221,15 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
               <ChevronLeft className="size-12 drop-shadow-[0_0_4px_rgba(0,0,0,0.4)]" />
             </button>
           )}
-
-          <img
-            src={validImages[displayIndex - 1]?.imageUrl}
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-
+          <TransformWrapper>
+            <TransformComponent>
+              <img
+                src={validImages[displayIndex - 1]?.imageUrl}
+                className="max-w-[90vw] max-h-[90vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </TransformComponent>
+          </TransformWrapper>
           {total > 1 && (
             <button
               type="button"
