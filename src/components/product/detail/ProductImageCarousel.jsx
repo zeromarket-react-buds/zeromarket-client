@@ -29,6 +29,8 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
   const startX = useRef(0);
   const isDragging = useRef(false);
 
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+
   const handleStart = (e) => {
     if (total <= 1) return;
     isDragging.current = true;
@@ -89,10 +91,35 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
     total <= 1
       ? 1 // 이미지 1장일때 무한루프 끄기
       : current === 0
-      ? total
-      : current === total + 1
-      ? 1
-      : current;
+        ? total
+        : current === total + 1
+          ? 1
+          : current;
+
+  // 확대 모달시 좌우 화살표키,  ESC 키 먹히게 하는 코드
+  useEffect(() => {
+    if (!isZoomOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") {
+        prev();
+      }
+
+      if (e.key === "ArrowRight") {
+        next();
+      }
+
+      if (e.key === "Escape") {
+        setIsZoomOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isZoomOpen]);
 
   return (
     <div
@@ -130,6 +157,7 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
                 src={img.imageUrl}
                 // onError={(e) => (e.target.src = "/fallback.png")} //오류발생시 보여줄 fallback 이미지 public 폴더에 첨부예정
                 className=" w-full h-full object-cover"
+                onClick={() => setIsZoomOpen(true)}
                 draggable={false}
               />
             </div>
@@ -173,6 +201,46 @@ const ProductImageCarousel = ({ images, isHidden, salesStatus }) => {
       h-15 bg-gradient-to-t from-black/10 to-transparent 
       opacity-0 group-hover:opacity-100 transition-opacity duration-200"
       ></div>
+
+      {/* 클릭시 나오는 이미지 모달 */}
+      {isZoomOpen && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+          onClick={() => setIsZoomOpen(false)}
+        >
+          {total > 1 && (
+            <button
+              type="button"
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white opacity-30 hover:opacity-100 transition-opacity duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                prev();
+              }}
+            >
+              <ChevronLeft className="size-12 drop-shadow-[0_0_4px_rgba(0,0,0,0.4)]" />
+            </button>
+          )}
+
+          <img
+            src={validImages[displayIndex - 1]?.imageUrl}
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {total > 1 && (
+            <button
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white opacity-30 hover:opacity-100 transition-opacity duration-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+              }}
+            >
+              <ChevronRight className="size-12 drop-shadow-[0_0_4px_rgba(0,0,0,0.4)]" />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
