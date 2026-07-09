@@ -31,8 +31,8 @@ function LoginPage() {
       field === "loginId"
         ? "아이디를 입력해주세요."
         : field === "password"
-        ? "비밀번호를 입력해주세요."
-        : "";
+          ? "비밀번호를 입력해주세요."
+          : "";
 
     if (!value || !value.trim()) {
       return { status: "error", message: errorMessage };
@@ -198,11 +198,19 @@ function LoginPage() {
 
             {/* 아이디/비밀번호 찾기 */}
             <div className="flex justify-center gap-2">
-              <span className="text-sm text-gray-400 cursor-pointer">
+              <span
+                className="text-sm text-gray-400 cursor-pointer"
+                onClick={() => navigate("/findAccount?tab=id")}
+              >
                 아이디 찾기
               </span>
+
               <span className="w-0 h-5 border border-gray-400"></span>
-              <span className="text-sm text-gray-400 cursor-pointer">
+
+              <span
+                className="text-sm text-gray-400 cursor-pointer"
+                onClick={() => navigate("/findAccount?tab=password")}
+              >
                 비밀번호 찾기
               </span>
             </div>
