@@ -259,7 +259,7 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "로그인", hideRight: true },
+              props: { title: " 아이디 / 비밀번호 찾기", hideRight: true },
             },
             footer: {
               component: "DefaultFooter",
