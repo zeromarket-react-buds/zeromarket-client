@@ -20,6 +20,15 @@ const registerApi = async (form) => {
   return data;
 };
 
+// 아이디 찾기
+const findLoginIdApi = async ({ name, phone }) => {
+  const { data } = await apiClient("/api/auth/findid", {
+    params: { name, phone },
+  });
+
+  return data;
+};
+
 // 내 정보 조회
 const getMyInfoApi = async () => {
   const { data } = await apiClient("/api/members/me");
@@ -67,7 +76,8 @@ const unlinkKakaoAccountApi = async () => {
 // 회원탈퇴
 const withdrawApi = async (payload = {}) => {
   const body = {};
-  if (payload.withdrawalReasonId) body.withdrawalReasonId = payload.withdrawalReasonId;
+  if (payload.withdrawalReasonId)
+    body.withdrawalReasonId = payload.withdrawalReasonId;
   if (payload.withdrawalReasonDetail) {
     body.withdrawalReasonDetail = payload.withdrawalReasonDetail;
   }
@@ -82,6 +92,7 @@ const withdrawApi = async (payload = {}) => {
 export {
   loginApi,
   registerApi,
+  findLoginIdApi,
   getMyInfoApi,
   checkDuplicateIdApi,
   logoutApi,
