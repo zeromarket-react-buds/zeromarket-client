@@ -2,16 +2,25 @@ import Container from "@/components/Container";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import formatPhone from "@/utils/formatPhone";
+import { findLoginIdApi } from "@/common/api/auth.api";
+import { useModal } from "@/hooks/useModal";
 
 const FindAccountPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab");
+
+  const { alert } = useModal();
 
   const idRef = useRef(null);
   const nameRef = useRef(null);
   const phoneRef = useRef(null);
   const findIdBtnRef = useRef(null);
   const findPasswordBtnRef = useRef(null);
+
+  const [loginId, setLoginId] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [openFindId, setOpenFindId] = useState(initialTab === "id");
   const [openFindPass, setOpenFindPass] = useState(initialTab === "password");
@@ -20,12 +29,36 @@ const FindAccountPage = () => {
     messages: [],
   });
 
-  const handleFindId = (type) => {
-    if (type === "success") {
+  // 아이디 찾기 API 호출
+  const submitFindId = async () => {
+    if (!name.trim()) {
+      await alert({
+        description: "이름을 입력해주세요.",
+      });
+
+      nameRef.current?.focus();
+      return;
+    }
+
+    if (!phone.trim()) {
+      await alert({
+        description: "전화번호를 입력해주세요.",
+      });
+
+      phoneRef.current?.focus();
+      return;
+    }
+
+    try {
+      const data = await findLoginIdApi({
+        name: name.trim(),
+        phone,
+      });
+
       setResult({
         status: "success",
         messages: [
-          "고객님의 아이디는 kim***입니다.",
+          `고객님의 아이디는 ${data.loginId}입니다.`,
           <>
             비밀번호를 찾으시려면{" "}
             <span
@@ -38,7 +71,7 @@ const FindAccountPage = () => {
           </>,
         ],
       });
-    } else {
+    } catch (error) {
       setResult({
         status: "fail",
         messages: [
@@ -112,7 +145,10 @@ const FindAccountPage = () => {
       </div>
       {/* 폼 영역 */}
       {!result.status && (
-        <form className="border rounded-2xl p-6 mb-2">
+        <form
+          className="border rounded-2xl p-6 mb-2"
+          onSubmit={(e) => e.preventDefault()}
+        >
           {/* 아이디 입력 영역 */}
           {openFindPass && (
             <div>
@@ -122,6 +158,8 @@ const FindAccountPage = () => {
               <input
                 ref={idRef}
                 placeholder="아이디"
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
                 className="w-full border rounded-xl my-5 py-2 px-4 text-base"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -138,6 +176,8 @@ const FindAccountPage = () => {
             <input
               ref={nameRef}
               placeholder="이름"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full border rounded-xl my-5 py-2 px-4 text-base"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -156,6 +196,13 @@ const FindAccountPage = () => {
               ref={phoneRef}
               placeholder="전화번호"
               className="w-full border rounded-xl my-5 py-2 px-4 text-base"
+              value={formatPhone(phone)}
+              onChange={(e) => {
+                const digitsOnly = e.target.value
+                  .replace(/\D/g, "")
+                  .slice(0, 11);
+                setPhone(digitsOnly);
+              }}
               onKeyDown={(e) => {
                 if (e.key !== "Enter") return;
 
@@ -177,7 +224,7 @@ const FindAccountPage = () => {
                 ref={findIdBtnRef}
                 variant="green"
                 className="px-6"
-                onClick={() => handleFindId("success")}
+                onClick={() => submitFindId()}
               >
                 아이디 찾기
               </Button>
@@ -199,8 +246,8 @@ const FindAccountPage = () => {
       <div>
         {result.status && (
           <div className="flex flex-col mt-6 border rounded-xl p-4">
-            {result.messages.map((msg) => (
-              <p>{msg}</p>
+            {result.messages.map((msg, index) => (
+              <p key={index}>{msg}</p>
             ))}
             {result.status === "fail" && (
               <Button
