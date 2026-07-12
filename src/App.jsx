@@ -54,6 +54,7 @@ import KeywordAlertSettingPage from "@/pages/me/KeywordAlertSettingPage";
 import KeywordAlertEditPage from "@/pages/me/KeywordAlertEditPage";
 import WithdrawWarnPage from "@/pages/me/WithdrawWarnPage";
 import WithdrawReasonPage from "@/pages/me/WithdrawReasonPage";
+import FindAccountPage from "./pages/auth/FindAccountPage";
 
 const router = createBrowserRouter([
   {
@@ -242,7 +243,23 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "로그인" },
+              props: { title: "로그인", hideRight: true },
+            },
+            footer: {
+              component: "DefaultFooter",
+            },
+          },
+        },
+      },
+      // 아이디 / 비밀번호 찾기
+      {
+        path: "findaccount",
+        element: <FindAccountPage />,
+        handle: {
+          layout: {
+            header: {
+              component: "TitleHeader",
+              props: { title: " 아이디 / 비밀번호 찾기", hideRight: true },
             },
             footer: {
               component: "DefaultFooter",
@@ -258,7 +275,7 @@ const router = createBrowserRouter([
           layout: {
             header: {
               component: "TitleHeader",
-              props: { title: "회원가입" },
+              props: { title: "회원가입", hideRight: true },
             },
             footer: {
               component: "DefaultFooter",

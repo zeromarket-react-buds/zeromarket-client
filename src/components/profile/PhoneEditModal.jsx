@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { validatePhone } from "@/utils/validators";
+import formatPhone from "@/utils/formatPhone";
 
 const PhoneEditModal = ({ onClose, phone, onSubmit, isSaving }) => {
   // 임시값 보관용
@@ -38,7 +39,7 @@ const PhoneEditModal = ({ onClose, phone, onSubmit, isSaving }) => {
       "handleSubmit 클릭됨, isSaving =",
       isSaving,
       "tempPhone =",
-      tempPhone
+      tempPhone,
     );
 
     const result = validatePhone(tempPhone);
@@ -67,13 +68,12 @@ const PhoneEditModal = ({ onClose, phone, onSubmit, isSaving }) => {
           </div>
 
           <Input
-            value={tempPhone}
             inputMode="numeric"
             ref={inputRef}
+            value={formatPhone(tempPhone)}
             onChange={(e) => {
-              const digitsOnly = e.target.value.replace(/\D/g, "");
-              setTempPhone(digitsOnly);
-              if (error) setError("");
+              const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 11);
+              setPhone(digitsOnly);
             }}
           />
           {error ? (
