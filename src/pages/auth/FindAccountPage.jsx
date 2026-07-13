@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import formatPhone from "@/utils/formatPhone";
-import { findLoginIdApi } from "@/common/api/auth.api";
+import { findLoginIdApi, findPasswordApi } from "@/common/api/auth.api";
 import { useModal } from "@/hooks/useModal";
+import PasswordSetting from "@/components/auth/PasswordSetting";
 
 const FindAccountPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,15 +30,22 @@ const FindAccountPage = () => {
     messages: [],
   });
 
-  // 아이디 찾기 API 호출
-  const submitFindId = async () => {
+  // 패스워드 결과 관련
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordVerified, setPasswordVerified] = useState(false);
+
+  // 패스워드 프론트 확인용
+  // const MOCK_PASSWORD_SUCCESS = true;
+
+  // 중복 validation
+  const validateNameAndPhone = async () => {
     if (!name.trim()) {
       await alert({
         description: "이름을 입력해주세요.",
       });
 
       nameRef.current?.focus();
-      return;
+      return false;
     }
 
     if (!phone.trim()) {
@@ -46,8 +54,17 @@ const FindAccountPage = () => {
       });
 
       phoneRef.current?.focus();
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  // 아이디 찾기 API 호출
+  const submitFindId = async () => {
+    const isValid = await validateNameAndPhone();
+
+    if (!isValid) return;
 
     try {
       const data = await findLoginIdApi({
@@ -75,7 +92,7 @@ const FindAccountPage = () => {
       setResult({
         status: "fail",
         messages: [
-          "고객님의 회원정보를 가진 아이디가 없습니다.",
+          error.message || "오류가 발생했습니다. 다시 시도해주세요.",
           <>
             이용을 원하신다면 먼저{" "}
             <Link to="/join" className="font-bold text-brand-green">
@@ -88,10 +105,54 @@ const FindAccountPage = () => {
     }
   };
 
+  // 비밀번호 찾기 API 호출
+  const submitFindPassword = async () => {
+    setPasswordError("");
+
+    if (!loginId.trim()) {
+      await alert({
+        description: "아이디를 입력해주세요.",
+      });
+
+      idRef.current?.focus();
+      return;
+    }
+
+    const isValid = await validateNameAndPhone();
+
+    if (!isValid) return;
+
+    // if (MOCK_PASSWORD_SUCCESS) {
+    //   setPasswordVerified(true);
+    // } else {
+    //   setPasswordError(
+    //     "입력하신 정보와 일치하는 회원정보가 없습니다. 다시 확인해주세요.",
+    //   );
+    // }
+
+    try {
+      await findPasswordApi({
+        loginId: loginId.trim(),
+        name: name.trim(),
+        phone,
+      });
+
+      setPasswordVerified(true);
+    } catch (error) {
+      console.error("비밀번호 찾기 오류:", error);
+
+      setPasswordError(
+        error.message || "오류가 발생했습니다. 다시 시도해주세요.",
+      );
+    }
+  };
+
   const findIdTap = () => {
     setOpenFindId(true);
     setOpenFindPass(false);
     setResult({ status: null, messages: [] });
+    setPasswordError("");
+    setPasswordVerified(false);
     setSearchParams({ tab: "id" });
   };
 
@@ -99,6 +160,8 @@ const FindAccountPage = () => {
     setOpenFindId(false);
     setOpenFindPass(true);
     setResult({ status: null, messages: [] });
+    setPasswordError("");
+    setPasswordVerified(false);
     setSearchParams({ tab: "password" });
   };
 
@@ -144,103 +207,115 @@ const FindAccountPage = () => {
         </div>
       </div>
       {/* 폼 영역 */}
-      {!result.status && (
-        <form
-          className="border rounded-2xl p-6 mb-2"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          {/* 아이디 입력 영역 */}
-          {openFindPass && (
+      {passwordVerified ? (
+        <PasswordSetting loginId={loginId} />
+      ) : (
+        !result.status && (
+          <form
+            className="border rounded-2xl p-6 mb-2"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            {/* 아이디 입력 영역 */}
+            {openFindPass && (
+              <div>
+                <span className="flex justify-between">
+                  아이디를 입력해주세요.
+                </span>
+                <input
+                  ref={idRef}
+                  placeholder="아이디"
+                  value={loginId}
+                  onChange={(e) => setLoginId(e.target.value)}
+                  className="w-full border rounded-xl my-5 py-2 px-4 text-base"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      nameRef.current?.focus();
+                    }
+                  }}
+                />
+              </div>
+            )}
+            {/* 이름 입력 영역 */}
             <div>
-              <span className="flex justify-between">
-                아이디를 입력해주세요.
-              </span>
+              <span className="flex justify-between">이름을 입력해주세요.</span>
               <input
-                ref={idRef}
-                placeholder="아이디"
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
+                ref={nameRef}
+                placeholder="이름"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full border rounded-xl my-5 py-2 px-4 text-base"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    nameRef.current?.focus();
+                    phoneRef.current?.focus();
                   }
                 }}
               />
             </div>
-          )}
-          {/* 이름 입력 영역 */}
-          <div>
-            <span className="flex justify-between">이름을 입력해주세요.</span>
-            <input
-              ref={nameRef}
-              placeholder="이름"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-xl my-5 py-2 px-4 text-base"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
+            {/* 전화번호 입력 영역 */}
+            <div>
+              <span className="flex justify-between">
+                전화번호를 입력해주세요.
+              </span>
+              <input
+                ref={phoneRef}
+                placeholder="전화번호"
+                className="w-full border rounded-xl my-5 py-2 px-4 text-base"
+                value={formatPhone(phone)}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 11);
+                  setPhone(digitsOnly);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+
                   e.preventDefault();
-                  phoneRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-          {/* 전화번호 입력 영역 */}
-          <div>
-            <span className="flex justify-between">
-              전화번호를 입력해주세요.
-            </span>
-            <input
-              ref={phoneRef}
-              placeholder="전화번호"
-              className="w-full border rounded-xl my-5 py-2 px-4 text-base"
-              value={formatPhone(phone)}
-              onChange={(e) => {
-                const digitsOnly = e.target.value
-                  .replace(/\D/g, "")
-                  .slice(0, 11);
-                setPhone(digitsOnly);
-              }}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter") return;
 
-                e.preventDefault();
+                  if (openFindId) {
+                    findIdBtnRef.current?.focus();
+                  } else {
+                    findPasswordBtnRef.current?.focus();
+                  }
+                }}
+              />
+            </div>
 
-                if (openFindId) {
-                  findIdBtnRef.current?.focus();
-                } else {
-                  findPasswordBtnRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-          {/* 버튼 영역 */}
-          <div className="flex justify-center">
-            {openFindId && (
-              <Button
-                type="button"
-                ref={findIdBtnRef}
-                variant="green"
-                className="px-6"
-                onClick={() => submitFindId()}
-              >
-                아이디 찾기
-              </Button>
+            {openFindPass && passwordError && (
+              <p className="mb-4 text-sm text-brand-red text-center">
+                {passwordError}
+              </p>
             )}
-            {openFindPass && (
-              <Button
-                type="button"
-                ref={findPasswordBtnRef}
-                variant="green"
-                className="px-6"
-              >
-                비밀번호 찾기
-              </Button>
-            )}
-          </div>
-        </form>
+
+            {/* 버튼 영역 */}
+            <div className="flex justify-center">
+              {openFindId && (
+                <Button
+                  type="button"
+                  ref={findIdBtnRef}
+                  variant="green"
+                  className="px-6"
+                  onClick={() => submitFindId()}
+                >
+                  아이디 찾기
+                </Button>
+              )}
+              {openFindPass && (
+                <Button
+                  type="button"
+                  ref={findPasswordBtnRef}
+                  variant="green"
+                  className="px-6"
+                  onClick={() => submitFindPassword()}
+                >
+                  비밀번호 찾기
+                </Button>
+              )}
+            </div>
+          </form>
+        )
       )}
       {/* 결과 영역 */}
       <div>
