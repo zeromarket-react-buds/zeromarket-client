@@ -22,7 +22,7 @@ const registerApi = async (form) => {
 
 // 아이디 찾기
 const findLoginIdApi = async ({ name, phone }) => {
-  const { data } = await apiClient("/api/auth/findid", {
+  const { data } = await apiClient("/api/auth/find-id", {
     params: { name, phone },
   });
 
@@ -31,7 +31,7 @@ const findLoginIdApi = async ({ name, phone }) => {
 
 // 비밀번호 찾기
 const findPasswordApi = async ({ loginId, name, phone }) => {
-  const { data } = await apiClient("/api/auth/findpassword", {
+  const { data } = await apiClient("/api/auth/find-password", {
     params: { loginId, name, phone },
   });
 
