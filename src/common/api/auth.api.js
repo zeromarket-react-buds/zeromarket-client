@@ -29,6 +29,15 @@ const findLoginIdApi = async ({ name, phone }) => {
   return data;
 };
 
+// 비밀번호 찾기
+const findPasswordApi = async ({ loginId, name, phone }) => {
+  const { data } = await apiClient("/api/auth/findpassword", {
+    params: { loginId, name, phone },
+  });
+
+  return data;
+};
+
 // 내 정보 조회
 const getMyInfoApi = async () => {
   const { data } = await apiClient("/api/members/me");
@@ -93,6 +102,7 @@ export {
   loginApi,
   registerApi,
   findLoginIdApi,
+  findPasswordApi,
   getMyInfoApi,
   checkDuplicateIdApi,
   logoutApi,
