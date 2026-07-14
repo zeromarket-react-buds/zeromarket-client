@@ -38,6 +38,19 @@ const findPasswordApi = async ({ loginId, name, phone }) => {
   return data;
 };
 
+// 새 비밀번호 변경
+const setPasswordApi = async ({ loginId, newPassword }) => {
+  const { data } = await apiClient("/api/auth/set-password", {
+    method: "POST",
+    body: {
+      loginId,
+      newPassword,
+    },
+  });
+
+  return data;
+};
+
 // 내 정보 조회
 const getMyInfoApi = async () => {
   const { data } = await apiClient("/api/members/me");
@@ -103,6 +116,7 @@ export {
   registerApi,
   findLoginIdApi,
   findPasswordApi,
+  setPasswordApi,
   getMyInfoApi,
   checkDuplicateIdApi,
   logoutApi,
