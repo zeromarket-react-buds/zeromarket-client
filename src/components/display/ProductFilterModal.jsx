@@ -35,6 +35,7 @@ const ProductFilterModal = ({
   const keywordRef = useRef(null);
   const categoryFocusRef = useRef(null);
   const areaRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const { alert } = useModal();
 
@@ -204,11 +205,13 @@ const ProductFilterModal = ({
             <form onSubmit={handleSubmit}>
               {/* 키워드 */}
               <KeywordFilterSection
+                filterOpen={filterOpen}
                 tempKeyword={tempKeyword}
                 setTempKeyword={setTempKeyword}
                 keywordRef={keywordRef}
                 clearKeyword={clearKeyword}
                 categoryFocusRef={categoryFocusRef}
+                buttonRef={buttonRef}
               />
 
               {filterOpen && (
@@ -241,6 +244,9 @@ const ProductFilterModal = ({
                     area={tempArea}
                     setArea={setTempArea}
                     areaRef={areaRef}
+                    onEnterToButton={() => {
+                      buttonRef.current?.focus();
+                    }}
                   />
 
                   {/* 거래방법 */}
@@ -265,7 +271,12 @@ const ProductFilterModal = ({
               )}
 
               {/* 검색 버튼 */}
-              <Button type="submit" variant="green" className="w-full">
+              <Button
+                type="submit"
+                ref={buttonRef}
+                variant="green"
+                className="w-full"
+              >
                 검색
               </Button>
             </form>
