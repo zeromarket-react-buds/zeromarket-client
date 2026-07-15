@@ -223,6 +223,15 @@ function LoginPage() {
               로그인
             </button>
 
+            {/* 회원가입 */}
+            <button
+              type="button"
+              className="w-full border border-green-700 bg-white text-green-700 py-3 rounded-md font-semibold cursor-pointer"
+              onClick={() => navigate("/join")}
+            >
+              회원가입
+            </button>
+
             {/* 비회원으로 둘러보기 */}
             <div
               onClick={() => {
