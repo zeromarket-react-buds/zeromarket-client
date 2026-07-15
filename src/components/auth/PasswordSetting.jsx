@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { setPasswordApi } from "@/common/api/auth.api";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "@/hooks/useModal";
+import { validatePassword } from "@/utils/validators";
 
 const PasswordSetting = ({ loginId }) => {
   const navigate = useNavigate();
@@ -44,6 +45,15 @@ const PasswordSetting = ({ loginId }) => {
         newPasswordRedoRef.current?.focus();
       }
 
+      return;
+    }
+
+    // 비밀번호 형식 검증(영문/숫자 포함, 8자 이상)
+    const passwordResult = validatePassword(newPassword);
+
+    if (!passwordResult.isValid) {
+      setValidation(passwordResult.message);
+      newPasswordRef.current?.focus();
       return;
     }
 
