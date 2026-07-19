@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, XCircle } from "lucide-react";
 
-const AreaFilterSection = ({ area, setArea, areaRef }) => {
+const AreaFilterSection = ({ area, setArea, areaRef, onEnterToButton }) => {
   const clearAreaInput = (e) => {
     e.preventDefault(); // submit 방지
     e.stopPropagation(); // 이벤트버블링 방지
@@ -19,6 +19,14 @@ const AreaFilterSection = ({ area, setArea, areaRef }) => {
           className="font-normal"
           onChange={(e) => setArea(e.target.value)}
           placeholder="지역을 입력해주세요"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (onEnterToButton) {
+                onEnterToButton();
+              }
+            }
+          }}
         />
         <Button
           type="button"

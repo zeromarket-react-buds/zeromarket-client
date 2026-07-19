@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Search, XCircle } from "lucide-react";
 
 const KeywordFilterSection = ({
+  filterOpen,
   tempKeyword,
   setTempKeyword,
   keywordRef,
   clearKeyword,
   categoryFocusRef,
+  buttonRef,
 }) => {
   return (
     <div className="relative w-full pt-2 pb-2 my-2">
@@ -20,8 +22,11 @@ const KeywordFilterSection = ({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            keywordRef.current?.focus();
-            categoryFocusRef.current?.focus();
+            {
+              filterOpen
+                ? categoryFocusRef.current?.focus()
+                : buttonRef.current?.focus();
+            }
           }
         }}
       />
